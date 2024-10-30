@@ -2,7 +2,6 @@ import pygame
 
 
 class OptionBox:
-
     def __init__(
         self, x, y, w, h, color, highlight_color, font, option_list, selected=0
     ):
@@ -16,13 +15,30 @@ class OptionBox:
         self.menu_active = False
         self.active_option = -1
 
-    def draw(self, surf):
+    def draw(
+        self,
+        surf,
+        x=None,
+        y=None,
+        width=None,
+        hight=None,
+    ):
         pygame.draw.rect(
             surf, self.highlight_color if self.menu_active else self.color, self.rect
         )
         pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
         msg = self.font.render(self.option_list[self.selected], 1, (0, 0, 0))
         surf.blit(msg, msg.get_rect(center=self.rect.center))
+
+        # resizing if given
+        if x is not None:
+            self.rect.x = x
+        if y is not None:
+            self.rect.y = y
+        if width is not None:
+            self.rect.width = width
+        if hight is not None:
+            self.rect.height = hight
 
         if self.draw_menu:
             for i, text in enumerate(self.option_list):
@@ -66,4 +82,4 @@ class OptionBox:
                     self.selected = self.active_option
                     self.draw_menu = False
                     return self.active_option
-        return -1
+        return None
