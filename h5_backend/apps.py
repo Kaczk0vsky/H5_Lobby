@@ -1,0 +1,6 @@
+from django.apps import AppConfig
+
+
+class H5BackendConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'h5_backend'
