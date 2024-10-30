@@ -1,4 +1,4 @@
-from src.settings_reader import load_initial_window_setting
+from src.settings_reader import load_resolution_settings
 from src.global_vars import resolution_choices, transformation_factors, fonts_sizes
 from window_elements.button import Button
 from window_elements.option_box import OptionBox
@@ -14,7 +14,7 @@ import toml
 class H5_Lobby:
     def __init__(self):
         pygame.init()
-        self.config = load_initial_window_setting()
+        self.config = load_resolution_settings()
         self.transformation_option = (
             f"{self.config["screen_width"]}x{self.config["screen_hight"]}"
         )
@@ -222,7 +222,7 @@ class H5_Lobby:
                         (self.config["screen_width"], self.config["screen_hight"]),
                     )
                 with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
-                    toml.dump({"initial_window": self.config}, f)
+                    toml.dump({"resolution": self.config}, f)
 
             RESOLUTION_CHOICES.draw(
                 self.SCREEN,
