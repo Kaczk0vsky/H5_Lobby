@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
-from src.lobby import H5_Lobby
+from src.login import LoginWindow
 
 import os
 import threading
@@ -26,7 +26,7 @@ def run_django_server():
 
 def run_lobby():
     """Run the H5_Lobby GUI."""
-    lobby = H5_Lobby()
+    lobby = LoginWindow()
     lobby.run_game()
 
 
