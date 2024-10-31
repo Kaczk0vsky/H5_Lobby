@@ -39,14 +39,22 @@ class TextInput:
             if self.active:
                 if event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
+                    if hide_text:
+                        self.hidden_text = self.hidden_text[:-1]
                 else:
-                    self.text += event.unicode
+                    if hide_text:
+                        self.text += "*"
+                        self.hidden_text += event.unicode
+                    else:
+                        self.text += event.unicode
                 self.txt_surface = self.FONT.render(
                     self.text, True, pygame.Color("black")
                 )
 
     def button_pressed(self, button_pressed=False):
         if button_pressed:
+            if len(self.text) == len(self.hidden_text):
+                return self.hidden_text
             return self.text
 
     def update(self):

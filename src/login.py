@@ -31,6 +31,7 @@ class LoginWindow:
         LOGIN_INPUT = TextInput(380, 225, 200, 40)
         PASSWORD_INPUT = TextInput(380, 315, 200, 40)
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
+        HIDE_INPUT = [False, True]
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -80,8 +81,8 @@ class LoginWindow:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                for input in INPUT_BOXES:
-                    input.event(event)
+                for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
+                    input.event(event, is_hidden)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if LOGIN_BUTTON.checkForInput(MENU_MOUSE_POS):
                         nickname = LOGIN_INPUT.button_pressed(True)
