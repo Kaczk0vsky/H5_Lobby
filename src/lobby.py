@@ -14,6 +14,14 @@ import toml
 class H5_Lobby:
     def __init__(self):
         pygame.init()
+        pygame.display.set_caption("Menu")
+        pygame.mixer.init()
+        pygame.mixer.music.load(
+            os.path.join(os.getcwd(), "resources/H5_main_theme.mp3")
+        )
+        pygame.mixer.music.play(-1, 0.0)
+        pygame.mixer.music.set_volume(0.3)
+
         self.config = load_resolution_settings()
         self.transformation_option = (
             f"{self.config["screen_width"]}x{self.config["screen_hight"]}"
@@ -26,7 +34,6 @@ class H5_Lobby:
         self.BG = pygame.image.load(
             os.path.join(os.getcwd(), "resources/h5_background.jpg")
         )
-        pygame.display.set_caption("Menu")
 
     def get_font(self, font_size: int = 75):
         return pygame.font.Font("resources/ASansrounded.ttf", font_size)

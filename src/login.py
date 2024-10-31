@@ -4,7 +4,7 @@ import sys
 
 from django.contrib.auth import authenticate
 
-from src.global_vars import resolution_choices, transformation_factors, fonts_sizes
+from src.global_vars import fonts_sizes
 from window_elements.text_input import TextInput
 from window_elements.button import Button
 from src.lobby import H5_Lobby
@@ -13,6 +13,14 @@ from src.lobby import H5_Lobby
 class LoginWindow:
     def __init__(self):
         pygame.init()
+        pygame.display.set_caption("Login menu")
+        pygame.mixer.init()
+        pygame.mixer.music.load(
+            os.path.join(os.getcwd(), "resources/H5_login_menu_theme.mp3")
+        )
+        pygame.mixer.music.play(-1, 0.0)
+        pygame.mixer.music.set_volume(0.3)
+
         self.transformation_option = "800x600"
         self.font_size = fonts_sizes[self.transformation_option]
 
@@ -22,7 +30,6 @@ class LoginWindow:
             self.BG,
             (800, 600),
         )
-        pygame.display.set_caption("Login menu")
 
     def get_font(self, font_size: int = 75):
         return pygame.font.Font("resources/ASansrounded.ttf", font_size)
@@ -89,6 +96,7 @@ class LoginWindow:
                         password = PASSWORD_INPUT.button_pressed(True)
                         user = authenticate(username=nickname, password=password)
                         if user is not None:
+                            pygame.mixer.fadeout(5000)
                             pygame.quit()
                             lobby = H5_Lobby()
                             lobby.run_game()
