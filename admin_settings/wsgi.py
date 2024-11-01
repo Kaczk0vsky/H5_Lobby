@@ -7,7 +7,6 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.1/howto/deployment/wsgi/
 """
 
-from src.lobby import H5_Lobby
 from django.core.wsgi import get_wsgi_application
 
 import os

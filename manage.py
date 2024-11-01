@@ -4,6 +4,7 @@ from src.login import LoginWindow
 
 import os
 import threading
+import sys
 
 
 def run_django_server():
@@ -18,10 +19,14 @@ def run_django_server():
             "forget to activate a virtual environment?"
         ) from exc
 
-    # Explicitly call runserver with host and port
+    # Running the backend from that line
     execute_from_command_line(
         ["manage.py", "runserver", "127.0.0.1:8000", "--noreload"]
     )
+    from django.core.management import execute_from_command_line
+
+    # for creating super user disable the line above and uncomment this below
+    # execute_from_command_line(sys.argv)
 
 
 def run_lobby():
