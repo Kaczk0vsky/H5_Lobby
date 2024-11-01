@@ -90,22 +90,28 @@ class LoginWindow:
                     sys.exit()
                 for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
                     input.event(event, is_hidden)
+                    if input._enter_detected == True and input.active:
+                        self.login_player(LOGIN_INPUT, PASSWORD_INPUT)
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if LOGIN_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        nickname = LOGIN_INPUT.button_pressed(True)
-                        password = PASSWORD_INPUT.button_pressed(True)
-                        user = authenticate(username=nickname, password=password)
-                        if user is not None:
-                            pygame.mixer.fadeout(5000)
-                            pygame.quit()
-                            lobby = H5_Lobby()
-                            lobby.run_game()
+                        self.login_player(LOGIN_INPUT, PASSWORD_INPUT)
 
             for input in INPUT_BOXES:
                 input.update()
                 input.draw(self.SCREEN)
 
             pygame.display.update()
+
+    def login_player(self, LOGIN_INPUT, PASSWORD_INPUT):
+        nickname = LOGIN_INPUT.button_pressed(True)
+        password = PASSWORD_INPUT.button_pressed(True)
+        user = authenticate(username=nickname, password=password)
+        if user is not None:
+            pygame.mixer.fadeout(5000)
+            pygame.quit()
+            lobby = H5_Lobby()
+            lobby.run_game()
 
     def run_game(self):
         self.login_window()

@@ -5,6 +5,7 @@ class TextInput:
     _id = 0
     _instances = []
     _key_pressed = False
+    _enter_detected = False
 
     def __init__(
         self,
@@ -53,7 +54,9 @@ class TextInput:
                     if not self._key_pressed:
                         self.jump_to_next_input()
                 elif event.key == pygame.K_RETURN:
-                    print("Enter key pressed!")
+                    TextInput._enter_detected = True
+                elif event.key == pygame.K_ESCAPE:
+                    self.active = False
                 else:
                     if hide_text:
                         self.text += "*"
@@ -67,6 +70,7 @@ class TextInput:
             if self.active:
                 for instance in TextInput._instances:
                     instance._key_pressed = False
+                    TextInput._enter_detected = False
 
     def button_pressed(self, button_pressed=False):
         if button_pressed:
