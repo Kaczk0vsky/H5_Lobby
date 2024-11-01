@@ -35,8 +35,16 @@ class LoginWindow:
         return pygame.font.Font("resources/ASansrounded.ttf", font_size)
 
     def login_window(self):
-        LOGIN_INPUT = TextInput(380, 225, 200, 40, is_active=True)
-        PASSWORD_INPUT = TextInput(380, 315, 200, 40)
+        LOGIN_INPUT = TextInput(
+            self.SCREEN.get_width() / 2.1,
+            self.SCREEN.get_height() / 2.5,
+            200,
+            40,
+            is_active=True,
+        )
+        PASSWORD_INPUT = TextInput(
+            self.SCREEN.get_width() / 2.1, self.SCREEN.get_height() / 2, 200, 40
+        )
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
         HIDE_INPUT = [False, True]
 
@@ -50,7 +58,7 @@ class LoginWindow:
             LOGIN_RECT = LOGIN_TEXT.get_rect(
                 center=(
                     self.SCREEN.get_width() / 3,
-                    self.SCREEN.get_height() / 2.5,
+                    self.SCREEN.get_height() / 2.3,
                 )
             )
             PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
@@ -59,7 +67,7 @@ class LoginWindow:
             PASSWORD_RECT = PASSWORD_TEXT.get_rect(
                 center=(
                     self.SCREEN.get_width() / 3,
-                    self.SCREEN.get_height() / 1.8,
+                    self.SCREEN.get_height() / 1.9,
                 )
             )
 
@@ -72,7 +80,7 @@ class LoginWindow:
                 ),
                 pos=(
                     self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 4),
+                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 3.3),
                 ),
                 text_input="Login",
                 font=self.get_font(font_size=30),
@@ -82,6 +90,23 @@ class LoginWindow:
 
             LOGIN_BUTTON.changeColor(MENU_MOUSE_POS)
             LOGIN_BUTTON.update(self.SCREEN)
+
+            REGISTER_BUTTON = Button(
+                image=pygame.image.load(
+                    os.path.join(os.getcwd(), "resources/rectangle.png")
+                ),
+                pos=(
+                    self.SCREEN.get_width() / 2,
+                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 10),
+                ),
+                text_input="Register",
+                font=self.get_font(font_size=30),
+                base_color="#d7fcd4",
+                hovering_color="White",
+            )
+
+            REGISTER_BUTTON.changeColor(MENU_MOUSE_POS)
+            REGISTER_BUTTON.update(self.SCREEN)
 
             event_list = pygame.event.get()
             for event in event_list:
@@ -96,6 +121,9 @@ class LoginWindow:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if LOGIN_BUTTON.checkForInput(MENU_MOUSE_POS):
                         self.login_player(LOGIN_INPUT, PASSWORD_INPUT)
+                    if REGISTER_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        # TODO: Add the new window with the registration
+                        pass
 
             for input in INPUT_BOXES:
                 input.update()
