@@ -35,7 +35,7 @@ class LoginWindow:
         return pygame.font.Font("resources/ASansrounded.ttf", font_size)
 
     def login_window(self):
-        LOGIN_INPUT = TextInput(380, 225, 200, 40)
+        LOGIN_INPUT = TextInput(380, 225, 200, 40, is_active=True)
         PASSWORD_INPUT = TextInput(380, 315, 200, 40)
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
         HIDE_INPUT = [False, True]
@@ -90,7 +90,7 @@ class LoginWindow:
                     sys.exit()
                 for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
                     input.event(event, is_hidden)
-                    if input._enter_detected == True and input.active:
+                    if input._enter_pressed == True and input.active:
                         self.login_player(LOGIN_INPUT, PASSWORD_INPUT)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -104,8 +104,8 @@ class LoginWindow:
             pygame.display.update()
 
     def login_player(self, LOGIN_INPUT, PASSWORD_INPUT):
-        nickname = LOGIN_INPUT.button_pressed(True)
-        password = PASSWORD_INPUT.button_pressed(True)
+        nickname = LOGIN_INPUT.get_string()
+        password = PASSWORD_INPUT.get_string()
         user = authenticate(username=nickname, password=password)
         if user is not None:
             pygame.mixer.fadeout(5000)
