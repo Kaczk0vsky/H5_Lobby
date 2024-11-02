@@ -1,3 +1,6 @@
 [resolution]
 screen_width = 1920
 screen_hight = 1080
+
+[game]
+game_path = "E:\\GOG\\GOG Galaxy\\Games\\Heroes of Might and Magic V - Tribes of the East\\bin\\AshanArena3"

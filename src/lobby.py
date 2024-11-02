@@ -1,5 +1,6 @@
 from src.settings_reader import load_resolution_settings
 from src.global_vars import resolution_choices, transformation_factors, fonts_sizes
+from src.run_ashan_arena import AschanArena3_Game
 from window_elements.button import Button
 from window_elements.option_box import OptionBox
 
@@ -128,7 +129,8 @@ class H5_Lobby:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        pass
+                        game = AschanArena3_Game()
+                        game.run_processes()
                     if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                         self.options_window()
                     if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
