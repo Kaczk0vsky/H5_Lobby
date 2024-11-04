@@ -15,7 +15,7 @@ import toml
 class H5_Lobby:
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption("Menu")
+        pygame.display.set_caption("Heroes V of Might and Magic Ashan Arena 3 - Menu")
         pygame.mixer.init()
         pygame.mixer.music.load(
             os.path.join(os.getcwd(), "resources/H5_main_theme.mp3")

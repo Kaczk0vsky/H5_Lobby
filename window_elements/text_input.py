@@ -21,6 +21,7 @@ class TextInput:
         fill_active: pygame.Color = pygame.Color("white"),
         font_size: int = 20,
         is_active: bool = False,
+        window_type: str = "login",
     ):
         self.id = TextInput._id
         self.rect = pygame.Rect(x, y, w, h)
@@ -33,9 +34,17 @@ class TextInput:
         self.txt_surface = self.FONT.render(text, True, self.text_color)
         self.active = is_active
         self.last_backspace_time = 0
+        self.window_type = window_type
 
         TextInput._id += 1
         TextInput._instances.append(self)
+
+    def delete_instance(self):
+        if self in TextInput._instances:
+            TextInput._instances.remove(self)
+
+        if not TextInput._instances:
+            TextInput._id = 0
 
     def event(self, event, hide_text=False):
         if event.type == pygame.MOUSEBUTTONDOWN:

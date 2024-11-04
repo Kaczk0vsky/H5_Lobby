@@ -4,7 +4,6 @@ from src.login import LoginWindow
 
 import os
 import threading
-import sys
 
 
 def run_django_server():
@@ -23,9 +22,10 @@ def run_django_server():
     execute_from_command_line(
         ["manage.py", "runserver", "127.0.0.1:8000", "--noreload"]
     )
-    from django.core.management import execute_from_command_line
 
+    # from django.core.management import execute_from_command_line
     # for creating super user disable the line above and uncomment this below
+    # import sys
     # execute_from_command_line(sys.argv)
 
 
