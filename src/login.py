@@ -256,7 +256,10 @@ class LoginWindow:
                 for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
                     input.event(event, is_hidden)
                     if input._enter_pressed == True and input.active:
-                        self.login_player(INPUT_BOXES)
+                        if_succesfull = self.register_new_player(INPUT_BOXES)
+                        if if_succesfull:
+                            delete_objects(INPUT_BOXES)
+                            self.login_window()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if REGISTER_ACCOUNT_BUTTON.checkForInput(MENU_MOUSE_POS):
