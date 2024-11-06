@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from . import views
+from h5_backend import views
 
 urlpatterns = [
     path("h5_backend/", include("h5_backend.urls")),
