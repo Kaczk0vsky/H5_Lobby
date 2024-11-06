@@ -51,5 +51,5 @@ def login_player(request):
 
 def ashanarena(request):
     return HttpResponse(
-        "Hello Warrior! The AshanArena3 is beeing developed here, please have a look in future..."
+        "Greetings, Noble Warrior! Behold, the AshanArena3 is currently under construction. Take heed and return in the future, for great wonders shall await thee... Thou shalt not be disappointed!"
     )
