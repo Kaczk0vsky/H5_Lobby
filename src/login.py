@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+import requests
 
 from django.contrib.auth import authenticate
 
@@ -297,6 +298,7 @@ class LoginWindow:
     def register_new_player(self, inputs: list):
         from django.contrib.auth.models import User
 
+        url = "http://48.209.34.240:8000/register/"
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
@@ -310,12 +312,8 @@ class LoginWindow:
             # TODO: add the error msg window
             return False
 
-        user = User.objects.create_user(
-            username=user_data["nickname"],
-            password=user_data["password"],
-            email=user_data["email"],
-        )
-        if user is not None:
+        response = requests.post(url, json=user_data)
+        if response.status_code == 200:
             return True
         return False
 

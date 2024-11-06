@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
-from src.login import LoginWindow
-
 import os
-import threading
 
 
 def run_django_server():
@@ -19,30 +16,14 @@ def run_django_server():
         ) from exc
 
     # Running the backend from that line
-    execute_from_command_line(
-        ["manage.py", "runserver", "127.0.0.1:8000", "--noreload"]
-    )
+    from django.core.management import execute_from_command_line
+    import sys
 
-    # from django.core.management import execute_from_command_line
-    # for creating super user disable the line above and uncomment this below
-    # import sys
-    # execute_from_command_line(sys.argv)
-
-
-def run_lobby():
-    """Run the H5_Lobby GUI."""
-    lobby = LoginWindow()
-    lobby.run_game()
+    execute_from_command_line(sys.argv)
 
 
 def main():
-    # Start Django server in a separate thread
-    django_thread = threading.Thread(target=run_django_server)
-    django_thread.daemon = True  # Allows program to exit even if thread is running
-    django_thread.start()
-
-    # Run lobby GUI in the main thread
-    run_lobby()
+    run_django_server()
 
 
 if __name__ == "__main__":

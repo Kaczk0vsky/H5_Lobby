@@ -9,3 +9,8 @@ def create_player(sender, instance, created, **kwargs):
     if created:
         # Automatically create a Player instance when a new User is created
         Player.objects.create(nickname=instance.username)
+
+
+@receiver(post_save, sender=User)
+def edit_configuration(sender):
+    pass
