@@ -3,8 +3,6 @@ import os
 import sys
 import requests
 
-from django.contrib.auth import authenticate
-
 from src.global_vars import fonts_sizes
 from src.lobby import H5_Lobby
 from src.helpers import delete_objects
@@ -279,25 +277,23 @@ class LoginWindow:
             pygame.display.update()
 
     def login_player(self, inputs: list):
+        url = "http://48.209.34.240:8000/login/"
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
         }
+        response = requests.post(url, json=user_data)
 
-        user = authenticate(
-            username=user_data["nickname"], password=user_data["password"]
-        )
-        if user is not None:
+        if response.status_code == 200:
             pygame.mixer.fadeout(5000)
             pygame.quit()
             lobby = H5_Lobby()
             lobby.run_game()
 
         # TODO: wrong password or login window
+        return False
 
     def register_new_player(self, inputs: list):
-        from django.contrib.auth.models import User
-
         url = "http://48.209.34.240:8000/register/"
         user_data = {
             "nickname": inputs[0].get_string(),
@@ -305,14 +301,9 @@ class LoginWindow:
             "repeat_password": inputs[2].get_string(),
             "email": inputs[3].get_string(),
         }
-        if (
-            user_data["password"] != user_data["repeat_password"]
-            or "@" not in user_data["email"]
-        ):
-            # TODO: add the error msg window
-            return False
-
         response = requests.post(url, json=user_data)
+
+        # TODO: add handling of different error codes
         if response.status_code == 200:
             return True
         return False

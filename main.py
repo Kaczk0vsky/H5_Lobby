@@ -1,8 +1,11 @@
 from src.login import LoginWindow
+import os
+import django
 
 
 def run_lobby():
-    """Run the H5_Lobby GUI."""
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "admin_settings.settings")
+    django.setup()
     lobby = LoginWindow()
     lobby.run_game()
 
