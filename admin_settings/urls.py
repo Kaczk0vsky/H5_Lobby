@@ -21,7 +21,7 @@ from django.urls import path, include
 from h5_backend import views
 
 urlpatterns = [
-    path("h5_backend/", include("h5_backend.urls")),
+    path("", include("h5_backend.urls")),
     path("admin/", admin.site.urls),
     path("register/", views.register_new_player, name="register_new_player"),
     path("login/", views.login_player, name="login_player"),
