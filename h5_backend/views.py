@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
+from django.http import HttpResponse
 
 import json
 
@@ -45,4 +46,10 @@ def login_player(request):
             return JsonResponse({"success": False, "error": str(e)}, status=400)
     return JsonResponse(
         {"success": False, "error": "Invalid request method"}, status=405
+    )
+
+
+def ashanarena(request):
+    return HttpResponse(
+        "Hello Warrior! The AshanArena3 is beeing developed here, please have a look in future..."
     )
