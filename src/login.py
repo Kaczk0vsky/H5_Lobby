@@ -6,6 +6,7 @@ import requests
 from src.global_vars import fonts_sizes
 from src.lobby import H5_Lobby
 from src.helpers import delete_objects
+from src.wireguard_handling import generate_keys, create_new_client
 from window_elements.text_input import TextInput
 from window_elements.button import Button
 
@@ -294,17 +295,29 @@ class LoginWindow:
         return False
 
     def register_new_player(self, inputs: list):
+        # TODO: have the url saved in safe file
         url = "http://48.209.34.240:8000/register/"
+        client_private_key, client_public_key = generate_keys()
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
             "repeat_password": inputs[2].get_string(),
             "email": inputs[3].get_string(),
+            "client_private_key": client_private_key,
+            "client_public_key": client_public_key,
         }
         response = requests.post(url, json=user_data)
+        data = requests.get(url)
+        # TODO: response get for last free ip, needs to be handled on the server
 
         # TODO: add handling of different error codes
         if response.status_code == 200:
+            create_new_client(
+                client=user_data["nickname"],
+                server_public_key="<encrypted>",  # TODO: handle the keys in separate file
+                client_private_key=user_data["client_private_key"],
+                client_ip=data["last_available_ip"],
+            )
             return True
         return False
 

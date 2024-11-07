@@ -13,8 +13,9 @@ def generate_keys():
     return private_key, public_key
 
 
-def create_new_client(client: str, server_public_key: str, client_ip: str):
-    client_private_key, client_public_key = generate_keys()
+def create_new_client(
+    client: str, server_public_key: str, client_private_key: str, client_ip: str
+):
     config_content = [
         "[Interface]",
         f"PrivateKey = {client_private_key}",
@@ -33,22 +34,16 @@ def create_new_client(client: str, server_public_key: str, client_ip: str):
     with open(config_path, "w") as file:
         file.write("\n".join(config_content))
 
-    return config_path
-
-
-def add_client_to_server():
-    config_content = [
-        "PublicKey = <CLIENT2_PUBLIC_KEY>",
-        "AllowedIPs = 10.0.0.3/32",
-    ]
-    config_path = os.path.join(os.getcwd(), "H5_Server.conf")
-    with open(config_path, "w") as file:
-        file.write("\n".join(config_content))
-
 
 if __name__ == "__main__":
+    # Run for quick generation of .conf file
+    client = input("Nickname: ")
+    client_ip = input("Client IP: ")
+
+    priv_key, pub_key = generate_keys()
     create_new_client(
-        client="Cwiercz",
+        client=client,
         server_public_key="encrypted",
-        client_ip="10.0.0.3",
+        client_private_key=priv_key,
+        client_ip=client_ip,
     )

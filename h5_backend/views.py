@@ -15,6 +15,13 @@ def register_new_player(request):
         password = data.get("password")
         repeat_password = data.get("repeat_password")
         email = data.get("email")
+        client_private_key = data.get("client_private_key")
+        client_public_key = data.get("client_public_key")
+        conf_path = "/etc/wireguard/H5_Server.conf"
+        conf_content = [
+            f"PublicKey = {client_public_key}",
+            "AllowedIPs = 10.0.0.3/32",  # TODO: change it to dynamic
+        ]
 
         if password != repeat_password or "@" not in email:
             return JsonResponse(
@@ -25,9 +32,16 @@ def register_new_player(request):
             user = User.objects.create_user(
                 username=nickname, password=password, email=email
             )
+            with open(conf_path, "a") as file:
+                file.write("\n".join(conf_content))
             return JsonResponse({"success": True, "user_id": user.id})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+    elif request.method == "GET":
+        data = {"last_available_ip": "<last_available_ip>"}
+        return JsonResponse(data)
+
     return JsonResponse(
         {"success": False, "error": "Invalid request method"}, status=405
     )
