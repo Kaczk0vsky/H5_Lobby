@@ -43,10 +43,13 @@ def register_new_player(request):
             )
             with open(conf_path, "a") as file:
                 file.write("\n".join(conf_content))
-            subprocess.run(
-                ["sudo", "systemctl", "restart", "wg-quick@H5_Server"], check=True
-            )
-            print("it worked")
+            try:
+                subprocess.run(
+                    ["sudo", "systemctl", "restart", "wg-quick@H5_Server"], check=True
+                )
+                print("WireGuard service restarted successfully.")
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to restart WireGuard service: {e}")
             save_server_settings()
             print("it also worked")
             return JsonResponse({"success": True, "user_id": user.id})
