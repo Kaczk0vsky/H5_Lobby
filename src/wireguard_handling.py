@@ -25,7 +25,7 @@ def create_new_client(
         "[Peer]",
         f"PublicKey = {server_public_key}",
         "Endpoint = 48.209.34.240:51820",
-        "AllowedIPs = 0.0.0.0/0",
+        "AllowedIPs = 10.0.0.0/24",
         "PersistentKeepalive = 25",
     ]
 

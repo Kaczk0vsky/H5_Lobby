@@ -295,7 +295,6 @@ class LoginWindow:
         return False
 
     def register_new_player(self, inputs: list):
-        # TODO: have the url saved in safe file
         url = "http://48.209.34.240:8000/register/"
         client_private_key, client_public_key = generate_keys()
         user_data = {
@@ -308,13 +307,13 @@ class LoginWindow:
         }
         response = requests.post(url, json=user_data)
         data = requests.get(url)
-        # TODO: response get for last free ip, needs to be handled on the server
 
         # TODO: add handling of different error codes
-        if response.status_code == 200:
+        if response.status_code == 200 and data.status_code == 200:
+            data = data.json()
             create_new_client(
                 client=user_data["nickname"],
-                server_public_key="<encrypted>",  # TODO: handle the keys in separate file
+                server_public_key="pJD0nHGtw+EpgTMd4HZh4zHaBiWfXHzuEOLBcDM2ZyE=",  # TODO: handle it from the server lvl
                 client_private_key=user_data["client_private_key"],
                 client_ip=data["last_available_ip"],
             )
