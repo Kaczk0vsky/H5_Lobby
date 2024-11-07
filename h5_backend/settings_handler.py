@@ -3,7 +3,7 @@ import toml
 
 
 def load_server_settings():
-    return toml.load(os.path.join(os.getcwd(), "settings.toml"))["H5_Server"]
+    return toml.load(os.path.join(os.getcwd(), "h5_backend/settings.toml"))["H5_Server"]
 
 
 def save_server_settings():

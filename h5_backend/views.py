@@ -12,6 +12,9 @@ import subprocess
 
 @csrf_exempt  # Disable CSRF for external requests; for production, secure this with proper auth
 def register_new_player(request):
+    server_settings = load_server_settings()
+    data = {"last_available_ip": server_settings["last_available_ip"]}
+
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         nickname = data.get("nickname")
@@ -25,7 +28,7 @@ def register_new_player(request):
             "\n",
             "[Peer]",
             f"PublicKey = {client_public_key}",
-            "AllowedIPs = 10.0.0.3/32",  # TODO: change it to dynamic
+            f"AllowedIPs = {server_settings["last_available_ip"]}",
         ]
 
         if password != repeat_password or "@" not in email:
@@ -48,8 +51,6 @@ def register_new_player(request):
             return JsonResponse({"success": False, "error": str(e)}, status=400)
 
     elif request.method == "GET":
-        server_settings = load_server_settings()
-        data = {"last_available_ip": server_settings["last_available_ip"]}
         return JsonResponse(data)
 
     return JsonResponse(
