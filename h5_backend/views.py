@@ -14,7 +14,6 @@ import subprocess
 def register_new_player(request):
     server_settings = load_server_settings()
     data = {"last_available_ip": server_settings["last_available_ip"]}
-    print(data)
 
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
@@ -51,7 +50,6 @@ def register_new_player(request):
             except subprocess.CalledProcessError as e:
                 print(f"Failed to restart WireGuard service: {e}")
             save_server_settings()
-            print("it also worked")
             return JsonResponse({"success": True, "user_id": user.id})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
