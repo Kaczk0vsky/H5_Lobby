@@ -19,6 +19,8 @@ def register_new_player(request):
         client_public_key = data.get("client_public_key")
         conf_path = "/etc/wireguard/H5_Server.conf"
         conf_content = [
+            "\n",
+            "[Peer]",
             f"PublicKey = {client_public_key}",
             "AllowedIPs = 10.0.0.3/32",  # TODO: change it to dynamic
         ]
