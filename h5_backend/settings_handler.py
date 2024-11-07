@@ -20,5 +20,5 @@ def save_server_settings():
     ip_string[3] = str(int(ip_string[3]) + 1)
     settings["H5_Server"]["last_available_ip"] = ".".join(ip_string)
 
-    with open(os.path.join(os.getcwd(), "/h5_backend/settings.toml"), "w") as file:
+    with open(os.path.join(os.getcwd(), "h5_backend/settings.toml"), "w") as file:
         toml.dump(settings, file)
