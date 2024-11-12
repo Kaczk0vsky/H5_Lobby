@@ -4,11 +4,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
 
-from h5_backend.settings_handler import load_server_settings, save_server_settings
-from h5_backend.tasks import add
+from h5_backend.settings_handler import load_server_settings
+from h5_backend.tasks import add, update_wireguard_config
 
 import json
-import subprocess
 
 
 @csrf_exempt  # Disable CSRF for external requests; for production, secure this with proper auth
@@ -41,17 +40,7 @@ def register_new_player(request):
             user = User.objects.create_user(
                 username=nickname, password=password, email=email
             )
-            with open(conf_path, "a") as file:
-                file.write("\n".join(conf_content))
-            try:
-                subprocess.run(
-                    ["sudo", "systemctl", "restart", "wg-quick@H5_Server.service"],
-                    check=True,
-                )
-                print("WireGuard service restarted successfully.")
-            except subprocess.CalledProcessError as e:
-                print(f"Failed to restart WireGuard service: {e}")
-            save_server_settings()
+            update_wireguard_config(conf_path, conf_content)
             return JsonResponse({"success": True, "user_id": user.id})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
@@ -72,7 +61,12 @@ def login_player(request):
         password = data.get("password")
         try:
             user = authenticate(username=nickname, password=password)
-            return JsonResponse({"success": True, "user_id": user.id})
+            if user is not None:
+                return JsonResponse({"success": True, "user_id": user.id})
+            else:
+                return JsonResponse(
+                    {"success": False, "error": "Invalid credentials"}, status=400
+                )
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
     return JsonResponse(
