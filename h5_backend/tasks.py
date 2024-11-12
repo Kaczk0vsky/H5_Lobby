@@ -1,14 +1,8 @@
 from celery import shared_task
-from django.http import JsonResponse
 
 from h5_backend.settings_handler import save_server_settings
 
 import subprocess
-
-
-@shared_task
-def add(x, y):
-    return x + y
 
 
 @shared_task

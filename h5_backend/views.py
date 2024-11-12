@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 from django.http import HttpResponse
 
 from h5_backend.settings_handler import load_server_settings
-from h5_backend.tasks import add, update_wireguard_config
+from h5_backend.tasks import update_wireguard_config
 
 import json
 
@@ -78,8 +78,3 @@ def ashanarena(request):
     return HttpResponse(
         "Greetings, Noble Warrior! Behold, the AshanArena3 is currently under construction. Take heed and return in the future, for great wonders shall await thee... Thou shalt not be disappointed!"
     )
-
-
-def with_celery(request):
-    res = add.delay(4, 4)
-    return HttpResponse("The task has run :)")
