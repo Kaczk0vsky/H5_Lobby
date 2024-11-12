@@ -87,4 +87,5 @@ def ashanarena(request):
 
 
 def with_celery(request):
+    res = add.delay(4, 4)
     return HttpResponse("The task has run :)")
