@@ -278,7 +278,7 @@ class LoginWindow:
             pygame.display.update()
 
     def login_player(self, inputs: list):
-        url = "http://48.209.34.240:8000/login/"
+        url = "http://4.231.97.96:8000/login/"
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
@@ -295,7 +295,7 @@ class LoginWindow:
         return False
 
     def register_new_player(self, inputs: list):
-        url = "http://48.209.34.240:8000/register/"
+        url = "http://4.231.97.96:8000/register/"
         client_private_key, client_public_key = generate_keys()
         user_data = {
             "nickname": inputs[0].get_string(),
