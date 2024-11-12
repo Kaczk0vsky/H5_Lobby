@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from django.http import HttpResponse
 
 from h5_backend.settings_handler import load_server_settings, save_server_settings
+from h5_backend.tasks import add
 
 import json
 import subprocess
@@ -44,7 +45,8 @@ def register_new_player(request):
                 file.write("\n".join(conf_content))
             try:
                 subprocess.run(
-                    ["sudo", "systemctl", "restart", "wg-quick@H5_Server"], check=True
+                    ["sudo", "systemctl", "restart", "wg-quick@H5_Server.service"],
+                    check=True,
                 )
                 print("WireGuard service restarted successfully.")
             except subprocess.CalledProcessError as e:
@@ -82,3 +84,7 @@ def ashanarena(request):
     return HttpResponse(
         "Greetings, Noble Warrior! Behold, the AshanArena3 is currently under construction. Take heed and return in the future, for great wonders shall await thee... Thou shalt not be disappointed!"
     )
+
+
+def with_celery(request):
+    return HttpResponse("The task has run :)")
