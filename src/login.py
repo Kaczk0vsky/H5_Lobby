@@ -305,15 +305,15 @@ class LoginWindow:
             "client_private_key": client_private_key,
             "client_public_key": client_public_key,
         }
-        response = requests.post(url, json=user_data)
         data = requests.get(url)
+        response = requests.post(url, json=user_data)
 
         # TODO: add handling of different error codes
         if response.status_code == 200 and data.status_code == 200:
             data = data.json()
             create_new_client(
                 client=user_data["nickname"],
-                server_public_key="pJD0nHGtw+EpgTMd4HZh4zHaBiWfXHzuEOLBcDM2ZyE=",  # TODO: handle it from the server lvl
+                server_public_key="pJD0nHGtw+EpgTMd4HZh4zHaBiWfXHzuEOLBcDM2ZyE=",
                 client_private_key=user_data["client_private_key"],
                 client_ip=data["last_available_ip"],
             )

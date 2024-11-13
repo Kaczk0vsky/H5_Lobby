@@ -28,7 +28,7 @@ def register_new_player(request):
             "\n",
             "[Peer]",
             f"PublicKey = {client_public_key}",
-            f"AllowedIPs = {server_settings["last_available_ip"]}",
+            f"AllowedIPs = {server_settings["last_available_ip"]}/32",
         ]
 
         if password != repeat_password or "@" not in email:

@@ -20,7 +20,7 @@ def create_new_client(
         "[Interface]",
         f"PrivateKey = {client_private_key}",
         f"Address = {client_ip}/24",
-        "DNS = 1.1.1.1",
+        "DNS = 8.8.8.8, 1.1.1.1",
         "",
         "[Peer]",
         f"PublicKey = {server_public_key}",
