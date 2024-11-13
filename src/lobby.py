@@ -13,7 +13,7 @@ import toml
 
 
 class H5_Lobby:
-    def __init__(self):
+    def __init__(self, wireguard_client):
         pygame.init()
         pygame.display.set_caption("Heroes V of Might and Magic Ashan Arena 3 - Menu")
         pygame.mixer.init()
@@ -22,6 +22,7 @@ class H5_Lobby:
         )
         pygame.mixer.music.play(-1, 0.0)
         pygame.mixer.music.set_volume(0.3)
+        self.wireguard_client = wireguard_client
 
         self.config = load_resolution_settings()
         self.transformation_option = (
@@ -134,6 +135,7 @@ class H5_Lobby:
                     if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                         self.options_window()
                     if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        self.wireguard_client.set_wireguard_state(False)
                         pygame.quit()
                         sys.exit()
 

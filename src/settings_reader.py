@@ -8,3 +8,7 @@ def load_resolution_settings():
 
 def load_game_settings():
     return toml.load(os.path.join(os.getcwd(), "settings.toml"))["game"]
+
+
+def load_wireguard_settings():
+    return toml.load(os.path.join(os.getcwd(), "settings.toml"))["wireguard"]
