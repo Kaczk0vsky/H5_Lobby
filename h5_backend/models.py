@@ -28,7 +28,7 @@ class Player(models.Model):
     )
 
     def __str__(self):
-        return f"{self.nickname} - {self.ranking_points} (online: {self.is_active})"
+        return f"{self.nickname} - {self.ranking_points} ({self.player_state})"
 
 
 # Create your models here.
