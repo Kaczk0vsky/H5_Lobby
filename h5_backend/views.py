@@ -41,9 +41,6 @@ def register_new_player(request):
             user = User.objects.create_user(
                 username=nickname, password=password, email=email
             )
-            Player.objects.filter(player__nickname=nickname).update(
-                player_state="online"
-            )
             update_wireguard_config(conf_path, conf_content)
             return JsonResponse({"success": True, "user_id": user.id})
         except Exception as e:
@@ -66,6 +63,9 @@ def login_player(request):
         try:
             user = authenticate(username=nickname, password=password)
             if user is not None:
+                player = Player.objects.get(nickname=nickname)
+                player.player_state = Player.ONLINE
+                player.save()
                 return JsonResponse({"success": True, "user_id": user.id})
             else:
                 return JsonResponse(
@@ -84,9 +84,9 @@ def set_player_offline(request):
         data = json.loads(request.body.decode("utf-8"))
         nickname = data.get("nickname")
         try:
-            player = Player.objects.filter(player__nickname=nickname).update(
-                player_state="offline"
-            )
+            player = Player.objects.get(nickname=nickname)
+            player.player_state = Player.OFFLINE
+            player.save()
             if player is not None:
                 return JsonResponse({"success": True, "user_id": player.id})
             else:
