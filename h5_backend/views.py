@@ -6,6 +6,7 @@ from django.http import HttpResponse
 
 from h5_backend.settings_handler import load_server_settings
 from h5_backend.tasks import update_wireguard_config
+from h5_backend.models import Player
 
 import json
 
@@ -40,6 +41,9 @@ def register_new_player(request):
             user = User.objects.create_user(
                 username=nickname, password=password, email=email
             )
+            Player.objects.filter(player__nickname=nickname).update(
+                player_state="online"
+            )
             update_wireguard_config(conf_path, conf_content)
             return JsonResponse({"success": True, "user_id": user.id})
         except Exception as e:
@@ -63,6 +67,28 @@ def login_player(request):
             user = authenticate(username=nickname, password=password)
             if user is not None:
                 return JsonResponse({"success": True, "user_id": user.id})
+            else:
+                return JsonResponse(
+                    {"success": False, "error": "Invalid credentials"}, status=400
+                )
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
+    return JsonResponse(
+        {"success": False, "error": "Invalid request method"}, status=405
+    )
+
+
+@csrf_exempt
+def set_player_offline(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        nickname = data.get("nickname")
+        try:
+            player = Player.objects.filter(player__nickname=nickname).update(
+                player_state="offline"
+            )
+            if player is not None:
+                return JsonResponse({"success": True, "user_id": player.id})
             else:
                 return JsonResponse(
                     {"success": False, "error": "Invalid credentials"}, status=400

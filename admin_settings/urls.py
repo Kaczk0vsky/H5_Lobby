@@ -25,4 +25,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("register/", views.register_new_player, name="register_new_player"),
     path("login/", views.login_player, name="login_player"),
+    path("set_player_offline/", views.set_player_offline, name="set_player_offline"),
 ]

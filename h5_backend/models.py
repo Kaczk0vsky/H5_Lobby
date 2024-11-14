@@ -10,13 +10,25 @@ class Player(models.Model):
     ranking_points = models.IntegerField(editable=True, default=1000)
     # leaderboard position
     ranking_position = models.IntegerField(editable=False, unique=True, null=True)
-    # if banned
-    is_banned = models.BooleanField(editable=True, default=False)
-    # is active
-    is_active = models.BooleanField(editable=False, default=False)
+
+    OFFLINE = "offline"
+    ONLINE = "online"
+    BANNED = "banned"
+    PLAYING = "playing"
+
+    PLAYER_STATE_CHOICES = [
+        (OFFLINE, "offline"),
+        (ONLINE, "online"),
+        (BANNED, "banned"),
+        (PLAYING, "playing"),
+    ]
+    # player state
+    player_state = models.CharField(
+        max_length=30, choices=PLAYER_STATE_CHOICES, default="offline", editable=True
+    )
 
     def __str__(self):
-        return self.nickname
+        return f"{self.nickname} - {self.ranking_points} (online: {self.is_active})"
 
 
 # Create your models here.
@@ -84,4 +96,4 @@ class Game(models.Model):
     )
 
     def __str__(self):
-        return f"Game ID - {self.id}"
+        return f"Game ID - {self.id}, Won by - {self.who_won}"

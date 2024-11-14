@@ -3,7 +3,7 @@
 import os
 
 
-def run_django_server():
+def main():
     """Run Django development server."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "admin_settings.settings")
     try:
@@ -22,9 +22,5 @@ def run_django_server():
     execute_from_command_line(sys.argv)
 
 
-def main():
-    run_django_server()
-
-
 if __name__ == "__main__":
-    run_django_server()
+    main()

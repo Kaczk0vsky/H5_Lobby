@@ -10,6 +10,7 @@ import pygame
 import sys
 import os
 import toml
+import requests
 
 
 class H5_Lobby:
@@ -135,6 +136,7 @@ class H5_Lobby:
                     if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                         self.options_window()
                     if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        self.set_player_offline()
                         self.wireguard_client.set_wireguard_state(False)
                         pygame.quit()
                         sys.exit()
@@ -202,6 +204,7 @@ class H5_Lobby:
             event_list = pygame.event.get()
             for event in event_list:
                 if event.type == pygame.QUIT:
+                    self.set_player_offline()
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -243,6 +246,11 @@ class H5_Lobby:
                 40,
             )
             pygame.display.update()
+
+    def set_player_offline(self):
+        url = "http://4.231.97.96:8000/set_player_offline/"
+        user_data = {"nickname": self.wireguard_client.user_name}
+        requests.post(url, json=user_data)
 
     def run_game(self):
         self.main_menu()
