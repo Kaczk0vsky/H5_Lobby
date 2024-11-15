@@ -14,6 +14,8 @@ import requests
 
 
 class H5_Lobby:
+    _queue_status = False
+
     def __init__(self, wireguard_client):
         pygame.init()
         pygame.display.set_caption("Heroes V of Might and Magic Ashan Arena 3 - Menu")
@@ -37,6 +39,9 @@ class H5_Lobby:
         self.BG = pygame.image.load(
             os.path.join(os.getcwd(), "resources/h5_background.jpg")
         )
+        self.QUEUE_BG = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/queue.jpg")
+        )
 
     def get_font(self, font_size: int = 75):
         return pygame.font.Font("resources/ASansrounded.ttf", font_size)
@@ -46,6 +51,10 @@ class H5_Lobby:
             self.BG,
             (self.config["screen_width"], self.config["screen_hight"]),
         )
+        queue_window, CANCEL_QUEUE, ACCEPT_QUEUE = self.queue_window()
+        queue_window_x = (self.config["screen_width"] - queue_window.get_width()) // 2
+        queue_window_y = (self.config["screen_hight"] - queue_window.get_height()) // 2
+
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
 
@@ -125,14 +134,20 @@ class H5_Lobby:
                 button.changeColor(MENU_MOUSE_POS)
                 button.update(self.SCREEN)
 
+            if self._queue_status:
+                self.SCREEN.blit(self.QUEUE_BG, (queue_window_x, queue_window_y))
+                CANCEL_QUEUE.changeColor(MENU_MOUSE_POS)
+                CANCEL_QUEUE.update(self.SCREEN)
+                ACCEPT_QUEUE.changeColor(MENU_MOUSE_POS)
+                ACCEPT_QUEUE.update(self.SCREEN)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        game = AschanArena3_Game()
-                        game.run_processes()
+                        self._queue_status = True
                     if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                         self.options_window()
                     if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
@@ -140,8 +155,54 @@ class H5_Lobby:
                         self.wireguard_client.set_wireguard_state(False)
                         pygame.quit()
                         sys.exit()
+                    if self._queue_status:
+                        if CANCEL_QUEUE.checkForInput(MENU_MOUSE_POS):
+                            self._queue_status = False
+                        if ACCEPT_QUEUE.checkForInput(MENU_MOUSE_POS):
+                            self._queue_status = False
 
             pygame.display.update()
+
+    def queue_window(self):
+        player_found = False
+        overlay_width, overlay_height = (
+            self.config["screen_width"] // 3,
+            self.config["screen_hight"] // 3,
+        )
+        self.QUEUE_BG = pygame.transform.scale(
+            self.QUEUE_BG, (overlay_width, overlay_height)
+        )
+        overlay_surface = pygame.Surface((overlay_width, overlay_height))
+        overlay_surface.fill((200, 200, 200))
+        pygame.draw.rect(overlay_surface, (0, 0, 0), overlay_surface.get_rect(), 5)
+
+        CANCEL_BUTTON = Button(
+            image=pygame.image.load(
+                os.path.join(os.getcwd(), "resources/rectangle.png")
+            ),
+            pos=(overlay_width * 1.8, overlay_height * 1.8),
+            text_input="Cancel",
+            font=self.get_font(self.font_size[1]),
+            base_color="#d7fcd4",
+            hovering_color="White",
+        )
+
+        ACCEPT_BUTTON = Button(
+            image=pygame.image.load(
+                os.path.join(os.getcwd(), "resources/rectangle.png")
+            ),
+            pos=(overlay_width * 1.2, overlay_height * 1.8),
+            text_input="Accept",
+            font=self.get_font(self.font_size[1]),
+            base_color="#d7fcd4",
+            hovering_color="White",
+        )
+
+        if player_found:
+            game = AschanArena3_Game()
+            game.run_processes()
+
+        return overlay_surface, CANCEL_BUTTON, ACCEPT_BUTTON
 
     def options_window(self):
         RESOLUTION_CHOICES = OptionBox(
