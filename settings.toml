@@ -5,5 +5,5 @@ screen_hight = 1080
 [game]
 game_path = "E:\\GOG\\GOG Galaxy\\Games\\Heroes of Might and Magic V - Tribes of the East\\bin\\AshanArena3"
 
-[wireguard]
-wireguard_path = "C:\\Program Files\\WireGuard\\wireguard.exe"
+[soft_ether]
+vpn_path = "C:\\Program Files\\WireGuard\\wireguard.exe"

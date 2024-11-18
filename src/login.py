@@ -6,20 +6,14 @@ import ctypes
 
 from src.global_vars import fonts_sizes
 from src.lobby import H5_Lobby
-from src.helpers import delete_objects, is_admin
-from src.wireguard_handling import WireguardClient
+from src.helpers import delete_objects
+from vpn_handling import SoftEtherClient
 from window_elements.text_input import TextInput
 from window_elements.button import Button
 
 
 class LoginWindow:
     def __init__(self):
-        if not is_admin():
-            ctypes.windll.shell32.ShellExecuteW(
-                None, "runas", sys.executable, " ".join(sys.argv), None, 0
-            )
-            sys.exit()
-
         pygame.init()
         pygame.display.set_caption("Heroes V of Might and Magic Ashan Arena 3 - Login")
         pygame.mixer.init()
@@ -295,9 +289,9 @@ class LoginWindow:
         if response.status_code == 200:
             pygame.mixer.fadeout(5000)
             pygame.quit()
-            self.wireguard_client = WireguardClient(user_data["nickname"])
-            self.wireguard_client.set_wireguard_state(state=True)
-            lobby = H5_Lobby(self.wireguard_client)
+            self.vpn_client = SoftEtherClient(user_data["nickname"])
+            self.vpn_client.set_vpn_state(state=True)
+            lobby = H5_Lobby(self.vpn_client)
             lobby.run_game()
 
         # TODO: wrong password or login window
@@ -305,7 +299,7 @@ class LoginWindow:
 
     def register_new_player(self, inputs: list):
         url = "http://4.231.97.96:8000/register/"
-        client_private_key, client_public_key = WireguardClient.generate_keys()
+        client_private_key, client_public_key = SoftEtherClient.generate_keys()
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
@@ -320,7 +314,7 @@ class LoginWindow:
         # TODO: add handling of different error codes
         if response.status_code == 200 and data.status_code == 200:
             data = data.json()
-            WireguardClient.create_new_client(
+            SoftEtherClient.create_new_client(
                 client=user_data["nickname"],
                 server_public_key="pJD0nHGtw+EpgTMd4HZh4zHaBiWfXHzuEOLBcDM2ZyE=",
                 client_private_key=user_data["client_private_key"],

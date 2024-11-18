@@ -2,31 +2,30 @@ import os
 import subprocess
 import time
 
-from src.settings_reader import load_wireguard_settings
+from src.settings_reader import load_vpn_settings
 
 
-class WireguardClient:
+class SoftEtherClient:
     def __init__(self, user_name: str):
         self.user_name = user_name
-        self.wireguard_path = load_wireguard_settings()["wireguard_path"]
+        self.vpn_path = load_vpn_settings()["vpn_path"]
 
-    def set_wireguard_state(self, state: bool):
-        config_file = os.path.join(os.getcwd(), f"{self.user_name}.conf")
+    def set_vpn_state(self, state: bool):
+        if state:
+            account_state = "AccountConnect"
+        else:
+            account_state = "AccountDisconnect"
+        command = [
+            "vpncmd.exe",
+            "localhost",
+            "/CLIENT",
+            "/CMD",
+            account_state,
+            "H5_Lobby VPN",
+        ]
 
         try:
-            if state:
-                subprocess.run(
-                    f'"{self.wireguard_path}" /installtunnelservice "{config_file}"',
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                    shell=True,
-                )
-            else:
-                subprocess.run(
-                    f'sc stop "WireGuardTunnel${self.user_name}"',
-                )
-
+            subprocess.run(command, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             print("Error:", e.stderr)
 

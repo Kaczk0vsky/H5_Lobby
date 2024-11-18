@@ -16,7 +16,7 @@ import requests
 class H5_Lobby:
     _queue_status = False
 
-    def __init__(self, wireguard_client):
+    def __init__(self, vpn_client):
         pygame.init()
         pygame.display.set_caption("Heroes V of Might and Magic Ashan Arena 3 - Menu")
         pygame.mixer.init()
@@ -25,7 +25,7 @@ class H5_Lobby:
         )
         pygame.mixer.music.play(-1, 0.0)
         pygame.mixer.music.set_volume(0.3)
-        self.wireguard_client = wireguard_client
+        self.vpn_client = vpn_client
 
         self.config = load_resolution_settings()
         self.transformation_option = (
@@ -152,7 +152,7 @@ class H5_Lobby:
                         self.options_window()
                     if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                         self.set_player_offline()
-                        self.wireguard_client.set_wireguard_state(False)
+                        self.vpn_client.set_vpn_state(False)
                         pygame.quit()
                         sys.exit()
                     if self._queue_status:
@@ -310,7 +310,7 @@ class H5_Lobby:
 
     def set_player_offline(self):
         url = "http://4.231.97.96:8000/set_player_offline/"
-        user_data = {"nickname": self.wireguard_client.user_name}
+        user_data = {"nickname": self.vpn_client.user_name}
         requests.post(url, json=user_data)
 
     def run_game(self):
