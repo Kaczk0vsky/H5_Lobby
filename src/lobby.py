@@ -20,11 +20,14 @@ class H5_Lobby:
         pygame.init()
         pygame.display.set_caption("Heroes V of Might and Magic Ashan Arena 3 - Menu")
         pygame.mixer.init()
-        pygame.mixer.music.load(
-            os.path.join(os.getcwd(), "resources/H5_main_theme.mp3")
+        pygame.mixer.Channel(0).play(
+            pygame.mixer.Sound(
+                os.path.join(os.getcwd(), "resources/H5_main_theme.mp3")
+            ),
+            -1,
+            0,
         )
-        pygame.mixer.music.play(-1, 0.0)
-        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.Channel(0).set_volume(0.3)
         self.vpn_client = vpn_client
 
         self.config = load_resolution_settings()
@@ -37,46 +40,142 @@ class H5_Lobby:
             (self.config["screen_width"], self.config["screen_hight"]), pygame.RESIZABLE
         )
         self.BG = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/h5_background.jpg")
+            os.path.join(os.getcwd(), "resources/background/background.png")
+        )
+        self.PLAYER_LIST = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/background/players_online.png")
+        )
+        self.TOP_BAR = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/main_menu/top_bar.png")
         )
         self.QUEUE_BG = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/queue.jpg")
+            os.path.join(os.getcwd(), "resources/game_search/game_search_window.png")
+        )
+        self.NEWS = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/news/news_window.png")
+        )
+        self.QUIT = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/close_dark.png")
+        )
+        self.QUIT_HIGHLIGHTED = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/close_highlighted.png")
+        )
+        self.ICON_SQUARE = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/iconsquare_dark.png")
+        )
+        self.ICON_SQUARE_HIGHLIGHTED = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/iconsquare_highlighted.png")
+        )
+        self.OPTIONS = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/options_dark.png")
+        )
+        self.OPTIONS_HIGHLIGHTED = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/options_highlighted.png")
+        )
+        self.SCROLL = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/scroll.png")
+        )
+        self.BUTTON = pygame.image.load(
+            os.path.join(
+                os.getcwd(), "resources/game_search/cancel_search_button_dark.png"
+            )
+        )
+        self.BUTTON_HIGHLIGHTED = pygame.image.load(
+            os.path.join(
+                os.getcwd(),
+                "resources/game_search/cancel_search_button_highlighted.png",
+            )
         )
 
     def get_font(self, font_size: int = 75):
-        return pygame.font.Font("resources/ASansrounded.ttf", font_size)
+        return pygame.font.Font("resources/Quivira.otf", font_size)
 
     def main_menu(self):
         self.BG = pygame.transform.scale(
             self.BG,
             (self.config["screen_width"], self.config["screen_hight"]),
         )
+        self.TOP_BAR = pygame.transform.scale(
+            self.TOP_BAR,
+            (self.config["screen_width"] / 1.5, self.config["screen_hight"] / 10),
+        )
+        self.PLAYER_LIST = pygame.transform.scale(
+            self.PLAYER_LIST,
+            (self.config["screen_width"] / 5, self.config["screen_hight"] / 1.5),
+        )
+        self.NEWS = pygame.transform.scale(
+            self.NEWS,
+            (self.config["screen_width"] / 2, self.config["screen_hight"] / 1.5),
+        )
+        self.OPTIONS = pygame.transform.scale(
+            self.OPTIONS,
+            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+        )
+        self.OPTIONS_HIGHLIGHTED = pygame.transform.scale(
+            self.OPTIONS_HIGHLIGHTED,
+            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+        )
+        self.ICON_SQUARE = pygame.transform.scale(
+            self.ICON_SQUARE,
+            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+        )
+        self.ICON_SQUARE_HIGHLIGHTED = pygame.transform.scale(
+            self.ICON_SQUARE_HIGHLIGHTED,
+            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+        )
+        self.QUIT = pygame.transform.scale(
+            self.QUIT,
+            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+        )
+        self.QUIT_HIGHLIGHTED = pygame.transform.scale(
+            self.QUIT_HIGHLIGHTED,
+            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+        )
+        self.BUTTON = pygame.transform.scale(
+            self.BUTTON,
+            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+        )
+        self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
+            self.BUTTON_HIGHLIGHTED,
+            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+        )
+
         queue_window, CANCEL_QUEUE, ACCEPT_QUEUE = self.queue_window()
         queue_window_x = (self.config["screen_width"] - queue_window.get_width()) // 2
         queue_window_y = (self.config["screen_hight"] - queue_window.get_height()) // 2
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
+            self.SCREEN.blit(
+                self.TOP_BAR,
+                (
+                    635 * (transformation_factors[self.transformation_option][0]),
+                    5 * (transformation_factors[self.transformation_option][1]),
+                ),
+            )
+            self.SCREEN.blit(
+                self.PLAYER_LIST,
+                (
+                    1530 * (transformation_factors[self.transformation_option][0]),
+                    100 * (transformation_factors[self.transformation_option][1]),
+                ),
+            )
+            # self.SCREEN.blit(
+            #     self.NEWS,
+            #     (
+            #         550 * (transformation_factors[self.transformation_option][0]),
+            #         100 * (transformation_factors[self.transformation_option][1]),
+            #     ),
+            # )
 
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-            MENU_TEXT = self.get_font(self.font_size[0]).render(
-                "H5 Lobby Launcher", True, "#b68f40"
-            )
-            MENU_RECT = MENU_TEXT.get_rect(
-                center=(
-                    290 * (transformation_factors[self.transformation_option][0]),
-                    220 * (transformation_factors[self.transformation_option][1]),
-                )
-            )
-
             FIND_GAME_BUTTON = Button(
-                image=pygame.image.load(
-                    os.path.join(os.getcwd(), "resources/rectangle.png")
-                ),
+                image=self.BUTTON,
+                image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
-                    290 * (transformation_factors[self.transformation_option][0]),
-                    350 * (transformation_factors[self.transformation_option][1]),
+                    830 * (transformation_factors[self.transformation_option][0]),
+                    50 * (transformation_factors[self.transformation_option][1]),
                 ),
                 text_input="Find Game",
                 font=self.get_font(self.font_size[1]),
@@ -84,62 +183,96 @@ class H5_Lobby:
                 hovering_color="White",
             )
             VIEW_STATISTICS = Button(
-                image=pygame.image.load(
-                    os.path.join(os.getcwd(), "resources/rectangle.png")
-                ),
+                image=self.BUTTON,
+                image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
-                    290 * (transformation_factors[self.transformation_option][0]),
-                    500 * (transformation_factors[self.transformation_option][1]),
+                    1080 * (transformation_factors[self.transformation_option][0]),
+                    50 * (transformation_factors[self.transformation_option][1]),
                 ),
                 text_input="View Statistics",
                 font=self.get_font(self.font_size[1]),
                 base_color="#d7fcd4",
                 hovering_color="White",
             )
-            OPTIONS_BUTTON = Button(
-                image=pygame.image.load(
-                    os.path.join(os.getcwd(), "resources/rectangle.png")
-                ),
+            NEWS = Button(
+                image=self.BUTTON,
+                image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
-                    290 * (transformation_factors[self.transformation_option][0]),
-                    650 * (transformation_factors[self.transformation_option][1]),
+                    1330 * (transformation_factors[self.transformation_option][0]),
+                    50 * (transformation_factors[self.transformation_option][1]),
                 ),
-                text_input="Options",
+                text_input="News",
+                font=self.get_font(self.font_size[1]),
+                base_color="#d7fcd4",
+                hovering_color="White",
+            )
+            MY_PROFILE = Button(
+                image=self.BUTTON,
+                image_highlited=self.BUTTON_HIGHLIGHTED,
+                pos=(
+                    1580 * (transformation_factors[self.transformation_option][0]),
+                    50 * (transformation_factors[self.transformation_option][1]),
+                ),
+                text_input="My Account",
+                font=self.get_font(self.font_size[1]),
+                base_color="#d7fcd4",
+                hovering_color="White",
+            )
+            PLAYER_PROFILE = Button(
+                image=self.ICON_SQUARE,
+                image_highlited=self.ICON_SQUARE_HIGHLIGHTED,
+                pos=(
+                    1730 * (transformation_factors[self.transformation_option][0]),
+                    50 * (transformation_factors[self.transformation_option][1]),
+                ),
+                text_input="",
+                font=self.get_font(self.font_size[1]),
+                base_color="#d7fcd4",
+                hovering_color="White",
+            )
+            OPTIONS_BUTTON = Button(
+                image=self.OPTIONS,
+                image_highlited=self.OPTIONS_HIGHLIGHTED,
+                pos=(
+                    1800 * (transformation_factors[self.transformation_option][0]),
+                    50 * (transformation_factors[self.transformation_option][1]),
+                ),
+                text_input="",
                 font=self.get_font(self.font_size[1]),
                 base_color="#d7fcd4",
                 hovering_color="White",
             )
             QUIT_BUTTON = Button(
-                image=pygame.image.load(
-                    os.path.join(os.getcwd(), "resources/rectangle.png")
-                ),
+                image=self.QUIT,
+                image_highlited=self.QUIT_HIGHLIGHTED,
                 pos=(
-                    290 * (transformation_factors[self.transformation_option][0]),
-                    800 * (transformation_factors[self.transformation_option][1]),
+                    1870 * (transformation_factors[self.transformation_option][0]),
+                    50 * (transformation_factors[self.transformation_option][1]),
                 ),
-                text_input="Quit",
+                text_input="",
                 font=self.get_font(self.font_size[1]),
                 base_color="#d7fcd4",
                 hovering_color="White",
             )
 
-            self.SCREEN.blit(MENU_TEXT, MENU_RECT)
-
             for button in [
                 FIND_GAME_BUTTON,
                 VIEW_STATISTICS,
+                NEWS,
+                MY_PROFILE,
+                PLAYER_PROFILE,
                 OPTIONS_BUTTON,
                 QUIT_BUTTON,
             ]:
                 button.changeColor(MENU_MOUSE_POS)
-                button.update(self.SCREEN)
+                button.update(self.SCREEN, MENU_MOUSE_POS)
 
             if self._queue_status:
                 self.SCREEN.blit(self.QUEUE_BG, (queue_window_x, queue_window_y))
                 CANCEL_QUEUE.changeColor(MENU_MOUSE_POS)
-                CANCEL_QUEUE.update(self.SCREEN)
+                CANCEL_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
                 ACCEPT_QUEUE.changeColor(MENU_MOUSE_POS)
-                ACCEPT_QUEUE.update(self.SCREEN)
+                ACCEPT_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -260,7 +393,7 @@ class H5_Lobby:
 
             for button in [BACK_BUTTON]:
                 button.changeColor(OPTIONS_MOUSE_POS)
-                button.update(self.SCREEN)
+                button.update(self.SCREEN, OPTIONS_MOUSE_POS)
 
             event_list = pygame.event.get()
             for event in event_list:
