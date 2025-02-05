@@ -1,16 +1,16 @@
-from src.settings_reader import load_resolution_settings
-from src.global_vars import resolution_choices, transformation_factors, fonts_sizes
-from src.run_ashan_arena import AschanArena3_Game
-from window_elements.button import Button
-from window_elements.option_box import OptionBox
-
-from pygame.locals import *
-
 import pygame
 import sys
 import os
 import toml
 import requests
+
+from pygame.locals import *
+
+from src.settings_reader import load_resolution_settings
+from src.global_vars import resolution_choices, transformation_factors, fonts_sizes
+from src.run_ashan_arena import AschanArena3_Game
+from window_elements.button import Button
+from window_elements.option_box import OptionBox
 
 
 class H5_Lobby:
@@ -119,6 +119,23 @@ class H5_Lobby:
             self.PLAYER_LIST,
             (self.config["screen_width"] / 5, self.config["screen_hight"] / 1.5),
         )
+        self.PLAYER_LIST_BG = pygame.Surface(
+            (
+                350 * (transformation_factors[self.transformation_option][0]),
+                680 * (transformation_factors[self.transformation_option][1]),
+            ),
+            pygame.SRCALPHA,
+        )
+        self.PLAYER_LIST_BG.fill((0, 0, 0, 200))
+        self.PLAYERS_TEXT = self.get_font(self.font_size[0]).render(
+            "Players active", True, "#d7fcd4"
+        )
+        self.PLAYERS_TEXT_RECT = self.PLAYERS_TEXT.get_rect(
+            center=(
+                1730 * (transformation_factors[self.transformation_option][0]),
+                180 * transformation_factors[self.transformation_option][1],
+            ),
+        )
         self.NEWS = pygame.transform.scale(
             self.NEWS,
             (self.config["screen_width"] / 2, self.config["screen_hight"] / 1.5),
@@ -172,7 +189,15 @@ class H5_Lobby:
             (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
         )
 
-        queue_window, CANCEL_QUEUE, ACCEPT_QUEUE = self.queue_window()
+        (
+            queue_window,
+            CANCEL_QUEUE,
+            ACCEPT_QUEUE,
+            GAME_FOUND_TEXT,
+            GAME_FOUND_RECT,
+            OPONNENT_TEXT,
+            OPONNENT_RECT,
+        ) = self.queue_window()
         queue_window_x = (self.config["screen_width"] - queue_window.get_width()) // 2
         queue_window_y = (self.config["screen_hight"] - queue_window.get_height()) // 2
 
@@ -186,12 +211,20 @@ class H5_Lobby:
                 ),
             )
             self.SCREEN.blit(
+                self.PLAYER_LIST_BG,
+                (
+                    1550 * (transformation_factors[self.transformation_option][0]),
+                    120 * (transformation_factors[self.transformation_option][1]),
+                ),
+            )
+            self.SCREEN.blit(
                 self.PLAYER_LIST,
                 (
                     1530 * (transformation_factors[self.transformation_option][0]),
                     100 * (transformation_factors[self.transformation_option][1]),
                 ),
             )
+            self.SCREEN.blit(self.PLAYERS_TEXT, self.PLAYERS_TEXT_RECT)
             # self.SCREEN.blit(
             #     self.NEWS,
             #     (
@@ -303,8 +336,13 @@ class H5_Lobby:
                 self.SCREEN.blit(self.QUEUE_BG, (queue_window_x, queue_window_y))
                 CANCEL_QUEUE.changeColor(MENU_MOUSE_POS)
                 CANCEL_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
-                ACCEPT_QUEUE.changeColor(MENU_MOUSE_POS)
-                ACCEPT_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
+                if ACCEPT_QUEUE is not None:
+                    ACCEPT_QUEUE.changeColor(MENU_MOUSE_POS)
+                    ACCEPT_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
+                if GAME_FOUND_TEXT is not None and GAME_FOUND_RECT is not None:
+                    self.SCREEN.blit(GAME_FOUND_TEXT, GAME_FOUND_RECT)
+                if OPONNENT_TEXT is not None and OPONNENT_RECT is not None:
+                    self.SCREEN.blit(OPONNENT_TEXT, OPONNENT_RECT)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -323,13 +361,17 @@ class H5_Lobby:
                     if self._queue_status:
                         if CANCEL_QUEUE.checkForInput(MENU_MOUSE_POS):
                             self._queue_status = False
-                        if ACCEPT_QUEUE.checkForInput(MENU_MOUSE_POS):
-                            self._queue_status = False
+                        if ACCEPT_QUEUE is not None:
+                            if ACCEPT_QUEUE.checkForInput(MENU_MOUSE_POS):
+                                self._queue_status = False
 
             pygame.display.update()
 
     def queue_window(self):
-        player_found = False
+        self.player_found = False
+        self.game_accepted = False
+        self.opponent_str = ""
+
         overlay_width, overlay_height = (
             self.config["screen_width"] // 3,
             self.config["screen_hight"] // 3,
@@ -351,21 +393,59 @@ class H5_Lobby:
             hovering_color="White",
         )
 
-        ACCEPT_BUTTON = Button(
-            image=self.ACCEPT_BUTTON,
-            image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
-            pos=(overlay_width * 1.3, overlay_height * 1.8),
-            text_input="Accept",
-            font=self.get_font(self.font_size[1]),
-            base_color="#d7fcd4",
-            hovering_color="White",
-        )
+        GAME_FOUND_TEXT = None
+        GAME_FOUND_RECT = None
+        OPONNENT_TEXT = None
+        OPONNENT_RECT = None
+        ACCEPT_BUTTON = None
 
-        if player_found:
+        if self.player_found:
+            GAME_FOUND_TEXT = self.get_font(self.font_size[0]).render(
+                "GAME FOUND", True, "white"
+            )
+            GAME_FOUND_RECT = GAME_FOUND_TEXT.get_rect(
+                center=(
+                    self.SCREEN.get_width() / 2,
+                    self.SCREEN.get_height() / 2.4,
+                )
+            )
+
+            OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
+                f"Opponent: Piotrek", True, "white"
+            )
+            if self.opponent_str != "":
+                OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
+                    f"Opponent: {self.opponent_str}", True, "white"
+                )
+            OPONNENT_RECT = OPONNENT_TEXT.get_rect(
+                center=(
+                    self.SCREEN.get_width() / 2,
+                    self.SCREEN.get_height() / 2,
+                )
+            )
+            ACCEPT_BUTTON = Button(
+                image=self.ACCEPT_BUTTON,
+                image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
+                pos=(overlay_width * 1.3, overlay_height * 1.8),
+                text_input="Accept",
+                font=self.get_font(self.font_size[1]),
+                base_color="#d7fcd4",
+                hovering_color="White",
+            )
+
+        if self.game_accepted:
             game = AschanArena3_Game()
             game.run_processes()
 
-        return overlay_surface, CANCEL_BUTTON, ACCEPT_BUTTON
+        return (
+            overlay_surface,
+            CANCEL_BUTTON,
+            ACCEPT_BUTTON,
+            GAME_FOUND_TEXT,
+            GAME_FOUND_RECT,
+            OPONNENT_TEXT,
+            OPONNENT_RECT,
+        )
 
     def options_window(self):
         RESOLUTION_CHOICES = OptionBox(
@@ -386,7 +466,7 @@ class H5_Lobby:
             OPTIONS_MOUSE_POS = pygame.mouse.get_pos()
 
             RESOLUTION_TEXT = self.get_font(self.font_size[1]).render(
-                "Select resolution", True, "#FFFFFF"
+                "Select resolution", True, "#d7fcd4"
             )
             RESOLUTION_RECT = RESOLUTION_TEXT.get_rect(
                 center=(
@@ -447,8 +527,13 @@ class H5_Lobby:
                         self.BG,
                         (self.config["screen_width"], self.config["screen_hight"]),
                     )
+
+                with open(os.path.join(os.getcwd(), "settings.toml"), "r") as f:
+                    data = toml.load(f)
+                    data["resolution"] = self.config
+
                 with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
-                    toml.dump({"resolution": self.config}, f)
+                    toml.dump(data, f)
 
             RESOLUTION_CHOICES.draw(
                 self.SCREEN,

@@ -2,7 +2,6 @@ import pygame
 import os
 import sys
 import requests
-import ctypes
 
 from src.global_vars import fonts_sizes
 from src.lobby import H5_Lobby
