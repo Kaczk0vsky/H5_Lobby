@@ -8,6 +8,7 @@ from src.global_vars import fonts_sizes
 from src.lobby import H5_Lobby
 from src.helpers import delete_objects
 from src.vpn_handling import SoftEtherClient
+from src.settings_reader import load_resolution_settings
 from window_elements.text_input import TextInput
 from window_elements.button import Button
 
@@ -27,6 +28,7 @@ class LoginWindow:
         pygame.mixer.Channel(0).set_volume(0.3)
 
         self.transformation_option = "800x600"
+        self.config = load_resolution_settings()
         self.font_size = fonts_sizes[self.transformation_option]
 
         self.SCREEN = pygame.display.set_mode((800, 600))
@@ -37,11 +39,31 @@ class LoginWindow:
             self.BG,
             (800, 600),
         )
+        self.BUTTON = pygame.image.load(
+            os.path.join(
+                os.getcwd(), "resources/game_search/cancel_search_button_dark.png"
+            )
+        )
+        self.BUTTON_HIGHLIGHTED = pygame.image.load(
+            os.path.join(
+                os.getcwd(),
+                "resources/game_search/cancel_search_button_highlighted.png",
+            )
+        )
 
     def get_font(self, font_size: int = 75):
         return pygame.font.Font("resources/Quivira.otf", font_size)
 
     def login_window(self):
+        self.BUTTON = pygame.transform.scale(
+            self.BUTTON,
+            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+        )
+        self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
+            self.BUTTON_HIGHLIGHTED,
+            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+        )
+
         LOGIN_INPUT = TextInput(
             self.SCREEN.get_width() / 2.1,
             self.SCREEN.get_height() / 2.5,
@@ -82,12 +104,11 @@ class LoginWindow:
             self.SCREEN.blit(PASSWORD_TEXT, PASSWORD_RECT)
 
             LOGIN_BUTTON = Button(
-                image=pygame.image.load(
-                    os.path.join(os.getcwd(), "resources/rectangle.png")
-                ),
+                image=self.BUTTON,
+                image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
                     self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 3.3),
+                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 2.8),
                 ),
                 text_input="Login",
                 font=self.get_font(font_size=30),
@@ -99,12 +120,11 @@ class LoginWindow:
             LOGIN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             REGISTER_BUTTON = Button(
-                image=pygame.image.load(
-                    os.path.join(os.getcwd(), "resources/rectangle.png")
-                ),
+                image=self.BUTTON,
+                image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
                     self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 10),
+                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 4),
                 ),
                 text_input="Register",
                 font=self.get_font(font_size=30),

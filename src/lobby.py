@@ -86,6 +86,22 @@ class H5_Lobby:
                 "resources/game_search/cancel_search_button_highlighted.png",
             )
         )
+        self.CANCEL_BUTTON = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/game_search/red_button_dark.png")
+        )
+        self.CANCEL_BUTTON_HIGHLIGHTED = pygame.image.load(
+            os.path.join(
+                os.getcwd(), "resources/game_search/red_button_highlighted.png"
+            )
+        )
+        self.ACCEPT_BUTTON = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/game_search/green_button_dark.png")
+        )
+        self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.image.load(
+            os.path.join(
+                os.getcwd(), "resources/game_search/green_button_highlighted.png"
+            )
+        )
 
     def get_font(self, font_size: int = 75):
         return pygame.font.Font("resources/Quivira.otf", font_size)
@@ -137,6 +153,22 @@ class H5_Lobby:
         )
         self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.BUTTON_HIGHLIGHTED,
+            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+        )
+        self.ACCEPT_BUTTON = pygame.transform.scale(
+            self.ACCEPT_BUTTON,
+            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+        )
+        self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.transform.scale(
+            self.ACCEPT_BUTTON_HIGHLIGHTED,
+            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+        )
+        self.CANCEL_BUTTON = pygame.transform.scale(
+            self.CANCEL_BUTTON,
+            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+        )
+        self.CANCEL_BUTTON_HIGHLIGHTED = pygame.transform.scale(
+            self.CANCEL_BUTTON_HIGHLIGHTED,
             (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
         )
 
@@ -310,10 +342,9 @@ class H5_Lobby:
         pygame.draw.rect(overlay_surface, (0, 0, 0), overlay_surface.get_rect(), 5)
 
         CANCEL_BUTTON = Button(
-            image=pygame.image.load(
-                os.path.join(os.getcwd(), "resources/rectangle.png")
-            ),
-            pos=(overlay_width * 1.8, overlay_height * 1.8),
+            image=self.CANCEL_BUTTON,
+            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
+            pos=(overlay_width * 1.7, overlay_height * 1.8),
             text_input="Cancel",
             font=self.get_font(self.font_size[1]),
             base_color="#d7fcd4",
@@ -321,10 +352,9 @@ class H5_Lobby:
         )
 
         ACCEPT_BUTTON = Button(
-            image=pygame.image.load(
-                os.path.join(os.getcwd(), "resources/rectangle.png")
-            ),
-            pos=(overlay_width * 1.2, overlay_height * 1.8),
+            image=self.ACCEPT_BUTTON,
+            image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
+            pos=(overlay_width * 1.3, overlay_height * 1.8),
             text_input="Accept",
             font=self.get_font(self.font_size[1]),
             base_color="#d7fcd4",
@@ -355,16 +385,6 @@ class H5_Lobby:
 
             OPTIONS_MOUSE_POS = pygame.mouse.get_pos()
 
-            MENU_TEXT = self.get_font(self.font_size[0]).render(
-                "H5 Lobby Launcher", True, "#FFFFFF"
-            )
-            MENU_RECT = MENU_TEXT.get_rect(
-                center=(
-                    290 * (transformation_factors[self.transformation_option][0]),
-                    220 * (transformation_factors[self.transformation_option][1]),
-                )
-            )
-
             RESOLUTION_TEXT = self.get_font(self.font_size[1]).render(
                 "Select resolution", True, "#FFFFFF"
             )
@@ -376,9 +396,8 @@ class H5_Lobby:
             )
 
             BACK_BUTTON = Button(
-                image=pygame.image.load(
-                    os.path.join(os.getcwd(), "resources/rectangle.png")
-                ),
+                image=self.BUTTON,
+                image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
                     290 * (transformation_factors[self.transformation_option][0]),
                     800 * (transformation_factors[self.transformation_option][1]),
@@ -388,7 +407,6 @@ class H5_Lobby:
                 base_color="#d7fcd4",
                 hovering_color="White",
             )
-            self.SCREEN.blit(MENU_TEXT, MENU_RECT)
             self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
 
             for button in [BACK_BUTTON]:
