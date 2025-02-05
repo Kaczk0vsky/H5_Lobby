@@ -3,6 +3,7 @@ import sys
 import os
 import toml
 import requests
+import time
 
 from pygame.locals import *
 
@@ -15,6 +16,8 @@ from window_elements.option_box import OptionBox
 
 class H5_Lobby:
     _queue_status = False
+    _player_found = False
+    _game_accepted = False
 
     def __init__(self, vpn_client):
         pygame.init()
@@ -28,6 +31,7 @@ class H5_Lobby:
             0,
         )
         pygame.mixer.Channel(0).set_volume(0.3)
+        self.opponent_str = ""
         self.vpn_client = vpn_client
 
         self.config = load_resolution_settings()
@@ -107,6 +111,10 @@ class H5_Lobby:
         return pygame.font.Font("resources/Quivira.otf", font_size)
 
     def main_menu(self):
+        get_time = False
+        refresh_queue_window = False
+        found_game = False  # TODO: remove, only for testing
+
         self.BG = pygame.transform.scale(
             self.BG,
             (self.config["screen_width"], self.config["screen_hight"]),
@@ -193,8 +201,8 @@ class H5_Lobby:
             queue_window,
             CANCEL_QUEUE,
             ACCEPT_QUEUE,
-            GAME_FOUND_TEXT,
-            GAME_FOUND_RECT,
+            HEADER_TEXT,
+            HEADER_RECT,
             OPONNENT_TEXT,
             OPONNENT_RECT,
         ) = self.queue_window()
@@ -333,14 +341,56 @@ class H5_Lobby:
                 button.update(self.SCREEN, MENU_MOUSE_POS)
 
             if self._queue_status:
+                if refresh_queue_window:
+                    (
+                        queue_window,
+                        CANCEL_QUEUE,
+                        ACCEPT_QUEUE,
+                        HEADER_TEXT,
+                        HEADER_RECT,
+                        OPONNENT_TEXT,
+                        OPONNENT_RECT,
+                    ) = self.queue_window()
+                    refresh_queue_window = False
+
+                if not get_time:
+                    self.start_time = time.time()
+                    get_time = True
+                elapsed_time = round(time.time() - self.start_time)
+                minutes = elapsed_time // 60
+                seconds = elapsed_time % 60
+
+                if not found_game:
+                    HEADER_TEXT = self.get_font(self.font_size[0]).render(
+                        f"Waiting for opponent: {minutes}:{seconds:02d}",
+                        True,
+                        "white",
+                    )
+                    HEADER_RECT = HEADER_TEXT.get_rect(
+                        center=(
+                            self.SCREEN.get_width() / 2,
+                            self.SCREEN.get_height() / 2.4,
+                        )
+                    )
+
+                # TODO: remove this if statment - ONLY FOR TESTING
+                if seconds == 3:
+                    found_game = True
+                    self._player_found = True
+
+                if self._player_found:
+                    refresh_queue_window = True
+
                 self.SCREEN.blit(self.QUEUE_BG, (queue_window_x, queue_window_y))
+                self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
+
                 CANCEL_QUEUE.changeColor(MENU_MOUSE_POS)
                 CANCEL_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
                 if ACCEPT_QUEUE is not None:
                     ACCEPT_QUEUE.changeColor(MENU_MOUSE_POS)
                     ACCEPT_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
-                if GAME_FOUND_TEXT is not None and GAME_FOUND_RECT is not None:
-                    self.SCREEN.blit(GAME_FOUND_TEXT, GAME_FOUND_RECT)
+                if HEADER_TEXT is not None and HEADER_RECT is not None:
+                    self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
                 if OPONNENT_TEXT is not None and OPONNENT_RECT is not None:
                     self.SCREEN.blit(OPONNENT_TEXT, OPONNENT_RECT)
 
@@ -360,18 +410,20 @@ class H5_Lobby:
                         sys.exit()
                     if self._queue_status:
                         if CANCEL_QUEUE.checkForInput(MENU_MOUSE_POS):
+                            get_time = False
                             self._queue_status = False
+                            self._player_found = False
+                            refresh_queue_window = True
+                            found_game = False  # TODO: remove this - ONLY FOR TESTING
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.checkForInput(MENU_MOUSE_POS):
                                 self._queue_status = False
+                                self._player_found = False
+                                self._game_accepted = True
 
             pygame.display.update()
 
     def queue_window(self):
-        self.player_found = False
-        self.game_accepted = False
-        self.opponent_str = ""
-
         overlay_width, overlay_height = (
             self.config["screen_width"] // 3,
             self.config["screen_hight"] // 3,
@@ -386,24 +438,24 @@ class H5_Lobby:
         CANCEL_BUTTON = Button(
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
-            pos=(overlay_width * 1.7, overlay_height * 1.8),
+            pos=(overlay_width * 1.5, overlay_height * 1.8),
             text_input="Cancel",
             font=self.get_font(self.font_size[1]),
             base_color="#d7fcd4",
             hovering_color="White",
         )
 
-        GAME_FOUND_TEXT = None
-        GAME_FOUND_RECT = None
         OPONNENT_TEXT = None
         OPONNENT_RECT = None
+        HEADER_TEXT = None
+        HEADER_RECT = None
         ACCEPT_BUTTON = None
 
-        if self.player_found:
-            GAME_FOUND_TEXT = self.get_font(self.font_size[0]).render(
+        if self._player_found:
+            HEADER_TEXT = self.get_font(self.font_size[0]).render(
                 "GAME FOUND", True, "white"
             )
-            GAME_FOUND_RECT = GAME_FOUND_TEXT.get_rect(
+            HEADER_RECT = HEADER_TEXT.get_rect(
                 center=(
                     self.SCREEN.get_width() / 2,
                     self.SCREEN.get_height() / 2.4,
@@ -432,8 +484,17 @@ class H5_Lobby:
                 base_color="#d7fcd4",
                 hovering_color="White",
             )
+            CANCEL_BUTTON = Button(
+                image=self.CANCEL_BUTTON,
+                image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
+                pos=(overlay_width * 1.7, overlay_height * 1.8),
+                text_input="Cancel",
+                font=self.get_font(self.font_size[1]),
+                base_color="#d7fcd4",
+                hovering_color="White",
+            )
 
-        if self.game_accepted:
+        if self._game_accepted:
             game = AschanArena3_Game()
             game.run_processes()
 
@@ -441,8 +502,8 @@ class H5_Lobby:
             overlay_surface,
             CANCEL_BUTTON,
             ACCEPT_BUTTON,
-            GAME_FOUND_TEXT,
-            GAME_FOUND_RECT,
+            HEADER_TEXT,
+            HEADER_RECT,
             OPONNENT_TEXT,
             OPONNENT_RECT,
         )
