@@ -8,8 +8,14 @@ import time
 from pygame.locals import *
 
 from src.settings_reader import load_resolution_settings
-from src.global_vars import resolution_choices, transformation_factors, fonts_sizes
+from src.global_vars import (
+    resolution_choices,
+    transformation_factors,
+    fonts_sizes,
+    bg_sound_volume,
+)
 from src.run_ashan_arena import AschanArena3_Game
+from src.helpers import play_on_empty
 from window_elements.button import Button
 from window_elements.option_box import OptionBox
 
@@ -30,7 +36,7 @@ class H5_Lobby:
             -1,
             0,
         )
-        pygame.mixer.Channel(0).set_volume(0.3)
+        pygame.mixer.Channel(0).set_volume(bg_sound_volume)
         self.opponent_str = ""
         self.vpn_client = vpn_client
 
@@ -114,6 +120,8 @@ class H5_Lobby:
         get_time = False
         refresh_queue_window = False
         found_game = False  # TODO: remove, only for testing
+        is_playing = False
+        queue_channel = 0
 
         self.BG = pygame.transform.scale(
             self.BG,
@@ -380,6 +388,12 @@ class H5_Lobby:
 
                 if self._player_found:
                     refresh_queue_window = True
+                    if not is_playing:
+                        queue_channel = play_on_empty(
+                            "resources/match_found.wav", volume=bg_sound_volume
+                        )
+                        pygame.mixer.Channel(0).set_volume(0.0)
+                        is_playing = True
 
                 self.SCREEN.blit(self.QUEUE_BG, (queue_window_x, queue_window_y))
                 self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
@@ -414,12 +428,16 @@ class H5_Lobby:
                             self._queue_status = False
                             self._player_found = False
                             refresh_queue_window = True
+                            is_playing = False
                             found_game = False  # TODO: remove this - ONLY FOR TESTING
+                            pygame.mixer.Channel(0).set_volume(bg_sound_volume)
+                            pygame.mixer.Channel(queue_channel).stop()
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.checkForInput(MENU_MOUSE_POS):
                                 self._queue_status = False
                                 self._player_found = False
                                 self._game_accepted = True
+                                found_game = False
 
             pygame.display.update()
 

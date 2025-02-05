@@ -3,7 +3,7 @@ import os
 import sys
 import requests
 
-from src.global_vars import fonts_sizes
+from src.global_vars import fonts_sizes, bg_sound_volume
 from src.lobby import H5_Lobby
 from src.helpers import delete_objects
 from src.vpn_handling import SoftEtherClient
@@ -24,7 +24,7 @@ class LoginWindow:
             -1,
             0,
         )
-        pygame.mixer.Channel(0).set_volume(0.3)
+        pygame.mixer.Channel(0).set_volume(bg_sound_volume)
 
         self.transformation_option = "800x600"
         self.config = load_resolution_settings()

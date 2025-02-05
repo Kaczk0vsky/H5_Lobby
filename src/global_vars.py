@@ -1,3 +1,5 @@
+bg_sound_volume = 0.2
+
 resolution_choices = [
     "640x480",
     "800x600",

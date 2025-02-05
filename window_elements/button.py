@@ -1,6 +1,8 @@
 import pygame
 import os
 
+from src.helpers import play_on_empty
+
 
 class Button:
     def __init__(
@@ -47,13 +49,7 @@ class Button:
         if position[0] in range(self.rect.left, self.rect.right) and position[
             1
         ] in range(self.rect.top, self.rect.bottom):
-            pygame.mixer.Channel(self.channel_index).play(
-                pygame.mixer.Sound(
-                    os.path.join(os.getcwd(), "resources/button_click.wav")
-                ),
-                0,
-                0,
-            )
+            self.channel_index = play_on_empty("resources/button_click.wav")
             return True
         return False
 
