@@ -1,5 +1,4 @@
 import pygame
-import os
 
 from src.helpers import play_on_empty
 
