@@ -1,7 +1,7 @@
 import os
 import django
 
-from src.settings_reader import check_for_missing_paths
+from src.settings_writer import check_for_missing_paths
 from src.login import LoginWindow
 
 

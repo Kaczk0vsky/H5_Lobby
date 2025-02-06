@@ -7,9 +7,11 @@ from src.global_vars import fonts_sizes, bg_sound_volume
 from src.lobby import H5_Lobby
 from src.helpers import delete_objects
 from src.vpn_handling import SoftEtherClient
-from src.settings_reader import load_resolution_settings
+from src.settings_reader import load_resolution_settings, load_client_settings
+from src.settings_writer import save_login_information
 from window_elements.text_input import TextInput
 from window_elements.button import Button
+from window_elements.check_box import CheckBox
 
 
 class LoginWindow:
@@ -28,6 +30,7 @@ class LoginWindow:
 
         self.transformation_option = "800x600"
         self.config = load_resolution_settings()
+        self.client_config = load_client_settings()
         self.font_size = fonts_sizes[self.transformation_option]
 
         self.SCREEN = pygame.display.set_mode((800, 600))
@@ -62,16 +65,37 @@ class LoginWindow:
             self.BUTTON_HIGHLIGHTED,
             (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
         )
+        CHECK_BOX_PASSWORD = CheckBox(
+            self.SCREEN,
+            self.SCREEN.get_width() / 1.7,
+            self.SCREEN.get_height() / 1.675,
+            20,
+            20,
+            self.client_config["remember_password"],
+        )
 
         LOGIN_INPUT = TextInput(
             self.SCREEN.get_width() / 2.1,
             self.SCREEN.get_height() / 2.5,
             200,
             40,
+            (
+                self.client_config["nickname"]
+                if self.client_config["remember_password"]
+                else ""
+            ),
             is_active=True,
         )
         PASSWORD_INPUT = TextInput(
-            self.SCREEN.get_width() / 2.1, self.SCREEN.get_height() / 2, 200, 40
+            self.SCREEN.get_width() / 2.1,
+            self.SCREEN.get_height() / 2,
+            200,
+            40,
+            (
+                self.client_config["password"]
+                if self.client_config["remember_password"]
+                else ""
+            ),
         )
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
         HIDE_INPUT = [False, True]
@@ -81,7 +105,7 @@ class LoginWindow:
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
             LOGIN_TEXT = self.get_font(self.font_size[0]).render(
-                "Username", True, "white"
+                "Username:", True, "#d7fcd4"
             )
             LOGIN_RECT = LOGIN_TEXT.get_rect(
                 center=(
@@ -90,7 +114,7 @@ class LoginWindow:
                 )
             )
             PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
-                "Password", True, "white"
+                "Password:", True, "#d7fcd4"
             )
             PASSWORD_RECT = PASSWORD_TEXT.get_rect(
                 center=(
@@ -98,16 +122,26 @@ class LoginWindow:
                     self.SCREEN.get_height() / 1.9,
                 )
             )
+            REMEMBER_LOGIN_TEXT = self.get_font(self.font_size[0]).render(
+                "Remeber me:", True, "#d7fcd4"
+            )
+            REMEMBER_LOGIN_RECT = REMEMBER_LOGIN_TEXT.get_rect(
+                center=(
+                    self.SCREEN.get_width() / 2.1,
+                    self.SCREEN.get_height() / 1.65,
+                )
+            )
 
             self.SCREEN.blit(LOGIN_TEXT, LOGIN_RECT)
             self.SCREEN.blit(PASSWORD_TEXT, PASSWORD_RECT)
+            self.SCREEN.blit(REMEMBER_LOGIN_TEXT, REMEMBER_LOGIN_RECT)
 
             LOGIN_BUTTON = Button(
                 image=self.BUTTON,
                 image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
                     self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 2.8),
+                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 3.3),
                 ),
                 text_input="Login",
                 font=self.get_font(font_size=30),
@@ -123,7 +157,7 @@ class LoginWindow:
                 image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
                     self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 4),
+                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 4.8),
                 ),
                 text_input="Register",
                 font=self.get_font(font_size=30),
@@ -150,7 +184,12 @@ class LoginWindow:
                     if REGISTER_BUTTON.checkForInput(MENU_MOUSE_POS):
                         delete_objects(INPUT_BOXES)
                         self.register_player()
+                    if CHECK_BOX_PASSWORD.checkForInput(MENU_MOUSE_POS):
+                        self.client_config["remember_password"] = (
+                            not self.client_config["remember_password"]
+                        )
 
+            CHECK_BOX_PASSWORD.update()
             for input in INPUT_BOXES:
                 input.update()
                 input.draw(self.SCREEN)
@@ -304,10 +343,11 @@ class LoginWindow:
 
     def login_player(self, inputs: list):
         # url = "http://4.231.97.96:8000/login/"
-        # user_data = {
-        #     "nickname": inputs[0].get_string(),
-        #     "password": inputs[1].get_string(),
-        # }
+        self.client_config = {
+            "nickname": inputs[0].get_string(),
+            "password": inputs[1].get_string(),
+            "remember_password": self.client_config["remember_password"],
+        }
         # response = requests.post(url, json=user_data)
 
         # if response.status_code == 200:
@@ -316,6 +356,7 @@ class LoginWindow:
         self.vpn_client = SoftEtherClient("Kaczk0vsky")
         # self.vpn_client = SoftEtherClient(user_data["nickname"])
         self.vpn_client.set_vpn_state(state=True)
+        save_login_information(self.client_config)
         lobby = H5_Lobby(self.vpn_client)
         lobby.run_game()
 
