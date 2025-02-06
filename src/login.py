@@ -15,6 +15,9 @@ from window_elements.check_box import CheckBox
 
 
 class LoginWindow:
+    _wrong_password_status = False
+    _change_password_status = False
+
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Heroes V of Might and Magic Ashan Arena 3 - Login")
@@ -29,6 +32,8 @@ class LoginWindow:
         pygame.mixer.Channel(0).set_volume(bg_sound_volume)
 
         self.transformation_option = "800x600"
+        self.text_color = "#d7fcd4"
+        self.hovering_color = "White"
         self.config = load_resolution_settings()
         self.client_config = load_client_settings()
         self.font_size = fonts_sizes[self.transformation_option]
@@ -40,6 +45,9 @@ class LoginWindow:
         self.BG = pygame.transform.scale(
             self.BG,
             (800, 600),
+        )
+        self.WRONG_PASSWORD_BG = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/game_search/game_search_window.png")
         )
         self.BUTTON = pygame.image.load(
             os.path.join(
@@ -64,6 +72,14 @@ class LoginWindow:
         self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.BUTTON_HIGHLIGHTED,
             (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+        )
+        self.LONG_BUTTON = pygame.transform.scale(
+            self.BUTTON,
+            (self.config["screen_width"] / 6, self.config["screen_hight"] / 17),
+        )
+        self.LONG_BUTTON_HIGHLIGHTED = pygame.transform.scale(
+            self.BUTTON_HIGHLIGHTED,
+            (self.config["screen_width"] / 6, self.config["screen_hight"] / 17),
         )
         CHECK_BOX_PASSWORD = CheckBox(
             self.SCREEN,
@@ -100,12 +116,19 @@ class LoginWindow:
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
         HIDE_INPUT = [False, True]
 
+        (
+            overlay_surface,
+            BACK_BUTTON,
+        ) = self.wrong_password_window()
+        overlay_surface_x = 100
+        overlay_surface_y = 100
+
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
             LOGIN_TEXT = self.get_font(self.font_size[0]).render(
-                "Username:", True, "#d7fcd4"
+                "Username:", True, self.text_color
             )
             LOGIN_RECT = LOGIN_TEXT.get_rect(
                 center=(
@@ -114,7 +137,7 @@ class LoginWindow:
                 )
             )
             PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
-                "Password:", True, "#d7fcd4"
+                "Password:", True, self.text_color
             )
             PASSWORD_RECT = PASSWORD_TEXT.get_rect(
                 center=(
@@ -123,7 +146,7 @@ class LoginWindow:
                 )
             )
             REMEMBER_LOGIN_TEXT = self.get_font(self.font_size[0]).render(
-                "Remeber me:", True, "#d7fcd4"
+                "Remeber me:", True, self.text_color
             )
             REMEMBER_LOGIN_RECT = REMEMBER_LOGIN_TEXT.get_rect(
                 center=(
@@ -145,28 +168,40 @@ class LoginWindow:
                 ),
                 text_input="Login",
                 font=self.get_font(font_size=30),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
-
-            LOGIN_BUTTON.changeColor(MENU_MOUSE_POS)
-            LOGIN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             REGISTER_BUTTON = Button(
                 image=self.BUTTON,
                 image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
                     self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 4.8),
+                    (self.SCREEN.get_height() - (self.SCREEN.get_height() / 3.3) + 65),
                 ),
                 text_input="Register",
                 font=self.get_font(font_size=30),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
 
-            REGISTER_BUTTON.changeColor(MENU_MOUSE_POS)
-            REGISTER_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+            FORGOT_PASSWORD_BUTTON = Button(
+                image=self.LONG_BUTTON,
+                image_highlited=self.LONG_BUTTON_HIGHLIGHTED,
+                pos=(
+                    self.SCREEN.get_width() / 2,
+                    (self.SCREEN.get_height() - (self.SCREEN.get_height() / 3.3) + 130),
+                ),
+                text_input="Forgot password",
+                font=self.get_font(font_size=30),
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
+            )
+            if not self._wrong_password_status:
+                buttons = [LOGIN_BUTTON, REGISTER_BUTTON, FORGOT_PASSWORD_BUTTON]
+                for button in buttons:
+                    button.changeColor(MENU_MOUSE_POS)
+                    button.update(self.SCREEN, MENU_MOUSE_POS)
 
             event_list = pygame.event.get()
             for event in event_list:
@@ -179,27 +214,45 @@ class LoginWindow:
                         self.login_player(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if LOGIN_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        self.login_player(INPUT_BOXES)
-                    if REGISTER_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        delete_objects(INPUT_BOXES)
-                        self.register_player()
-                    if CHECK_BOX_PASSWORD.checkForInput(MENU_MOUSE_POS):
-                        self.client_config["remember_password"] = (
-                            not self.client_config["remember_password"]
-                        )
+                    if not self._wrong_password_status:
+                        if LOGIN_BUTTON.checkForInput(MENU_MOUSE_POS):
+                            self.login_player(INPUT_BOXES)
+                        if REGISTER_BUTTON.checkForInput(MENU_MOUSE_POS):
+                            delete_objects(INPUT_BOXES)
+                            self.register_player()
+                        if FORGOT_PASSWORD_BUTTON.checkForInput(MENU_MOUSE_POS):
+                            self._wrong_password_status = True
+                        if CHECK_BOX_PASSWORD.checkForInput(MENU_MOUSE_POS):
+                            self.client_config["remember_password"] = (
+                                not self.client_config["remember_password"]
+                            )
+                    else:
+                        if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
+                            self._wrong_password_status = False
 
             CHECK_BOX_PASSWORD.update()
             for input in INPUT_BOXES:
                 input.update()
                 input.draw(self.SCREEN)
 
+            if self._wrong_password_status:
+                (
+                    overlay_surface,
+                    BACK_BUTTON,
+                ) = self.wrong_password_window()
+
+                self.SCREEN.blit(
+                    self.WRONG_PASSWORD_BG, (overlay_surface_x, overlay_surface_y)
+                )
+                BACK_BUTTON.changeColor(MENU_MOUSE_POS)
+                BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+
             pygame.display.update()
 
     def register_player(self):
         NICKNAME_INPUT = TextInput(
             self.SCREEN.get_width() / 2.1,
-            self.SCREEN.get_height() / 5.7,
+            self.SCREEN.get_height() / 4.6,
             200,
             40,
             is_active=True,
@@ -207,21 +260,21 @@ class LoginWindow:
         )
         PASSWORD_INPUT = TextInput(
             self.SCREEN.get_width() / 2.1,
-            (self.SCREEN.get_height() / 5.7) + 50,
+            (self.SCREEN.get_height() / 4.6) + 50,
             200,
             40,
             window_type="register",
         )
         REPEAT_PASSWORD_INPUT = TextInput(
             self.SCREEN.get_width() / 2.1,
-            (self.SCREEN.get_height() / 5.7) + 100,
+            (self.SCREEN.get_height() / 4.6) + 100,
             200,
             40,
             window_type="register",
         )
         EMAIL_INPUT = TextInput(
             self.SCREEN.get_width() / 2.1,
-            (self.SCREEN.get_height() / 5.7) + 150,
+            (self.SCREEN.get_height() / 4.6) + 150,
             200,
             40,
             window_type="register",
@@ -239,37 +292,39 @@ class LoginWindow:
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
             NICKNAME_TEXT = self.get_font(self.font_size[0]).render(
-                "Username", True, "white"
+                "Username", True, self.text_color
             )
             NICKNAME_RECT = NICKNAME_TEXT.get_rect(
                 center=(
                     self.SCREEN.get_width() / 3,
-                    self.SCREEN.get_height() / 5,
+                    self.SCREEN.get_height() / 4,
                 )
             )
             PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
-                "Password", True, "white"
+                "Password", True, self.text_color
             )
             PASSWORD_RECT = PASSWORD_TEXT.get_rect(
                 center=(
                     self.SCREEN.get_width() / 3,
-                    (self.SCREEN.get_height() / 5) + 50,
+                    (self.SCREEN.get_height() / 4) + 50,
                 )
             )
             REPEAT_PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
-                "Repeat Password", True, "white"
+                "Repeat Password", True, self.text_color
             )
             REPEAT_PASSWORD_RECT = REPEAT_PASSWORD_TEXT.get_rect(
                 center=(
                     self.SCREEN.get_width() / 3,
-                    (self.SCREEN.get_height() / 5) + 100,
+                    (self.SCREEN.get_height() / 4) + 100,
                 )
             )
-            EMAIL_TEXT = self.get_font(self.font_size[0]).render("Email", True, "white")
+            EMAIL_TEXT = self.get_font(self.font_size[0]).render(
+                "Email", True, self.text_color
+            )
             EMAIL_RECT = PASSWORD_TEXT.get_rect(
                 center=(
                     self.SCREEN.get_width() / 3,
-                    (self.SCREEN.get_height() / 5) + 150,
+                    (self.SCREEN.get_height() / 4) + 150,
                 )
             )
 
@@ -279,34 +334,32 @@ class LoginWindow:
             self.SCREEN.blit(EMAIL_TEXT, EMAIL_RECT)
 
             REGISTER_ACCOUNT_BUTTON = Button(
-                image=pygame.image.load(
-                    os.path.join(os.getcwd(), "resources/rectangle.png")
-                ),
+                image=self.BUTTON,
+                image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
                     self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 3.3),
+                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 2.6),
                 ),
-                text_input="Register account",
+                text_input="Register",
                 font=self.get_font(font_size=30),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
 
             REGISTER_ACCOUNT_BUTTON.changeColor(MENU_MOUSE_POS)
             REGISTER_ACCOUNT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             BACK_BUTTON = Button(
-                image=pygame.image.load(
-                    os.path.join(os.getcwd(), "resources/rectangle.png")
-                ),
+                image=self.BUTTON,
+                image_highlited=self.BUTTON_HIGHLIGHTED,
                 pos=(
                     self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 3.3) + 120,
+                    self.SCREEN.get_height() - (self.SCREEN.get_height() / 2.6) + 120,
                 ),
                 text_input="Back",
                 font=self.get_font(font_size=30),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
 
             BACK_BUTTON.changeColor(MENU_MOUSE_POS)
@@ -340,6 +393,33 @@ class LoginWindow:
                 input.draw(self.SCREEN)
 
             pygame.display.update()
+
+    def wrong_password_window(self):
+        overlay_width, overlay_height = (
+            600,
+            400,
+        )
+        self.WRONG_PASSWORD_BG = pygame.transform.scale(
+            self.WRONG_PASSWORD_BG, (overlay_width, overlay_height)
+        )
+        overlay_surface = pygame.Surface((overlay_width, overlay_height))
+        overlay_surface.fill((200, 200, 200))
+        pygame.draw.rect(overlay_surface, (0, 0, 0), overlay_surface.get_rect(), 5)
+
+        BACK_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(self.SCREEN.get_width() / 2, self.SCREEN.get_height() / 1.5),
+            text_input="Back",
+            font=self.get_font(self.font_size[0]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+
+        return (
+            overlay_surface,
+            BACK_BUTTON,
+        )
 
     def login_player(self, inputs: list):
         # url = "http://4.231.97.96:8000/login/"
