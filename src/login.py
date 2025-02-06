@@ -345,7 +345,7 @@ class LoginWindow:
                     self.SCREEN.get_width() / 2,
                     self.SCREEN.get_height() - (self.SCREEN.get_height() / 2.6),
                 ),
-                text_input="Register",
+                text_input="Submit",
                 font=self.get_font(font_size=30),
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
