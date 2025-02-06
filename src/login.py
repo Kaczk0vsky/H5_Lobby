@@ -448,17 +448,16 @@ class LoginWindow:
         # response = requests.post(url, json=user_data)
 
         # if response.status_code == 200:
-        if False:
-            pygame.mixer.fadeout(5000)
-            pygame.quit()
-            self.vpn_client = SoftEtherClient("Kaczk0vsky")
-            # self.vpn_client = SoftEtherClient(user_data["nickname"])
-            self.vpn_client.set_vpn_state(state=True)
-            save_login_information(self.client_config)
-            lobby = H5_Lobby(self.vpn_client)
-            lobby.run_game()
+        pygame.mixer.fadeout(5000)
+        pygame.quit()
+        self.vpn_client = SoftEtherClient("Kaczk0vsky")
+        # self.vpn_client = SoftEtherClient(user_data["nickname"])
+        self.vpn_client.set_vpn_state(state=True)
+        save_login_information(self.client_config)
+        lobby = H5_Lobby(self.vpn_client)
+        lobby.run_game()
 
-        self._wrong_password_status = True
+        # self._wrong_password_status = True
 
     def register_new_player(self, inputs: list):
         url = "http://4.231.97.96:8000/register/"
