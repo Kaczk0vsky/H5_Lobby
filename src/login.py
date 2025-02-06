@@ -118,6 +118,8 @@ class LoginWindow:
 
         (
             overlay_surface,
+            WRONG_PASSWORD_TEXT,
+            WRONG_PASSWORD_RECT,
             BACK_BUTTON,
         ) = self.wrong_password_window()
         overlay_surface_x = 100
@@ -192,7 +194,7 @@ class LoginWindow:
                     self.SCREEN.get_width() / 2,
                     (self.SCREEN.get_height() - (self.SCREEN.get_height() / 3.3) + 130),
                 ),
-                text_input="Forgot password",
+                text_input="Forgot Password",
                 font=self.get_font(font_size=30),
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
@@ -221,7 +223,7 @@ class LoginWindow:
                             delete_objects(INPUT_BOXES)
                             self.register_player()
                         if FORGOT_PASSWORD_BUTTON.checkForInput(MENU_MOUSE_POS):
-                            self._wrong_password_status = True
+                            pass
                         if CHECK_BOX_PASSWORD.checkForInput(MENU_MOUSE_POS):
                             self.client_config["remember_password"] = (
                                 not self.client_config["remember_password"]
@@ -238,12 +240,15 @@ class LoginWindow:
             if self._wrong_password_status:
                 (
                     overlay_surface,
+                    WRONG_PASSWORD_TEXT,
+                    WRONG_PASSWORD_RECT,
                     BACK_BUTTON,
                 ) = self.wrong_password_window()
 
                 self.SCREEN.blit(
                     self.WRONG_PASSWORD_BG, (overlay_surface_x, overlay_surface_y)
                 )
+                self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
                 BACK_BUTTON.changeColor(MENU_MOUSE_POS)
                 BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
@@ -406,6 +411,16 @@ class LoginWindow:
         overlay_surface.fill((200, 200, 200))
         pygame.draw.rect(overlay_surface, (0, 0, 0), overlay_surface.get_rect(), 5)
 
+        WRONG_PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
+            "Given password is not correct!", True, self.text_color
+        )
+        WRONG_PASSOWRD_RECT = WRONG_PASSWORD_TEXT.get_rect(
+            center=(
+                self.SCREEN.get_width() / 2,
+                self.SCREEN.get_height() / 2.5,
+            )
+        )
+
         BACK_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
@@ -418,6 +433,8 @@ class LoginWindow:
 
         return (
             overlay_surface,
+            WRONG_PASSWORD_TEXT,
+            WRONG_PASSOWRD_RECT,
             BACK_BUTTON,
         )
 
@@ -431,17 +448,17 @@ class LoginWindow:
         # response = requests.post(url, json=user_data)
 
         # if response.status_code == 200:
-        pygame.mixer.fadeout(5000)
-        pygame.quit()
-        self.vpn_client = SoftEtherClient("Kaczk0vsky")
-        # self.vpn_client = SoftEtherClient(user_data["nickname"])
-        self.vpn_client.set_vpn_state(state=True)
-        save_login_information(self.client_config)
-        lobby = H5_Lobby(self.vpn_client)
-        lobby.run_game()
+        if False:
+            pygame.mixer.fadeout(5000)
+            pygame.quit()
+            self.vpn_client = SoftEtherClient("Kaczk0vsky")
+            # self.vpn_client = SoftEtherClient(user_data["nickname"])
+            self.vpn_client.set_vpn_state(state=True)
+            save_login_information(self.client_config)
+            lobby = H5_Lobby(self.vpn_client)
+            lobby.run_game()
 
-        # TODO: wrong password or login window
-        return False
+        self._wrong_password_status = True
 
     def register_new_player(self, inputs: list):
         url = "http://4.231.97.96:8000/register/"

@@ -415,6 +415,14 @@ class H5_Lobby:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.checkForInput(MENU_MOUSE_POS):
                         self._queue_status = True
+                    if VIEW_STATISTICS.checkForInput(MENU_MOUSE_POS):
+                        pass
+                    if NEWS.checkForInput(MENU_MOUSE_POS):
+                        pass
+                    if MY_PROFILE.checkForInput(MENU_MOUSE_POS):
+                        pass
+                    if PLAYER_PROFILE.checkForInput(MENU_MOUSE_POS):
+                        pass
                     if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                         self.options_window()
                     if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
