@@ -445,7 +445,11 @@ class H5_Lobby:
                                 self._queue_status = False
                                 self._player_found = False
                                 self._game_accepted = True
+                                refresh_queue_window = True
                                 found_game = False
+                                pygame.mixer.Channel(queue_channel).stop()
+                                game = AschanArena3_Game()
+                                game.run_processes()
 
             pygame.display.update()
 
@@ -519,10 +523,6 @@ class H5_Lobby:
                 base_color="#d7fcd4",
                 hovering_color="White",
             )
-
-        if self._game_accepted:
-            game = AschanArena3_Game()
-            game.run_processes()
 
         return (
             overlay_surface,
