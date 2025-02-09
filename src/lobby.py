@@ -21,10 +21,6 @@ from window_elements.option_box import OptionBox
 
 
 class H5_Lobby:
-    _queue_status = False
-    _player_found = False
-    _game_accepted = False
-
     def __init__(self, vpn_client):
         pygame.init()
         pygame.display.set_caption("Heroes V of Might and Magic Ashan Arena 3 - Menu")
@@ -37,9 +33,8 @@ class H5_Lobby:
             0,
         )
         pygame.mixer.Channel(0).set_volume(bg_sound_volume)
-        self.opponent_str = ""
-        self.vpn_client = vpn_client
 
+        self.vpn_client = vpn_client
         self.config = load_resolution_settings()
         self.transformation_option = (
             f"{self.config["screen_width"]}x{self.config["screen_hight"]}"
@@ -117,11 +112,14 @@ class H5_Lobby:
         return pygame.font.Font("resources/Quivira.otf", font_size)
 
     def main_menu(self):
-        get_time = False
-        refresh_queue_window = False
-        found_game = False  # TODO: remove, only for testing
-        is_playing = False
-        queue_channel = 0
+        self.get_time = False
+        self.found_game = False
+        self.player_found = False
+        self.game_found_music = False
+        self.opponent_str = ""
+        self.queue_channel = 0
+
+        queue_status = False
 
         self.BG = pygame.transform.scale(
             self.BG,
@@ -348,53 +346,29 @@ class H5_Lobby:
                 button.changeColor(MENU_MOUSE_POS)
                 button.update(self.SCREEN, MENU_MOUSE_POS)
 
-            if self._queue_status:
-                if refresh_queue_window:
-                    (
-                        queue_window,
-                        CANCEL_QUEUE,
-                        ACCEPT_QUEUE,
-                        HEADER_TEXT,
-                        HEADER_RECT,
-                        OPONNENT_TEXT,
-                        OPONNENT_RECT,
-                    ) = self.queue_window()
-                    refresh_queue_window = False
+            (
+                queue_window,
+                CANCEL_QUEUE,
+                ACCEPT_QUEUE,
+                HEADER_TEXT,
+                HEADER_RECT,
+                OPONNENT_TEXT,
+                OPONNENT_RECT,
+            ) = self.queue_window(queue_status)
 
-                if not get_time:
-                    self.start_time = time.time()
-                    get_time = True
-                elapsed_time = round(time.time() - self.start_time)
-                minutes = elapsed_time // 60
-                seconds = elapsed_time % 60
+            is_None = True
+            for window_element in [
+                CANCEL_QUEUE,
+                ACCEPT_QUEUE,
+                HEADER_TEXT,
+                HEADER_RECT,
+                OPONNENT_TEXT,
+                OPONNENT_RECT,
+            ]:
+                if window_element is not None:
+                    is_None = False
 
-                if not found_game:
-                    HEADER_TEXT = self.get_font(self.font_size[0]).render(
-                        f"Waiting for opponent: {minutes}:{seconds:02d}",
-                        True,
-                        "white",
-                    )
-                    HEADER_RECT = HEADER_TEXT.get_rect(
-                        center=(
-                            self.SCREEN.get_width() / 2,
-                            self.SCREEN.get_height() / 2.4,
-                        )
-                    )
-
-                # TODO: remove this if statment - ONLY FOR TESTING
-                if seconds == 3:
-                    found_game = True
-                    self._player_found = True
-
-                if self._player_found:
-                    refresh_queue_window = True
-                    if not is_playing:
-                        queue_channel = play_on_empty(
-                            "resources/match_found.wav", volume=bg_sound_volume
-                        )
-                        pygame.mixer.Channel(0).set_volume(0.0)
-                        is_playing = True
-
+            if not is_None:
                 self.SCREEN.blit(self.QUEUE_BG, (queue_window_x, queue_window_y))
                 self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
 
@@ -414,7 +388,8 @@ class H5_Lobby:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        self._queue_status = True
+                        queue_status = True
+                        continue
                     if VIEW_STATISTICS.checkForInput(MENU_MOUSE_POS):
                         pass
                     if NEWS.checkForInput(MENU_MOUSE_POS):
@@ -430,30 +405,23 @@ class H5_Lobby:
                         self.vpn_client.set_vpn_state(False)
                         pygame.quit()
                         sys.exit()
-                    if self._queue_status:
+                    if queue_status:
                         if CANCEL_QUEUE.checkForInput(MENU_MOUSE_POS):
-                            get_time = False
-                            self._queue_status = False
-                            self._player_found = False
-                            refresh_queue_window = True
-                            is_playing = False
-                            found_game = False  # TODO: remove this - ONLY FOR TESTING
+                            self.game_found_music = False
+                            queue_status = False
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
-                            pygame.mixer.Channel(queue_channel).stop()
+                            pygame.mixer.Channel(self.queue_channel).stop()
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.checkForInput(MENU_MOUSE_POS):
-                                self._queue_status = False
-                                self._player_found = False
-                                self._game_accepted = True
-                                refresh_queue_window = True
-                                found_game = False
-                                pygame.mixer.Channel(queue_channel).stop()
+                                self.game_found_music = False
+                                queue_status = False
+                                pygame.mixer.Channel(self.queue_channel).stop()
                                 game = AschanArena3_Game()
                                 game.run_processes()
 
             pygame.display.update()
 
-    def queue_window(self):
+    def queue_window(self, queue_status: bool = False):
         overlay_width, overlay_height = (
             self.config["screen_width"] // 3,
             self.config["screen_hight"] // 3,
@@ -465,6 +433,52 @@ class H5_Lobby:
         overlay_surface.fill((200, 200, 200))
         pygame.draw.rect(overlay_surface, (0, 0, 0), overlay_surface.get_rect(), 5)
 
+        CANCEL_BUTTON = None
+        ACCEPT_BUTTON = None
+        HEADER_TEXT = None
+        HEADER_RECT = None
+        OPONNENT_TEXT = None
+        OPONNENT_RECT = None
+
+        if not queue_status:
+            self.get_time = False
+            self.found_game = False
+            self.player_found = False
+            return (
+                overlay_surface,
+                CANCEL_BUTTON,
+                ACCEPT_BUTTON,
+                HEADER_TEXT,
+                HEADER_RECT,
+                OPONNENT_TEXT,
+                OPONNENT_RECT,
+            )
+
+        if not self.get_time:
+            self.start_time = time.time()
+        elapsed_time = round(time.time() - self.start_time)
+        minutes = elapsed_time // 60
+        seconds = elapsed_time % 60
+        self.get_time = True
+
+        if not self.found_game:
+            HEADER_TEXT = self.get_font(self.font_size[0]).render(
+                f"Waiting for opponent: {minutes}:{seconds:02d}",
+                True,
+                "white",
+            )
+            HEADER_RECT = HEADER_TEXT.get_rect(
+                center=(
+                    self.SCREEN.get_width() / 2,
+                    self.SCREEN.get_height() / 2.4,
+                )
+            )
+
+            # TODO: remove this if statment - ONLY FOR TESTING
+            if seconds == 3:
+                self.found_game = True
+                self.player_found = True
+
         CANCEL_BUTTON = Button(
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
@@ -475,13 +489,14 @@ class H5_Lobby:
             hovering_color="White",
         )
 
-        OPONNENT_TEXT = None
-        OPONNENT_RECT = None
-        HEADER_TEXT = None
-        HEADER_RECT = None
-        ACCEPT_BUTTON = None
+        if self.player_found:
+            if not self.game_found_music:
+                self.queue_channel = play_on_empty(
+                    "resources/match_found.wav", volume=bg_sound_volume
+                )
+                pygame.mixer.Channel(0).set_volume(0.0)
+                self.game_found_music = True
 
-        if self._player_found:
             HEADER_TEXT = self.get_font(self.font_size[0]).render(
                 "GAME FOUND", True, "white"
             )
