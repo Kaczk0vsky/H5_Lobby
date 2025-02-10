@@ -15,8 +15,9 @@ from window_elements.check_box import CheckBox
 
 
 class LoginWindow:
+    _window_overlay = False
     _wrong_password_status = False
-    _change_password_status = False
+    _forgot_password_status = False
 
     def __init__(self):
         pygame.init()
@@ -116,12 +117,10 @@ class LoginWindow:
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
         HIDE_INPUT = [False, True]
 
-        (
-            overlay_surface,
-            WRONG_PASSWORD_TEXT,
-            WRONG_PASSWORD_RECT,
-            BACK_BUTTON,
-        ) = self.wrong_password_window()
+        (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = (
+            self.wrong_password_window()
+        )
+        (RETURN_BUTTON) = self.forgot_password_window()
         overlay_surface_x = 100
         overlay_surface_y = 100
 
@@ -199,7 +198,7 @@ class LoginWindow:
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
             )
-            if not self._wrong_password_status:
+            if not self._window_overlay:
                 buttons = [LOGIN_BUTTON, REGISTER_BUTTON, FORGOT_PASSWORD_BUTTON]
                 for button in buttons:
                     button.changeColor(MENU_MOUSE_POS)
@@ -216,21 +215,27 @@ class LoginWindow:
                         self.login_player(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if not self._wrong_password_status:
+                    if not self._window_overlay:
                         if LOGIN_BUTTON.checkForInput(MENU_MOUSE_POS):
                             self.login_player(INPUT_BOXES)
                         if REGISTER_BUTTON.checkForInput(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.register_player()
                         if FORGOT_PASSWORD_BUTTON.checkForInput(MENU_MOUSE_POS):
-                            pass
+                            self._window_overlay = True
+                            self._forgot_password_status = True
                         if CHECK_BOX_PASSWORD.checkForInput(MENU_MOUSE_POS):
                             self.client_config["remember_password"] = (
                                 not self.client_config["remember_password"]
                             )
                     else:
-                        if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
-                            self._wrong_password_status = False
+                        if self._forgot_password_status:
+                            if RETURN_BUTTON.checkForInput(MENU_MOUSE_POS):
+                                self._forgot_password_status = False
+                        elif self._wrong_password_status:
+                            if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
+                                self._wrong_password_status = False
+                        self._window_overlay = False
 
             CHECK_BOX_PASSWORD.update()
             for input in INPUT_BOXES:
@@ -238,12 +243,9 @@ class LoginWindow:
                 input.draw(self.SCREEN)
 
             if self._wrong_password_status:
-                (
-                    overlay_surface,
-                    WRONG_PASSWORD_TEXT,
-                    WRONG_PASSWORD_RECT,
-                    BACK_BUTTON,
-                ) = self.wrong_password_window()
+                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = (
+                    self.wrong_password_window()
+                )
 
                 self.SCREEN.blit(
                     self.WRONG_PASSWORD_BG, (overlay_surface_x, overlay_surface_y)
@@ -251,6 +253,15 @@ class LoginWindow:
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
                 BACK_BUTTON.changeColor(MENU_MOUSE_POS)
                 BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+
+            if self._forgot_password_status:
+                (RETURN_BUTTON) = self.forgot_password_window()
+
+                self.SCREEN.blit(
+                    self.FORGOT_PASSWORD_BG, (overlay_surface_x, overlay_surface_y)
+                )
+                RETURN_BUTTON.changeColor(MENU_MOUSE_POS)
+                RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             pygame.display.update()
 
@@ -431,12 +442,31 @@ class LoginWindow:
             hovering_color=self.hovering_color,
         )
 
-        return (
-            overlay_surface,
-            WRONG_PASSWORD_TEXT,
-            WRONG_PASSOWRD_RECT,
-            BACK_BUTTON,
+        return (WRONG_PASSWORD_TEXT, WRONG_PASSOWRD_RECT, BACK_BUTTON)
+
+    def forgot_password_window(self):
+        overlay_width, overlay_height = (
+            600,
+            400,
         )
+        self.FORGOT_PASSWORD_BG = pygame.transform.scale(
+            self.WRONG_PASSWORD_BG, (overlay_width, overlay_height)
+        )
+        overlay_surface = pygame.Surface((overlay_width, overlay_height))
+        overlay_surface.fill((200, 200, 200))
+        pygame.draw.rect(overlay_surface, (0, 0, 0), overlay_surface.get_rect(), 5)
+
+        BACK_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(self.SCREEN.get_width() / 2, self.SCREEN.get_height() / 1.5),
+            text_input="Back",
+            font=self.get_font(self.font_size[0]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+
+        return BACK_BUTTON
 
     def login_player(self, inputs: list):
         # url = "http://4.231.97.96:8000/login/"
@@ -457,6 +487,7 @@ class LoginWindow:
         lobby = H5_Lobby(self.vpn_client)
         lobby.run_game()
 
+        # self._window_overlay = True
         # self._wrong_password_status = True
 
     def register_new_player(self, inputs: list):
