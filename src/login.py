@@ -610,6 +610,10 @@ class LoginWindow:
             "nickname": inputs[0].get_string(),
             "email": inputs[1].get_string(),
         }
+
+        # TODO: check if username and email exist in database in this combination
+        pass
+
         is_sent = send_email(user_data)
 
         if is_sent:
