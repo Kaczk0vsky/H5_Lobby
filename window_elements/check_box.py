@@ -1,7 +1,5 @@
 import pygame
 
-from src.helpers import play_on_empty
-
 
 class CheckBox:
     def __init__(self, surface, x, y, w, h, checked=False):

@@ -15,7 +15,7 @@ from src.global_vars import (
     bg_sound_volume,
 )
 from src.run_ashan_arena import AschanArena3_Game
-from src.helpers import play_on_empty
+from src.helpers import play_on_empty, calculate_time_passed
 from window_elements.button import Button
 from window_elements.option_box import OptionBox
 
@@ -456,10 +456,8 @@ class H5_Lobby:
 
         if not self.get_time:
             self.start_time = time.time()
-        elapsed_time = round(time.time() - self.start_time)
-        minutes = elapsed_time // 60
-        seconds = elapsed_time % 60
-        self.get_time = True
+            self.get_time = True
+        minutes, seconds = calculate_time_passed(self.start_time)
 
         if not self.found_game:
             HEADER_TEXT = self.get_font(self.font_size[0]).render(

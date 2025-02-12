@@ -3,6 +3,7 @@ import pygame
 import os
 import ssl
 import smtplib
+import time
 
 from email.message import EmailMessage
 
@@ -74,3 +75,10 @@ def send_email(userdata: dict):
             return True
         except Exception as e:
             return False
+
+
+def calculate_time_passed(start_time):
+    elapsed_time = round(time.time() - start_time)
+    minutes = elapsed_time // 60
+    seconds = elapsed_time % 60
+    return minutes, seconds

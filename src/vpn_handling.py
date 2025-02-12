@@ -1,6 +1,5 @@
 import os
 import subprocess
-import time
 
 from src.settings_reader import load_vpn_settings
 
