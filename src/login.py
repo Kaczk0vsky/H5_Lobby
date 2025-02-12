@@ -347,9 +347,6 @@ class LoginWindow:
                 hovering_color=self.hovering_color,
             )
 
-            REGISTER_ACCOUNT_BUTTON.changeColor(MENU_MOUSE_POS)
-            REGISTER_ACCOUNT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
-
             BACK_BUTTON = Button(
                 image=self.BUTTON,
                 image_highlited=self.BUTTON_HIGHLIGHTED,
@@ -363,9 +360,6 @@ class LoginWindow:
                 hovering_color=self.hovering_color,
             )
 
-            BACK_BUTTON.changeColor(MENU_MOUSE_POS)
-            BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
-
             event_list = pygame.event.get()
             for event in event_list:
                 if event.type == pygame.QUIT:
@@ -378,20 +372,48 @@ class LoginWindow:
                         if if_succesfull:
                             delete_objects(INPUT_BOXES)
                             self.login_window()
+                        else:
+                            self._window_overlay = True
+                            self._wrong_credentials_status = True
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if REGISTER_ACCOUNT_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        if_succesfull = self.register_new_player(INPUT_BOXES)
-                        if if_succesfull:
+                    if not self._window_overlay:
+                        if REGISTER_ACCOUNT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                            if_succesfull = self.register_new_player(INPUT_BOXES)
+                            if if_succesfull:
+                                delete_objects(INPUT_BOXES)
+                                self.login_window()
+                            else:
+                                self._window_overlay = True
+                                self._wrong_credentials_status = True
+                        elif BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.login_window()
-                    elif BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        delete_objects(INPUT_BOXES)
-                        self.login_window()
+                    else:
+                        if self._wrong_credentials_status:
+                            if RETURN_BUTTON.checkForInput(MENU_MOUSE_POS):
+                                self._window_overlay = False
+                                self._wrong_credentials_status = False
+                                NICKNAME_INPUT.set_active(self.SCREEN)
 
-            for input in INPUT_BOXES:
-                input.update()
-                input.draw(self.SCREEN)
+            if not self._window_overlay:
+                REGISTER_ACCOUNT_BUTTON.changeColor(MENU_MOUSE_POS)
+                REGISTER_ACCOUNT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                BACK_BUTTON.changeColor(MENU_MOUSE_POS)
+                BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                for input in INPUT_BOXES:
+                    input.update()
+                    input.draw(self.SCREEN)
+
+            if self._wrong_credentials_status:
+                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
+                    self.error_window(text="Username and Email already taken!")
+                )
+
+                self.SCREEN.blit(self.WRONG_PASSWORD_BG, (100, 100))
+                self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
+                RETURN_BUTTON.changeColor(MENU_MOUSE_POS)
+                RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             pygame.display.update()
 
@@ -590,6 +612,9 @@ class LoginWindow:
             "client_private_key": client_private_key,
             "client_public_key": client_public_key,
         }
+        # TODO: check if the useres already exists and email is free
+        pass
+
         data = requests.get(url)
         response = requests.post(url, json=user_data)
 
