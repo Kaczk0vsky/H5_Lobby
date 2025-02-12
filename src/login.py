@@ -5,7 +5,7 @@ import requests
 
 from src.global_vars import fonts_sizes, bg_sound_volume
 from src.lobby import H5_Lobby
-from src.helpers import delete_objects
+from src.helpers import delete_objects, send_email
 from src.vpn_handling import SoftEtherClient
 from src.settings_reader import load_resolution_settings, load_client_settings
 from src.settings_writer import save_login_information
@@ -582,7 +582,15 @@ class LoginWindow:
         return False
 
     def set_new_password(self, inputs: list):
-        return True
+        user_data = {
+            "nickname": inputs[0].get_string(),
+            "email": inputs[1].get_string(),
+        }
+        is_sent = send_email(user_data)
+
+        if is_sent:
+            return True
+        return False
 
     def run_game(self):
         self.login_window()
