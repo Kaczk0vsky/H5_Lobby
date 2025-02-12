@@ -1,9 +1,10 @@
 # H5 Lobby Client and Server
-![H5 Lobby Logo](https://raw.githubusercontent.com/Kaczk0vsky/H5_Lobby/main/resources/logo.png)
+[![logo.png](https://i.postimg.cc/L86ZtXLB/logo.png)](https://postimg.cc/56T01fP6)
+
 There are two versions that will be covered in this file. First one will be installation for a developer from the player side aswell as covering the most important features. The second one will be installation and full setup guide for the server on Linux machine.
-##Player side
+## Player side
 This is simply what the player will see after downloading the installator and running the .exe file.
-###Key features
+### Key features
 - logging into the game and starting the game search through **Find game** button,
 - after finding the game showing the window with opponnent found and options to **Accept** or **Decline** this matchup,
 - after accepting launching the game .exe file for both players that agreed to play,
@@ -14,7 +15,7 @@ This is simply what the player will see after downloading the installator and ru
 - set of security measures that do not allow any unwanted operation.
 - **Options** button for changing the resolution and in the future also other things,
 
-###Installation guide
+### Installation guide
 1. Clone the repository.
 2. Install poetry:
 `pip3 install poetry`
@@ -25,5 +26,5 @@ This is simply what the player will see after downloading the installator and ru
 5. Run the program:
 `poetry run python main.py`
 
-##Instalation from Server side (Linux machine)
+## Instalation from Server side (Linux machine)
 Will be covered later...
