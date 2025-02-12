@@ -16,7 +16,7 @@ from window_elements.check_box import CheckBox
 
 class LoginWindow:
     _window_overlay = False
-    _wrong_password_status = False
+    _wrong_credentials_status = False
 
     def __init__(self):
         pygame.init()
@@ -225,7 +225,7 @@ class LoginWindow:
                                 not self.client_config["remember_password"]
                             )
                     else:
-                        if self._wrong_password_status:
+                        if self._wrong_credentials_status:
                             if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
                                 fix_main_window()
 
@@ -240,9 +240,9 @@ class LoginWindow:
                     input.update()
                     input.draw(self.SCREEN)
 
-            if self._wrong_password_status:
+            if self._wrong_credentials_status:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = (
-                    self.wrong_password_window()
+                    self.error_window(text="Given password is not correct!")
                 )
 
                 self.SCREEN.blit(
@@ -395,7 +395,7 @@ class LoginWindow:
 
             pygame.display.update()
 
-    def wrong_password_window(self):
+    def error_window(self, text: str):
         overlay_width, overlay_height = (
             600,
             400,
@@ -408,7 +408,7 @@ class LoginWindow:
         pygame.draw.rect(overlay_surface, (0, 0, 0), overlay_surface.get_rect(), 5)
 
         WRONG_PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
-            "Given password is not correct!", True, self.text_color
+            text, True, self.text_color
         )
         WRONG_PASSOWRD_RECT = WRONG_PASSWORD_TEXT.get_rect(
             center=(
@@ -486,8 +486,6 @@ class LoginWindow:
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
             )
-            BACK_BUTTON.changeColor(MENU_MOUSE_POS)
-            BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             SUBMIT_BUTTON = Button(
                 image=self.BUTTON,
@@ -501,8 +499,6 @@ class LoginWindow:
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
             )
-            SUBMIT_BUTTON.changeColor(MENU_MOUSE_POS)
-            SUBMIT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             event_list = pygame.event.get()
             for event in event_list:
@@ -516,20 +512,48 @@ class LoginWindow:
                         if if_succesfull:
                             delete_objects(INPUT_BOXES)
                             self.login_window()
+                        else:
+                            self._window_overlay = True
+                            self._wrong_credentials_status = True
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if SUBMIT_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        if_succesfull = self.set_new_password(INPUT_BOXES)
-                        if if_succesfull:
+                    if not self._window_overlay:
+                        if SUBMIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                            if_succesfull = self.set_new_password(INPUT_BOXES)
+                            if if_succesfull:
+                                delete_objects(INPUT_BOXES)
+                                self.login_window()
+                            else:
+                                self._window_overlay = True
+                                self._wrong_credentials_status = True
+                        if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.login_window()
-                    elif BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        delete_objects(INPUT_BOXES)
-                        self.login_window()
+                    else:
+                        if self._wrong_credentials_status:
+                            if RETURN_BUTTON.checkForInput(MENU_MOUSE_POS):
+                                self._window_overlay = False
+                                self._wrong_credentials_status = False
+                                NICKNAME_INPUT.set_active(self.SCREEN)
 
-            for input in INPUT_BOXES:
-                input.update()
-                input.draw(self.SCREEN)
+            if not self._window_overlay:
+                BACK_BUTTON.changeColor(MENU_MOUSE_POS)
+                BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                SUBMIT_BUTTON.changeColor(MENU_MOUSE_POS)
+                SUBMIT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                for input in INPUT_BOXES:
+                    input.update()
+                    input.draw(self.SCREEN)
+
+            if self._wrong_credentials_status:
+                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
+                    self.error_window(text="Given Username and Email do not match!")
+                )
+
+                self.SCREEN.blit(self.WRONG_PASSWORD_BG, (100, 100))
+                self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
+                RETURN_BUTTON.changeColor(MENU_MOUSE_POS)
+                RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             pygame.display.update()
 
