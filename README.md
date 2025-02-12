@@ -1,5 +1,5 @@
 # H5 Lobby Client and Server
-[![logo.png](https://i.postimg.cc/L86ZtXLB/logo.png)](https://postimg.cc/56T01fP6)
+![H5 Lobby Logo](https://raw.githubusercontent.com/Kaczk0vsky/H5_Lobby/main/resources/logo.png?raw=true)
 
 There are two versions that will be covered in this file. First one will be installation for a developer from the player side aswell as covering the most important features. The second one will be installation and full setup guide for the server on Linux machine.
 ## Player side
