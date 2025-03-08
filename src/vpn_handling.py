@@ -56,7 +56,4 @@ class SoftEtherClient:
             "PersistentKeepalive = 25",
         ]
 
-        # Write to client configuration file
-        config_path = os.path.join(os.getcwd(), f"{client}.conf")
-        with open(config_path, "w") as file:
-            file.write("\n".join(config_content))
+        # TODO: change to adding to SoftEtherVPN

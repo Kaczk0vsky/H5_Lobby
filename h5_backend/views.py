@@ -41,7 +41,6 @@ def register_new_player(request):
             user = User.objects.create_user(
                 username=nickname, password=password, email=email
             )
-            update_wireguard_config(conf_path, conf_content)
             return JsonResponse({"success": True, "user_id": user.id})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)

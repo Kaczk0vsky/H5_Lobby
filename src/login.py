@@ -611,14 +611,25 @@ class LoginWindow:
             "client_private_key": client_private_key,
             "client_public_key": client_public_key,
         }
+
         # TODO: check if the useres already exists and email is free
         pass
 
-        data = requests.get(url)
-        response = requests.post(url, json=user_data)
+        if user_data["password"] != user_data["repeat_password"]:
+            # TODO: passwords do not match handling
+            return False
 
-        # TODO: add handling of different error codes
-        if response.status_code == 200 and data.status_code == 200:
+        if len(user_data["password"]) < 8:
+            # TODO: special conditions for password
+            return False
+
+        # TODO: check for nickname special conditions
+        pass
+
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, json=user_data, headers=headers)
+        print(response.text)
+        if response.status_code == 200:
             data = data.json()
             SoftEtherClient.create_new_client(
                 client=user_data["nickname"],
