@@ -580,29 +580,28 @@ class LoginWindow:
             pygame.display.update()
 
     def login_player(self, inputs: list):
-        # url = "http://4.231.97.96:8000/login/"
+        url = "http://52.169.83.170:8000/login/"
         self.client_config = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
             "remember_password": self.client_config["remember_password"],
         }
-        # response = requests.post(url, json=user_data)
+        response = requests.post(url, json=self.client_config)
 
-        # if response.status_code == 200:
-        pygame.mixer.fadeout(5000)
-        pygame.quit()
-        self.vpn_client = SoftEtherClient("Kaczk0vsky")
-        # self.vpn_client = SoftEtherClient(user_data["nickname"])
-        self.vpn_client.set_vpn_state(state=True)
-        save_login_information(self.client_config)
-        lobby = H5_Lobby(self.vpn_client)
-        lobby.run_game()
+        if response.status_code == 200:
+            pygame.mixer.fadeout(5000)
+            pygame.quit()
+            self.vpn_client = SoftEtherClient(self.client_config["nickname"])
+            self.vpn_client.set_vpn_state(state=True)
+            save_login_information(self.client_config)
+            lobby = H5_Lobby(self.vpn_client)
+            lobby.run_game()
 
-        # self._window_overlay = True
-        # self._wrong_password_status = True
+        self._window_overlay = True
+        self._wrong_password_status = True
 
     def register_new_player(self, inputs: list):
-        url = "http://4.231.97.96:8000/register/"
+        url = "http://52.169.83.170:8000/register/"
         client_private_key, client_public_key = SoftEtherClient.generate_keys()
         user_data = {
             "nickname": inputs[0].get_string(),

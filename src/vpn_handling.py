@@ -51,7 +51,7 @@ class SoftEtherClient:
             "",
             "[Peer]",
             f"PublicKey = {server_public_key}",
-            "Endpoint = 4.231.97.96:51820",
+            "Endpoint = 52.169.83.170:51820",
             "AllowedIPs = 10.0.0.0/24",
             "PersistentKeepalive = 25",
         ]

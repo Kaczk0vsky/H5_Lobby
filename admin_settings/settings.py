@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-4k0gyu)u313(8bm$+0+@sbmolvhs4begv6fi3ypzbo+2(a(%^+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["4.231.97.96"]
+ALLOWED_HOSTS = ["52.169.83.170"]
 
 CELERY_BROKER_URL = "pyamqp://guest@localhost//"
 
