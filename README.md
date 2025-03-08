@@ -28,46 +28,47 @@ This is simply what the player will see after downloading the installator and ru
 
 ## Instalation from Server side (Linux machine)
 ##### 1. Setting Git
-a) `sudo apt update && sudo apt install git -y`
-b) `git clone https://github.com/Kaczk0vsky/H5_Lobby.git`
-c) `cd H5_Lobby`
+1) `sudo apt update && sudo apt install git -y`
+2) `git clone https://github.com/Kaczk0vsky/H5_Lobby.git`
+3) `cd H5_Lobby`
 
 ##### 2. Firewall
-a) `sudo ufw allow 8000`
-b) `sudo ufw allow 22`
-c) `sudo ufw enable`
+1) `sudo ufw allow 8000`
+2) `sudo ufw allow 22`
+3) `sudo ufw enable`
 
 ##### 3. Install Python and create venv
-a) `sudo apt update && sudo apt install -y python3 python3-venv python3-pip`
-b) `python3 -m venv venv`
-c) `source venv/bin/activate`
-d) `pip3 install django celery toml`
+1) `sudo apt update && sudo apt install -y python3 python3-venv python3-pip`
+2) `python3 -m venv venv`
+3) `source venv/bin/activate`
+4) `pip3 install django celery toml`
 
 ##### 4. Run django commands
-a) `python -m manage makemigrations`
-b) `python -m manage migrate`
-c) `python -m manage createsuperuser`
+1) `python -m manage makemigrations`
+2) `python -m manage migrate`
+3) `python -m manage createsuperuser`
 
 ##### 5. Create django service file
-a) `sudo nano /etc/systemd/system/django.service`
-b) paste into file:
-	
-	[Unit]
-	Description=Django Application
-	After=network.target
+1) `sudo nano /etc/systemd/system/django.service`
+2) paste into the file:
+```
+[Unit]
+Description=Django Application
+After=network.target
 
-	[Service]
-	User=h5lobby
-	Group=h5lobby
-	WorkingDirectory=/home/h5lobby/H5_Lobby
-	ExecStart=/home/h5lobby/H5_Lobby/venv/bin/python /home/h5lobby/H5_Lobby/manage.py runserver 0.0.0.0:8000
-	Restart=always
-	RestartSec=5
-	Environment=PYTHONUNBUFFERED=1
+[Service]
+User=h5lobby
+Group=h5lobby
+WorkingDirectory=/home/h5lobby/H5_Lobby
+ExecStart=/home/h5lobby/H5_Lobby/venv/bin/python /home/h5lobby/H5_Lobby/manage.py runserver 0.0.0.0:8000
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
 
-	[Install]
-	WantedBy=multi-user.target
-c) `sudo systemctl daemon-reload`
-d) `sudo systemctl enable django`
-e) `sudo systemctl start django`
-f) `sudo systemctl status django`
+[Install]
+WantedBy=multi-user.target
+```
+4) `sudo systemctl daemon-reload`
+5) `sudo systemctl enable django`
+6) `sudo systemctl start django`
+7) `sudo systemctl status django`
