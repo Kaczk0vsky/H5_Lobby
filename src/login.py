@@ -627,8 +627,8 @@ class LoginWindow:
         pass
 
         headers = {"Content-Type": "application/json"}
+        data = requests.get(url)
         response = requests.post(url, json=user_data, headers=headers)
-        print(response.text)
         if response.status_code == 200:
             data = data.json()
             SoftEtherClient.create_new_client(
