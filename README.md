@@ -48,7 +48,16 @@ This is simply what the player will see after downloading the installator and ru
 2) `python -m manage migrate`
 3) `python -m manage createsuperuser`
 
-##### 5. Create django service file
+##### 5. Setup RabitMQ broker
+1) `sudo apt update && sudo apt install rabbitmq-server -y`
+2) `sudo systemctl status rabbitmq-server`
+3) `sudo systemctl start rabbitmq-server`
+4) `sudo systemctl enable rabbitmq-server`
+5) `sudo rabbitmqctl add_user myuser mypassword` - myuser and mypassword is to be set by you
+6) `sudo rabbitmqctl set_user_tags myuser administrator` - same here
+7) `sudo rabbitmqctl set_permissions -p / myuser ".*" ".*" ".*"` - same here
+
+##### 6. Create django service file
 1) `sudo nano /etc/systemd/system/django.service`
 2) paste into the file:
 ```
@@ -68,7 +77,33 @@ Environment=PYTHONUNBUFFERED=1
 [Install]
 WantedBy=multi-user.target
 ```
-4) `sudo systemctl daemon-reload`
-5) `sudo systemctl enable django`
-6) `sudo systemctl start django`
-7) `sudo systemctl status django`
+3) `sudo systemctl daemon-reload`
+4) `sudo systemctl enable django`
+5) `sudo systemctl start django`
+6) `sudo systemctl status django`
+
+##### 7. Create celery service file
+1) `sudo nano /etc/systemd/system/celery.service`
+2) paste into the file:
+```
+[Unit]
+Description=Celery Worker
+After=network.target redis-server.service
+
+[Service]
+Type=forking
+User=h5lobby
+Group=h5lobby
+WorkingDirectory=/home/h5lobby/H5_Lobby
+Environment="PATH=/home/h5lobby/H5_Lobby/venv/bin"
+ExecStart=/home/h5lobby/H5_Lobby/venv/bin/celery -A admin_settings worker --loglevel=info
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+3) `sudo systemctl daemon-reload`
+4) `sudo systemctl enable celery`
+5) `sudo systemctl start celery`
+6) `sudo systemctl status celery`

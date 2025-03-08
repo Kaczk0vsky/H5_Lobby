@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["52.169.83.170"]
 
-CELERY_BROKER_URL = "pyamqp://guest@localhost//"
+CELERY_BROKER_URL = "amqp://h5admin:Sukub0912@localhost:5672/"
 
 # Application definition
 
