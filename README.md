@@ -27,4 +27,47 @@ This is simply what the player will see after downloading the installator and ru
 `poetry run python main.py`
 
 ## Instalation from Server side (Linux machine)
-Will be covered later...
+##### 1. Setting Git
+a) `sudo apt update && sudo apt install git -y`
+b) `git clone https://github.com/Kaczk0vsky/H5_Lobby.git`
+c) `cd H5_Lobby`
+
+##### 2. Firewall
+a) `sudo ufw allow 8000`
+b) `sudo ufw allow 22`
+c) `sudo ufw enable`
+
+##### 3. Install Python and create venv
+a) `sudo apt update && sudo apt install -y python3 python3-venv python3-pip`
+b) `python3 -m venv venv`
+c) `source venv/bin/activate`
+d) `pip3 install django celery toml`
+
+##### 4. Run django commands
+a) `python -m manage makemigrations`
+b) `python -m manage migrate`
+c) `python -m manage createsuperuser`
+
+##### 5. Create django service file
+a) `sudo nano /etc/systemd/system/django.service`
+b) paste into file:
+	
+	[Unit]
+	Description=Django Application
+	After=network.target
+
+	[Service]
+	User=h5lobby
+	Group=h5lobby
+	WorkingDirectory=/home/h5lobby/H5_Lobby
+	ExecStart=/home/h5lobby/H5_Lobby/venv/bin/python /home/h5lobby/H5_Lobby/manage.py runserver 0.0.0.0:8000
+	Restart=always
+	RestartSec=5
+	Environment=PYTHONUNBUFFERED=1
+
+	[Install]
+	WantedBy=multi-user.target
+c) `sudo systemctl daemon-reload`
+d) `sudo systemctl enable django`
+e) `sudo systemctl start django`
+f) `sudo systemctl status django`

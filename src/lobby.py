@@ -645,7 +645,7 @@ class H5_Lobby:
             pygame.display.update()
 
     def set_player_offline(self):
-        url = "http://4.231.97.96:8000/set_player_offline/"
+        url = "http://52.169.83.170:8000/set_player_offline/"
         user_data = {"nickname": self.vpn_client.user_name}
         requests.post(url, json=user_data)
 
