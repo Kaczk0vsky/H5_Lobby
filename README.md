@@ -23,7 +23,8 @@ This is simply what the player will see after downloading the installator and ru
 `poetry --version`
 4. Install the packages:
 `poetry install`
-5. Run the program:
+5. Copy the .env.template and name it .env and then fill the missing variables.
+6. Run the program:
 `poetry run python main.py`
 
 ## Instalation from Server side (Linux machine)
