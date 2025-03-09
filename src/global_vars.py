@@ -1,5 +1,9 @@
-bg_sound_volume = 0.2
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+bg_sound_volume = 0.2
 resolution_choices = [
     "640x480",
     "800x600",
@@ -27,4 +31,14 @@ fonts_sizes = {
     "1920x1080": [40, 24],
     "1920x1440": [40, 24],
     "2560x1440": [60, 36],
+}
+env_dict = {
+    "SERVER_URL": os.getenv("SERVER_URL"),
+    "DJANGO_SECRET_KEY": os.getenv("DJANGO_SECRET_KEY"),
+    "RABITMQ_LOGIN": os.getenv("RABITMQ_LOGIN"),
+    "RABITMQ_PASSWORD": os.getenv("RABITMQ_PASSWORD"),
+    "VPN_SERVER_PASSWORD": os.getenv("VPN_SERVER_PASSWORD"),
+    "VPN_HUB_NAME": os.getenv("VPN_HUB_NAME"),
+    "VPN_HUB_VPN_PASSWORD": os.getenv("VPN_HUB_VPN_PASSWORD"),
+    "VPN_IPSEC_SHARED_KEY": os.getenv("VPN_IPSEC_SHARED_KEY"),
 }

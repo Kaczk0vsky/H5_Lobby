@@ -2,20 +2,18 @@ import os
 import subprocess
 import time
 
-from dotenv import load_dotenv
-
 from src.settings_reader import load_vpn_settings
+from src.global_vars import env_dict
 
 
 class SoftEtherClient:
     def __init__(self, user_name: str, password: str):
-        load_dotenv()
         self.user_name = user_name
         self.password = password
         self.vpn_path = load_vpn_settings()["vpn_path"]
         self.vpn_cmd_path = os.path.join(self.vpn_path, "vpncmd.exe")
-        self.server_url = os.getenv("URL")
-        self.hub_name = os.getenv("HUB_NAME")
+        self.server_url = env_dict["SERVER_URL"]
+        self.hub_name = env_dict["VPN_HUB_NAME"]
 
     def set_vpn_state(self, state: bool):
         if state:

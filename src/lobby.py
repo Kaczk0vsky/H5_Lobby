@@ -13,6 +13,7 @@ from src.global_vars import (
     transformation_factors,
     fonts_sizes,
     bg_sound_volume,
+    env_dict,
 )
 from src.run_ashan_arena import AschanArena3_Game
 from src.helpers import play_on_empty, calculate_time_passed
@@ -384,6 +385,7 @@ class H5_Lobby:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    self.vpn_client.set_vpn_state(state=False)
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -596,6 +598,7 @@ class H5_Lobby:
             event_list = pygame.event.get()
             for event in event_list:
                 if event.type == pygame.QUIT:
+                    self.vpn_client.set_vpn_state(state=False)
                     self.set_player_offline()
                     pygame.quit()
                     sys.exit()
@@ -645,7 +648,7 @@ class H5_Lobby:
             pygame.display.update()
 
     def set_player_offline(self):
-        url = "http://52.169.83.170:8000/set_player_offline/"
+        url = f"http://{env_dict["SERVER_URL"]}:8000/set_player_offline/"
         user_data = {"nickname": self.vpn_client.user_name}
         requests.post(url, json=user_data)
 

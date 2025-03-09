@@ -3,7 +3,7 @@ import os
 import sys
 import requests
 
-from src.global_vars import fonts_sizes, bg_sound_volume
+from src.global_vars import fonts_sizes, bg_sound_volume, env_dict
 from src.lobby import H5_Lobby
 from src.helpers import delete_objects, send_email
 from src.vpn_handling import SoftEtherClient
@@ -580,7 +580,7 @@ class LoginWindow:
             pygame.display.update()
 
     def login_player(self, inputs: list):
-        url = "http://52.169.83.170:8000/login/"
+        url = f"http://{env_dict["SERVER_URL"]}:8000/login/"
         self.client_config = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
@@ -605,7 +605,7 @@ class LoginWindow:
         self._wrong_password_status = True
 
     def register_new_player(self, inputs: list):
-        url = "http://52.169.83.170:8000/register/"
+        url = f"http://{env_dict["SERVER_URL"]}:8000/register/"
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
