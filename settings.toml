@@ -6,7 +6,7 @@ screen_hight = 1080
 game_path = "E:\\GOG\\GOG Galaxy\\Games\\Heroes of Might and Magic V - Tribes of the East\\bin\\AshanArena3"
 
 [soft_ether]
-vpn_path = "E:\\GOG\\GOG Galaxy\\Games\\Heroes of Might and Magic V - Tribes of the East\\bin\\SoftEther VPN"
+vpn_path = "C:\\Program Files\\SoftEther VPN Client"
 
 [client_settings]
 nickname = ""

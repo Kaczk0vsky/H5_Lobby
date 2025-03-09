@@ -1,13 +1,21 @@
 import os
 import subprocess
+import time
+
+from dotenv import load_dotenv
 
 from src.settings_reader import load_vpn_settings
 
 
 class SoftEtherClient:
-    def __init__(self, user_name: str):
+    def __init__(self, user_name: str, password: str):
+        load_dotenv()
         self.user_name = user_name
+        self.password = password
         self.vpn_path = load_vpn_settings()["vpn_path"]
+        self.vpn_cmd_path = os.path.join(self.vpn_path, "vpncmd.exe")
+        self.server_url = os.getenv("URL")
+        self.hub_name = os.getenv("HUB_NAME")
 
     def set_vpn_state(self, state: bool):
         if state:
@@ -15,12 +23,12 @@ class SoftEtherClient:
         else:
             account_state = "AccountDisconnect"
         command = [
-            "vpncmd.exe",
+            self.vpn_cmd_path,
             "localhost",
             "/CLIENT",
             "/CMD",
             account_state,
-            "H5_Lobby VPN",
+            "H5_Lobby_VPN",
         ]
 
         try:
@@ -28,32 +36,27 @@ class SoftEtherClient:
         except subprocess.CalledProcessError as e:
             print("Error:", e.stderr)
 
-    @staticmethod
-    def generate_keys():
-        """Generate a WireGuard private and public key pair."""
-        private_key = subprocess.check_output("wg genkey", shell=True).strip().decode()
-        public_key = (
-            subprocess.check_output(f"echo {private_key} | wg pubkey", shell=True)
-            .strip()
-            .decode()
-        )
-        return private_key, public_key
+    def create_new_client(self):
+        vpn_server_ip = self.server_url
+        vpn_hub = self.hub_name
+        vpn_port = "443"
 
-    @staticmethod
-    def create_new_client(
-        client: str, server_public_key: str, client_private_key: str, client_ip: str
-    ):
-        config_content = [
-            "[Interface]",
-            f"PrivateKey = {client_private_key}",
-            f"Address = {client_ip}/24",
-            "DNS = 8.8.8.8, 1.1.1.1",
-            "",
-            "[Peer]",
-            f"PublicKey = {server_public_key}",
-            "Endpoint = 52.169.83.170:51820",
-            "AllowedIPs = 10.0.0.0/24",
-            "PersistentKeepalive = 25",
+        commands = [
+            f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD NicCreate VPN',
+            f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountCreate H5_Lobby_VPN /SERVER:{vpn_server_ip}:{vpn_port} /HUB:{vpn_hub} /USERNAME:{self.user_name} /NICNAME:VPN',
+            f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountPasswordSet H5_Lobby_VPN /PASSWORD:{self.password} /TYPE:standard',
         ]
 
-        # TODO: change to adding to SoftEtherVPN
+        for cmd in commands:
+            try:
+                subprocess.run(
+                    cmd, shell=True, capture_output=True, text=True, check=True
+                )
+                time.sleep(1)
+
+            except subprocess.CalledProcessError as e:
+                # TODO: error handling if crashes during one of those commands
+                print(f"Error executing command: {cmd}")
+                print(e.stderr)
+                return False
+        return True

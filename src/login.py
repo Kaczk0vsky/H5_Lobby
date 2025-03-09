@@ -591,7 +591,11 @@ class LoginWindow:
         if response.status_code == 200:
             pygame.mixer.fadeout(5000)
             pygame.quit()
-            self.vpn_client = SoftEtherClient(self.client_config["nickname"])
+            if not self.vpn_client:
+                self.vpn_client = SoftEtherClient(
+                    self.client_config["nickname"],
+                    self.client_config["password"],
+                )
             self.vpn_client.set_vpn_state(state=True)
             save_login_information(self.client_config)
             lobby = H5_Lobby(self.vpn_client)
@@ -602,14 +606,11 @@ class LoginWindow:
 
     def register_new_player(self, inputs: list):
         url = "http://52.169.83.170:8000/register/"
-        client_private_key, client_public_key = SoftEtherClient.generate_keys()
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
             "repeat_password": inputs[2].get_string(),
             "email": inputs[3].get_string(),
-            "client_private_key": client_private_key,
-            "client_public_key": client_public_key,
         }
 
         # TODO: check if the useres already exists and email is free
@@ -626,18 +627,24 @@ class LoginWindow:
         # TODO: check for nickname special conditions
         pass
 
+        self.client_config = {
+            "nickname": user_data["nickname"],
+            "password": user_data["password"],
+            "remember_password": False,
+        }
+
         headers = {"Content-Type": "application/json"}
         data = requests.get(url)
         response = requests.post(url, json=user_data, headers=headers)
         if response.status_code == 200:
             data = data.json()
-            SoftEtherClient.create_new_client(
-                client=user_data["nickname"],
-                server_public_key="pJD0nHGtw+EpgTMd4HZh4zHaBiWfXHzuEOLBcDM2ZyE=",
-                client_private_key=user_data["client_private_key"],
-                client_ip=data["last_available_ip"],
+            self.vpn_client = SoftEtherClient(
+                self.client_config["nickname"],
+                self.client_config["password"],
             )
-            return True
+            is_succesfull = self.vpn_client.create_new_client()
+            if is_succesfull:
+                return True
         return False
 
     def set_new_password(self, inputs: list):
