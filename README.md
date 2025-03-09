@@ -88,7 +88,7 @@ WantedBy=multi-user.target
 ```
 [Unit]
 Description=Celery Worker
-After=network.target redis-server.service
+After=network.target rabbitmq-server.service
 
 [Service]
 Type=forking
@@ -107,3 +107,93 @@ WantedBy=multi-user.target
 4) `sudo systemctl enable celery`
 5) `sudo systemctl start celery`
 6) `sudo systemctl status celery`
+
+##### 8. SoftEtherVPN server creation
+1) `sudo apt-get install lynx -y`
+2) `lynx http://www.softether-download.com/files/softether/` - find latets version, select linux, then VPN server. Next press "d" to download the file.
+3) `tar -xvzf softether-vpnserver-v4.42-9798-rtm-2023.06.30-linux-x64-64bit.tar.gz ` - the file name may be different, change accordingly
+4) `cd vpnserver/ & make`
+5) `sudo mv vpnserver /usr/local/`
+6) `cd  /usr/local/vpnserver/`
+7) `chmod 600 * & chmod 700 vpnserver & chmod 700 vpncmd`
+8) `sudo nano /etc/init.d/vpnserver` - and paste into the file:
+```
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides: vpnserver
+# Required-Start:
+# Required-Stop:
+# Default-Start: 2 3 4 5
+# Default-Stop:
+# Short-Description: SoftEtherVPNServer
+### END INIT INFO
+
+DAEMON=/usr/local/vpnserver/vpnserver
+LOCK=/var/lock/subsys/vpnserver
+test -x $DAEMON || exit 0
+case "$1" in
+start)
+$DAEMON start
+touch $LOCK
+;;
+stop)
+$DAEMON stop
+rm $LOCK
+;;
+restart)
+$DAEMON stop
+sleep 3
+$DAEMON start
+;;
+*)
+echo "Usage: $0 {start|stop|restart}"
+exit 1
+esac
+exit 0
+```
+9) `sudo chmod 755 /etc/init.d/vpnserver`
+10) `sudo nano /etc/systemd/system/vpnserver.service` - and paste into the file:
+```
+[Unit]
+Description=SoftEther VPN Server
+After=network.target
+
+[Service]
+ExecStart=/usr/local/vpnserver/vpnserver start
+ExecStop=/usr/local/vpnserver/vpnserver stop
+Restart=always
+User=root
+Group=root
+Type=forking
+
+[Install]
+WantedBy=multi-user.target
+```
+11) `sudo chmod +x /usr/local/vpnserver/vpnserver`
+12) `sudo systemctl daemon-reload`
+13) `sudo systemctl enable vpnserver.service`
+14) `sudo systemctl restart vpnserver`
+15) `sudo update-rc.d vpnserver defaults`
+16) `sudo chmod +x /usr/local/vpnserver/vpncmd`
+17) `sudo /usr/local/vpnserver/vpncmd` - press option 1 and then ENTER twice
+18) `ServerPasswordSet` - set password
+19) `HubCreate VPN` - set password, where VPN is the name of the Hub
+20) `Hub VPN`
+21) `SecureNatEnable`
+22) `UserCreate <name>` - create user with <name>
+23) `UserPasswordSet <name>` - set password for <name>
+24) `IPsecEnable` - click yes, no, yes, then set the key, and then paste the HUB name (VPN in this case)
+25) `exit` - to exit the VPN configuration
+26) `sudo ufw allow 443/tcp`
+27) paste below commands:
+```
+sudo ufw allow 443/tcp
+sudo ufw allow 5555/tcp
+sudo ufw allow 992/tcp
+sudo ufw allow 1194/udp
+sudo ufw allow 22/tcp
+```
+28) `sudo systemctl restart vpnserver-service`
+
+##### 9. (OPTIONAL - for cloud solutions) Set inbound rules for Ports
+Only needed if you use some clound hostef Virtual Machine. Open all ports that were described before.
