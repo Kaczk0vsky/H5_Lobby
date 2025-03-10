@@ -26,8 +26,8 @@ def register_new_player(request):
         password = data.get("password")
         email = data.get("email")
         vpn_server_ip = os.getenv("SERVER_URL")
+        vpn_server_password = os.getenv("VPN_SERVER_PASSWORD")
         vpn_hub = os.getenv("VPN_HUB_NAME")
-        vpn_admin_password = os.getenv("VPN_HUB_VPN_PASSWORD")
 
         try:
             user = User.objects.create_user(
@@ -42,7 +42,7 @@ def register_new_player(request):
             UserPasswordSet {nickname} /PASSWORD:{password}
         """
         result = add_new_user_to_vpn_server(
-            vpn_server_ip, vpn_admin_password, vpncmd_commands
+            vpn_server_ip, vpn_server_password, vpncmd_commands
         )
 
         if not result:
