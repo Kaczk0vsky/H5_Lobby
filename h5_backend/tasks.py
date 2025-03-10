@@ -16,15 +16,10 @@ def add_new_user_to_vpn_server(
             "/CMD",
         ]
 
-        # Debugging logs
-        print(f"Executing command: {' '.join(command)}")
-        print(f"Commands to execute:\n{vpncmd_commands}")
-
         result = subprocess.run(
             command, input=vpncmd_commands, text=True, capture_output=True, check=True
         )
 
-        print("VPNCMD Output:", result.stdout)
         if result.returncode != 0:
             print("Error Output:", result.stderr)
             return False
