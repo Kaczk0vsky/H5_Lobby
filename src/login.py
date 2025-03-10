@@ -9,9 +9,9 @@ from src.helpers import delete_objects, send_email
 from src.vpn_handling import SoftEtherClient
 from src.settings_reader import load_resolution_settings, load_client_settings
 from src.settings_writer import save_login_information
-from window_elements.text_input import TextInput
-from window_elements.button import Button
-from window_elements.check_box import CheckBox
+from widgets.text_input import TextInput
+from widgets.button import Button
+from widgets.check_box import CheckBox
 
 
 class LoginWindow:
@@ -87,12 +87,10 @@ class LoginWindow:
             (self.config["screen_width"] / 6, self.config["screen_hight"] / 17),
         )
         CHECK_BOX_PASSWORD = CheckBox(
-            self.SCREEN,
-            self.SCREEN.get_width() / 1.7,
-            self.SCREEN.get_height() / 1.675,
-            20,
-            20,
-            self.client_config["remember_password"],
+            surface=self.SCREEN,
+            position=(self.SCREEN.get_width() / 1.7, self.SCREEN.get_height() / 1.675),
+            dimensions=(20, 20),
+            checked=self.client_config["remember_password"],
         )
 
         LOGIN_INPUT = TextInput(
@@ -211,22 +209,22 @@ class LoginWindow:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if not self._window_overlay:
-                        if LOGIN_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        if LOGIN_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.login_player(INPUT_BOXES)
-                        if REGISTER_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        if REGISTER_BUTTON.check_for_input(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.register_player()
-                        if FORGOT_PASSWORD_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        if FORGOT_PASSWORD_BUTTON.check_for_input(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.forgot_password_window()
                             self._window_overlay = True
-                        if CHECK_BOX_PASSWORD.checkForInput(MENU_MOUSE_POS):
+                        if CHECK_BOX_PASSWORD.check_for_input(MENU_MOUSE_POS):
                             self.client_config["remember_password"] = (
                                 not self.client_config["remember_password"]
                             )
                     else:
                         if self._wrong_credentials_status:
-                            if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
+                            if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
                                 fix_main_window()
 
             if not self._window_overlay:
@@ -234,7 +232,7 @@ class LoginWindow:
 
                 CHECK_BOX_PASSWORD.update()
                 for button in buttons:
-                    button.changeColor(MENU_MOUSE_POS)
+                    button.change_color(MENU_MOUSE_POS)
                     button.update(self.SCREEN, MENU_MOUSE_POS)
                 for input in INPUT_BOXES:
                     input.update()
@@ -249,7 +247,7 @@ class LoginWindow:
                     self.WRONG_PASSWORD_BG, (overlay_surface_x, overlay_surface_y)
                 )
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                BACK_BUTTON.changeColor(MENU_MOUSE_POS)
+                BACK_BUTTON.change_color(MENU_MOUSE_POS)
                 BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             pygame.display.update()
@@ -378,7 +376,7 @@ class LoginWindow:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if not self._window_overlay:
-                        if REGISTER_ACCOUNT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        if REGISTER_ACCOUNT_BUTTON.check_for_input(MENU_MOUSE_POS):
                             if_succesfull = self.register_new_player(INPUT_BOXES)
                             if if_succesfull:
                                 delete_objects(INPUT_BOXES)
@@ -386,20 +384,20 @@ class LoginWindow:
                             else:
                                 self._window_overlay = True
                                 self._wrong_credentials_status = True
-                        elif BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        elif BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.login_window()
                     else:
                         if self._wrong_credentials_status:
-                            if RETURN_BUTTON.checkForInput(MENU_MOUSE_POS):
+                            if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
                                 self._window_overlay = False
                                 self._wrong_credentials_status = False
                                 NICKNAME_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
-                REGISTER_ACCOUNT_BUTTON.changeColor(MENU_MOUSE_POS)
+                REGISTER_ACCOUNT_BUTTON.change_color(MENU_MOUSE_POS)
                 REGISTER_ACCOUNT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
-                BACK_BUTTON.changeColor(MENU_MOUSE_POS)
+                BACK_BUTTON.change_color(MENU_MOUSE_POS)
                 BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
                 for input in INPUT_BOXES:
                     input.update()
@@ -412,7 +410,7 @@ class LoginWindow:
 
                 self.SCREEN.blit(self.WRONG_PASSWORD_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                RETURN_BUTTON.changeColor(MENU_MOUSE_POS)
+                RETURN_BUTTON.change_color(MENU_MOUSE_POS)
                 RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             pygame.display.update()
@@ -540,7 +538,7 @@ class LoginWindow:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if not self._window_overlay:
-                        if SUBMIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        if SUBMIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                             if_succesfull = self.set_new_password(INPUT_BOXES)
                             if if_succesfull:
                                 delete_objects(INPUT_BOXES)
@@ -548,20 +546,20 @@ class LoginWindow:
                             else:
                                 self._window_overlay = True
                                 self._wrong_credentials_status = True
-                        if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.login_window()
                     else:
                         if self._wrong_credentials_status:
-                            if RETURN_BUTTON.checkForInput(MENU_MOUSE_POS):
+                            if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
                                 self._window_overlay = False
                                 self._wrong_credentials_status = False
                                 NICKNAME_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
-                BACK_BUTTON.changeColor(MENU_MOUSE_POS)
+                BACK_BUTTON.change_color(MENU_MOUSE_POS)
                 BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
-                SUBMIT_BUTTON.changeColor(MENU_MOUSE_POS)
+                SUBMIT_BUTTON.change_color(MENU_MOUSE_POS)
                 SUBMIT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
                 for input in INPUT_BOXES:
                     input.update()
@@ -574,7 +572,7 @@ class LoginWindow:
 
                 self.SCREEN.blit(self.WRONG_PASSWORD_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                RETURN_BUTTON.changeColor(MENU_MOUSE_POS)
+                RETURN_BUTTON.change_color(MENU_MOUSE_POS)
                 RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             pygame.display.update()

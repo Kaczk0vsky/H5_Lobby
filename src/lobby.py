@@ -17,8 +17,8 @@ from src.global_vars import (
 )
 from src.run_ashan_arena import AschanArena3_Game
 from src.helpers import play_on_empty, calculate_time_passed
-from window_elements.button import Button
-from window_elements.option_box import OptionBox
+from widgets.button import Button
+from widgets.option_box import OptionBox
 
 
 class H5_Lobby:
@@ -344,7 +344,7 @@ class H5_Lobby:
                 OPTIONS_BUTTON,
                 QUIT_BUTTON,
             ]:
-                button.changeColor(MENU_MOUSE_POS)
+                button.change_color(MENU_MOUSE_POS)
                 button.update(self.SCREEN, MENU_MOUSE_POS)
 
             (
@@ -373,10 +373,10 @@ class H5_Lobby:
                 self.SCREEN.blit(self.QUEUE_BG, (queue_window_x, queue_window_y))
                 self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
 
-                CANCEL_QUEUE.changeColor(MENU_MOUSE_POS)
+                CANCEL_QUEUE.change_color(MENU_MOUSE_POS)
                 CANCEL_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
                 if ACCEPT_QUEUE is not None:
-                    ACCEPT_QUEUE.changeColor(MENU_MOUSE_POS)
+                    ACCEPT_QUEUE.change_color(MENU_MOUSE_POS)
                     ACCEPT_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
                 if HEADER_TEXT is not None and HEADER_RECT is not None:
                     self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
@@ -389,32 +389,32 @@ class H5_Lobby:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if FIND_GAME_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
                         queue_status = True
                         continue
-                    if VIEW_STATISTICS.checkForInput(MENU_MOUSE_POS):
+                    if VIEW_STATISTICS.check_for_input(MENU_MOUSE_POS):
                         pass
-                    if NEWS.checkForInput(MENU_MOUSE_POS):
+                    if NEWS.check_for_input(MENU_MOUSE_POS):
                         pass
-                    if MY_PROFILE.checkForInput(MENU_MOUSE_POS):
+                    if MY_PROFILE.check_for_input(MENU_MOUSE_POS):
                         pass
-                    if PLAYER_PROFILE.checkForInput(MENU_MOUSE_POS):
+                    if PLAYER_PROFILE.check_for_input(MENU_MOUSE_POS):
                         pass
-                    if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.options_window()
-                    if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.set_player_offline()
                         self.vpn_client.set_vpn_state(False)
                         pygame.quit()
                         sys.exit()
                     if queue_status:
-                        if CANCEL_QUEUE.checkForInput(MENU_MOUSE_POS):
+                        if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
                             self.game_found_music = False
                             queue_status = False
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                             pygame.mixer.Channel(self.queue_channel).stop()
                         if ACCEPT_QUEUE is not None:
-                            if ACCEPT_QUEUE.checkForInput(MENU_MOUSE_POS):
+                            if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
                                 self.game_found_music = False
                                 queue_status = False
                                 pygame.mixer.Channel(self.queue_channel).stop()
@@ -551,15 +551,16 @@ class H5_Lobby:
 
     def options_window(self):
         RESOLUTION_CHOICES = OptionBox(
-            (self.SCREEN.get_width() / 6.5),
-            (self.SCREEN.get_height() / 3.9),
-            160,
-            40,
-            (150, 150, 150),
-            (100, 200, 255),
-            pygame.font.SysFont(None, 30),
-            resolution_choices,
-            resolution_choices.index(self.transformation_option),
+            position=(
+                (self.SCREEN.get_width() / 6.5),
+                (self.SCREEN.get_height() / 3.9),
+            ),
+            dimensions=(160, 40),
+            color=pygame.Color("gray"),
+            highlight_color=pygame.Color("deepskyblue"),
+            font=pygame.font.SysFont(None, 30),
+            option_list=resolution_choices,
+            selected=resolution_choices.index(self.transformation_option),
         )
 
         while True:
@@ -592,7 +593,7 @@ class H5_Lobby:
             self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
 
             for button in [BACK_BUTTON]:
-                button.changeColor(OPTIONS_MOUSE_POS)
+                button.change_color(OPTIONS_MOUSE_POS)
                 button.update(self.SCREEN, OPTIONS_MOUSE_POS)
 
             event_list = pygame.event.get()
@@ -603,7 +604,7 @@ class H5_Lobby:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if BACK_BUTTON.checkForInput(OPTIONS_MOUSE_POS):
+                    if BACK_BUTTON.check_for_input(OPTIONS_MOUSE_POS):
                         self.main_menu()
 
             selected_option = RESOLUTION_CHOICES.update(event_list)
