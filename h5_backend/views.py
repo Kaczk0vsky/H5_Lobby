@@ -46,7 +46,9 @@ def register_new_player(request):
         )
 
         if not result:
-            return JsonResponse({"success": False, "error": result.stderr}, status=500)
+            return JsonResponse(
+                {"success": False, "error": "Something went wrong!"}, status=500
+            )
         return JsonResponse({"success": True, "user_id": user.id})
     elif request.method == "GET":
         return JsonResponse(data)
