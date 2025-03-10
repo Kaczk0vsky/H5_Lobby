@@ -1,21 +1,32 @@
 from celery import shared_task
 
-from h5_backend.settings_handler import save_server_settings
-
 import subprocess
 
 
 @shared_task
-def update_wireguard_config(conf_path, conf_content):
+def add_new_user_to_vpn_server(
+    vpn_server_ip: str, vpn_admin_password: str, vpncmd_commands: str
+) -> bool:
     try:
-        with open(conf_path, "a") as file:
-            file.write("\n".join(conf_content))
-        subprocess.run(
-            ["sudo", "systemctl", "restart", "wg-quick@H5_Server.service"],
+        result = subprocess.run(
+            [
+                "vpncmd",
+                vpn_server_ip,
+                "/SERVER",
+                "/PASSWORD:",
+                vpn_admin_password,
+                "/CMD",
+            ],
+            input=vpncmd_commands,
+            text=True,
+            capture_output=True,
+            shell=True,
             check=True,
         )
-        print("WireGuard service restarted successfully.")
-        save_server_settings()
+
+        if result.returncode != 0:
+            return False
+        return True
+
     except Exception as e:
-        print(f"Error in updating WireGuard config: {e}")
-        raise e
+        return False
