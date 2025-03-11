@@ -20,7 +20,7 @@ def save_login_information(user_data: dict):
         toml.dump(data, f)
 
 
-def check_for_missing_paths():
+def check_for_missing_paths() -> dict:
     is_saved = False
     with open(os.path.join(os.getcwd(), "settings.toml"), "r") as f:
         data = toml.load(f)

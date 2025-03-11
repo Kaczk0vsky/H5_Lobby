@@ -13,15 +13,7 @@ def delete_objects(object_list: list):
         object.delete_instance()
 
 
-def is_admin():
-    """Check if the script is running with administrator privileges."""
-    try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
-        return False
-
-
-def play_on_empty(path: str, volume: float = 1):
+def play_on_empty(path: str, volume: float = 1) -> int:
     for index in range(0, 8):
         if not pygame.mixer.Channel(index).get_busy():
             pygame.mixer.Channel(index).play(
@@ -33,7 +25,7 @@ def play_on_empty(path: str, volume: float = 1):
             return index
 
 
-def send_email(userdata: dict):
+def send_email(userdata: dict) -> bool:
     SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 465
     EMAIL_SENDER = "ashanarena3@gmail.com"
@@ -77,7 +69,7 @@ def send_email(userdata: dict):
             return False
 
 
-def calculate_time_passed(start_time):
+def calculate_time_passed(start_time) -> tuple[int, int]:
     elapsed_time = round(time.time() - start_time)
     minutes = elapsed_time // 60
     seconds = elapsed_time % 60

@@ -7,6 +7,29 @@ from src.global_vars import env_dict
 
 
 class SoftEtherClient:
+    """
+    A client interface for managing a SoftEther VPN connection.
+
+    This class provides methods to create a VPN client configuration and
+    connect or disconnect from the VPN using the SoftEther VPN command-line tool.
+
+    Attributes:
+        user_name (str): The username for VPN authentication.
+        password (str): The password for VPN authentication.
+        vpn_path (str): The path to the SoftEther VPN client directory.
+        vpn_cmd_path (str): The full path to the SoftEther VPN command-line executable (vpncmd.exe).
+        server_url (str): The SoftEther VPN server address.
+        hub_name (str): The name of the VPN hub.
+
+    Methods:
+        set_vpn_state(state: bool):
+            Connects or disconnects from the VPN based on the provided state.
+
+        create_new_client():
+            Creates a new VPN client configuration, including NIC creation,
+            account creation, and password setup.
+    """
+
     def __init__(self, user_name: str, password: str):
         self.user_name = user_name
         self.password = password

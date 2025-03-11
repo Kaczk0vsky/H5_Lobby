@@ -163,3 +163,4 @@ cython_debug/
 # config files for wireguard
 *.conf
 SI.bin
+.vscode/
