@@ -1,9 +1,8 @@
 import pygame
-import os
 import sys
 import requests
 
-from src.global_vars import fonts_sizes, bg_sound_volume, env_dict
+from src.global_vars import fonts_sizes, env_dict
 from src.basic_window import BasicWindow
 from src.lobby import H5_Lobby
 from src.helpers import delete_objects, send_email
@@ -16,6 +15,23 @@ from widgets.check_box import CheckBox
 
 
 class LoginWindow(BasicWindow):
+    """Represents the login window for user authentication.
+
+    This class handles the user login process, registration, and password recovery.
+    It manages UI elements like text inputs, buttons, and checkboxes, and communicates
+    with the server for authentication.
+
+    Methods:
+        login_window(): Displays the login UI and handles user interactions.
+        register_player():  Displays the register UI and handles user interactions.
+        forgot_password_window():  Displays the forgot password UI and handles user interactions.
+        login_player(inputs: list): Send the request for authentication of the user to the server.
+        If succesfull creates a VPN client class and H5_Lobby class.
+        register_new_player(inputs: list): Registers a new user account and sends request to the server.
+        set_new_password(inputs: list): Sends a password reset request.
+        run_game(): Starts the main UI called in login_window().
+    """
+
     _window_overlay = False
     _wrong_credentials_status = False
 
