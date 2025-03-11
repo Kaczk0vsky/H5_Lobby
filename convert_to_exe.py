@@ -35,6 +35,8 @@ def create_exe_file():
             --collect-submodules=pygame \
             --hidden-import=toml \
             --collect-submodules=toml \
+            --hidden-import=django \
+            --collect-submodules=django \
             --hidden-import=requests \
             --collect-submodules=requests \
             --hidden-import=easygui \
