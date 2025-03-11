@@ -31,9 +31,8 @@ class H5_Lobby(BasicWindow):
         )
         self.font_size = fonts_sizes[self.transformation_option]
 
-        self.play_background_music(
-            title="Menu", music_path="resources/H5_main_theme.mp3"
-        )
+        self.set_window_caption(title="Menu")
+        self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.create_window_elements(is_extended=True)
 
         self.SCREEN = pygame.display.set_mode(

@@ -46,6 +46,7 @@ class LoginWindow(BasicWindow):
         self.input_dims = (200, 40)
         self.transformation_option = "800x600"
         self.font_size = fonts_sizes[self.transformation_option]
+        self.vpn_client = None
 
         self.client_config = load_client_settings()
         self.set_window_caption(title="Login")
@@ -182,6 +183,7 @@ class LoginWindow(BasicWindow):
                         if self._wrong_credentials_status:
                             if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
                                 self._window_overlay = False
+                                self._wrong_credentials_status = False
                                 LOGIN_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
@@ -470,7 +472,7 @@ class LoginWindow(BasicWindow):
         if response.status_code == 200:
             save_login_information(self.client_config)
             self.stop_background_music()
-            if not self.vpn_client:
+            if self.vpn_client is None:
                 self.vpn_client = SoftEtherClient(
                     self.client_config["nickname"],
                     self.client_config["password"],
@@ -480,7 +482,7 @@ class LoginWindow(BasicWindow):
             lobby.run_game()
 
         self._window_overlay = True
-        self._wrong_password_status = True
+        self._wrong_credentials_status = True
 
     def register_new_player(self, inputs: list):
         url = f"http://{env_dict["SERVER_URL"]}:8000/register/"
