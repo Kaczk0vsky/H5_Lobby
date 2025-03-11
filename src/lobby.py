@@ -7,7 +7,6 @@ import time
 
 from pygame.locals import *
 
-from src.settings_reader import load_resolution_settings
 from src.global_vars import (
     resolution_choices,
     transformation_factors,
@@ -15,102 +14,31 @@ from src.global_vars import (
     bg_sound_volume,
     env_dict,
 )
+from src.basic_window import BasicWindow
 from src.run_ashan_arena import AschanArena3_Game
 from src.helpers import play_on_empty, calculate_time_passed
 from widgets.button import Button
 from widgets.option_box import OptionBox
 
 
-class H5_Lobby:
+class H5_Lobby(BasicWindow):
     def __init__(self, vpn_client):
-        pygame.init()
-        pygame.display.set_caption("Heroes V of Might and Magic Ashan Arena 3 - Menu")
-        pygame.mixer.init()
-        pygame.mixer.Channel(0).play(
-            pygame.mixer.Sound(
-                os.path.join(os.getcwd(), "resources/H5_main_theme.mp3")
-            ),
-            -1,
-            0,
-        )
-        pygame.mixer.Channel(0).set_volume(bg_sound_volume)
+        BasicWindow.__init__(self)
 
         self.vpn_client = vpn_client
-        self.config = load_resolution_settings()
         self.transformation_option = (
             f"{self.config["screen_width"]}x{self.config["screen_hight"]}"
         )
         self.font_size = fonts_sizes[self.transformation_option]
 
+        self.play_background_music(
+            title="Menu", music_path="resources/H5_main_theme.mp3"
+        )
+        self.create_window_elements(is_extended=True)
+
         self.SCREEN = pygame.display.set_mode(
             (self.config["screen_width"], self.config["screen_hight"]), pygame.RESIZABLE
         )
-        self.BG = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/background/background.png")
-        )
-        self.PLAYER_LIST = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/background/players_online.png")
-        )
-        self.TOP_BAR = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/main_menu/top_bar.png")
-        )
-        self.QUEUE_BG = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/game_search/game_search_window.png")
-        )
-        self.NEWS = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/news/news_window.png")
-        )
-        self.QUIT = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/buttons/close_dark.png")
-        )
-        self.QUIT_HIGHLIGHTED = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/buttons/close_highlighted.png")
-        )
-        self.ICON_SQUARE = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/buttons/iconsquare_dark.png")
-        )
-        self.ICON_SQUARE_HIGHLIGHTED = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/buttons/iconsquare_highlighted.png")
-        )
-        self.OPTIONS = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/buttons/options_dark.png")
-        )
-        self.OPTIONS_HIGHLIGHTED = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/buttons/options_highlighted.png")
-        )
-        self.SCROLL = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/buttons/scroll.png")
-        )
-        self.BUTTON = pygame.image.load(
-            os.path.join(
-                os.getcwd(), "resources/game_search/cancel_search_button_dark.png"
-            )
-        )
-        self.BUTTON_HIGHLIGHTED = pygame.image.load(
-            os.path.join(
-                os.getcwd(),
-                "resources/game_search/cancel_search_button_highlighted.png",
-            )
-        )
-        self.CANCEL_BUTTON = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/game_search/red_button_dark.png")
-        )
-        self.CANCEL_BUTTON_HIGHLIGHTED = pygame.image.load(
-            os.path.join(
-                os.getcwd(), "resources/game_search/red_button_highlighted.png"
-            )
-        )
-        self.ACCEPT_BUTTON = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/game_search/green_button_dark.png")
-        )
-        self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.image.load(
-            os.path.join(
-                os.getcwd(), "resources/game_search/green_button_highlighted.png"
-            )
-        )
-
-    def get_font(self, font_size: int = 75):
-        return pygame.font.Font("resources/Quivira.otf", font_size)
 
     def main_menu(self):
         self.get_time = False
@@ -370,7 +298,9 @@ class H5_Lobby:
                     is_None = False
 
             if not is_None:
-                self.SCREEN.blit(self.QUEUE_BG, (queue_window_x, queue_window_y))
+                self.SCREEN.blit(
+                    self.SMALLER_WINDOWS_BG, (queue_window_x, queue_window_y)
+                )
                 self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
 
                 CANCEL_QUEUE.change_color(MENU_MOUSE_POS)
@@ -428,8 +358,8 @@ class H5_Lobby:
             self.config["screen_width"] // 3,
             self.config["screen_hight"] // 3,
         )
-        self.QUEUE_BG = pygame.transform.scale(
-            self.QUEUE_BG, (overlay_width, overlay_height)
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(
+            self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height)
         )
         overlay_surface = pygame.Surface((overlay_width, overlay_height))
         overlay_surface.fill((200, 200, 200))

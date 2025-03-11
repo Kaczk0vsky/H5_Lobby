@@ -40,7 +40,7 @@ class CheckBox:
             position[0], position[1], dimensions[0], dimensions[1]
         )
         self.inner_rect = pygame.Rect(
-            position[0] + 2, position[0] + 2, dimensions[0] - 4, dimensions[0] - 4
+            position[0] + 2, position[1] + 2, dimensions[0] - 4, dimensions[1] - 4
         )
         self.checked = checked
         self.is_active = False

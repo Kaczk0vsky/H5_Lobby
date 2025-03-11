@@ -57,19 +57,17 @@ class TextInput:
 
     def __init__(
         self,
-        x: int,
-        y: int,
-        w: int,
-        h: int,
-        text: str = "",
+        position: tuple[float, float],
+        dimensions: tuple[int, int],
         text_color: pygame.Color = pygame.Color("black"),
         fill_inactive: pygame.Color = pygame.Color("gray"),
         fill_active: pygame.Color = pygame.Color("white"),
         font_size: int = 20,
+        text: str = "",
         is_active: bool = False,
     ):
         self.id = TextInput.__id
-        self.rect = pygame.Rect(x, y, w, h)
+        self.rect = pygame.Rect(position[0], position[1], dimensions[0], dimensions[1])
         self.text_color = text_color
         self.fill_inactive = fill_inactive
         self.fill_active = fill_active
