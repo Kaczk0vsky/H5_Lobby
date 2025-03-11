@@ -1,8 +1,6 @@
 import pygame
-import sys
 import os
 import toml
-import requests
 import time
 
 from pygame.locals import *
@@ -22,6 +20,29 @@ from widgets.option_box import OptionBox
 
 
 class H5_Lobby(BasicWindow):
+    """
+    The H5_Lobby class represents the main menu and lobby system for the game.
+    It provides a graphical user interface (GUI) for players to navigate
+    through various options, including finding a game, viewing statistics,
+    accessing news, managing their profile, and adjusting game settings.
+
+    Methods:
+        main_menu():
+            Displays the main menu and handles button interactions, including
+            game queueing and accessing submenus.
+
+        queue_window():
+            Displays the matchmaking queue interface, handling the process of
+            finding an opponent and accepting a match.
+
+        options_window():
+            Displays the settings menu, allowing the player to adjust screen
+            resolution and apply changes.
+
+        run_game():
+            Starts the lobby system by initializing and displaying the main menu.
+    """
+
     def __init__(self, vpn_client):
         BasicWindow.__init__(self)
 
@@ -40,14 +61,27 @@ class H5_Lobby(BasicWindow):
         )
 
     def main_menu(self):
-        self.get_time = False
-        self.found_game = False
-        self.player_found = False
-        self.game_found_music = False
+        def set_queue_vars(state: bool = False) -> bool:
+            self.game_found_music = state
+            self.get_time = state
+            self.found_game = state
+            self.player_found = state
+            queue_status = state
+
+            return queue_status
+
+        set_queue_vars()
+        queue_status = False
         self.opponent_str = ""
         self.queue_channel = 0
-
-        queue_status = False
+        self.button_dims = (
+            self.config["screen_width"] / 9,
+            self.config["screen_hight"] / 17,
+        )
+        self.top_elements_dims = (
+            self.config["screen_width"] / 28,
+            self.config["screen_hight"] / 17,
+        )
 
         self.BG = pygame.transform.scale(
             self.BG,
@@ -84,68 +118,58 @@ class H5_Lobby(BasicWindow):
         )
         self.OPTIONS = pygame.transform.scale(
             self.OPTIONS,
-            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+            self.top_elements_dims,
         )
         self.OPTIONS_HIGHLIGHTED = pygame.transform.scale(
             self.OPTIONS_HIGHLIGHTED,
-            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+            self.top_elements_dims,
         )
         self.ICON_SQUARE = pygame.transform.scale(
             self.ICON_SQUARE,
-            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+            self.top_elements_dims,
         )
         self.ICON_SQUARE_HIGHLIGHTED = pygame.transform.scale(
             self.ICON_SQUARE_HIGHLIGHTED,
-            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+            self.top_elements_dims,
         )
         self.QUIT = pygame.transform.scale(
             self.QUIT,
-            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+            self.top_elements_dims,
         )
         self.QUIT_HIGHLIGHTED = pygame.transform.scale(
             self.QUIT_HIGHLIGHTED,
-            (self.config["screen_width"] / 28, self.config["screen_hight"] / 17),
+            self.top_elements_dims,
         )
         self.BUTTON = pygame.transform.scale(
             self.BUTTON,
-            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+            self.button_dims,
         )
         self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.BUTTON_HIGHLIGHTED,
-            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+            self.button_dims,
         )
         self.ACCEPT_BUTTON = pygame.transform.scale(
             self.ACCEPT_BUTTON,
-            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+            self.button_dims,
         )
         self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.ACCEPT_BUTTON_HIGHLIGHTED,
-            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+            self.button_dims,
         )
         self.CANCEL_BUTTON = pygame.transform.scale(
             self.CANCEL_BUTTON,
-            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+            self.button_dims,
         )
         self.CANCEL_BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.CANCEL_BUTTON_HIGHLIGHTED,
-            (self.config["screen_width"] / 9, self.config["screen_hight"] / 17),
+            self.button_dims,
         )
-
-        (
-            queue_window,
-            CANCEL_QUEUE,
-            ACCEPT_QUEUE,
-            HEADER_TEXT,
-            HEADER_RECT,
-            OPONNENT_TEXT,
-            OPONNENT_RECT,
-        ) = self.queue_window()
-        queue_window_x = (self.config["screen_width"] - queue_window.get_width()) // 2
-        queue_window_y = (self.config["screen_hight"] - queue_window.get_height()) // 2
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
             self.cursor.update()
+            MENU_MOUSE_POS = pygame.mouse.get_pos()
+
             self.SCREEN.blit(
                 self.TOP_BAR,
                 (
@@ -168,6 +192,8 @@ class H5_Lobby(BasicWindow):
                 ),
             )
             self.SCREEN.blit(self.PLAYERS_TEXT, self.PLAYERS_TEXT_RECT)
+
+            # TODO: add news block
             # self.SCREEN.blit(
             #     self.NEWS,
             #     (
@@ -175,8 +201,6 @@ class H5_Lobby(BasicWindow):
             #         100 * (transformation_factors[self.transformation_option][1]),
             #     ),
             # )
-
-            MENU_MOUSE_POS = pygame.mouse.get_pos()
 
             FIND_GAME_BUTTON = Button(
                 image=self.BUTTON,
@@ -187,8 +211,8 @@ class H5_Lobby(BasicWindow):
                 ),
                 text_input="Find Game",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
             VIEW_STATISTICS = Button(
                 image=self.BUTTON,
@@ -199,8 +223,8 @@ class H5_Lobby(BasicWindow):
                 ),
                 text_input="View Statistics",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
             NEWS = Button(
                 image=self.BUTTON,
@@ -211,8 +235,8 @@ class H5_Lobby(BasicWindow):
                 ),
                 text_input="News",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
             MY_PROFILE = Button(
                 image=self.BUTTON,
@@ -223,8 +247,8 @@ class H5_Lobby(BasicWindow):
                 ),
                 text_input="My Account",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
             PLAYER_PROFILE = Button(
                 image=self.ICON_SQUARE,
@@ -233,10 +257,9 @@ class H5_Lobby(BasicWindow):
                     1730 * (transformation_factors[self.transformation_option][0]),
                     50 * (transformation_factors[self.transformation_option][1]),
                 ),
-                text_input="",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
             OPTIONS_BUTTON = Button(
                 image=self.OPTIONS,
@@ -245,10 +268,9 @@ class H5_Lobby(BasicWindow):
                     1800 * (transformation_factors[self.transformation_option][0]),
                     50 * (transformation_factors[self.transformation_option][1]),
                 ),
-                text_input="",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
             QUIT_BUTTON = Button(
                 image=self.QUIT,
@@ -257,10 +279,9 @@ class H5_Lobby(BasicWindow):
                     1870 * (transformation_factors[self.transformation_option][0]),
                     50 * (transformation_factors[self.transformation_option][1]),
                 ),
-                text_input="",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
 
             for button in [
@@ -275,31 +296,22 @@ class H5_Lobby(BasicWindow):
                 button.change_color(MENU_MOUSE_POS)
                 button.update(self.SCREEN, MENU_MOUSE_POS)
 
-            (
-                queue_window,
-                CANCEL_QUEUE,
-                ACCEPT_QUEUE,
-                HEADER_TEXT,
-                HEADER_RECT,
-                OPONNENT_TEXT,
-                OPONNENT_RECT,
-            ) = self.queue_window(queue_status)
+            if queue_status:
+                (
+                    CANCEL_QUEUE,
+                    ACCEPT_QUEUE,
+                    HEADER_TEXT,
+                    HEADER_RECT,
+                    OPONNENT_TEXT,
+                    OPONNENT_RECT,
+                ) = self.queue_window()
 
-            is_None = True
-            for window_element in [
-                CANCEL_QUEUE,
-                ACCEPT_QUEUE,
-                HEADER_TEXT,
-                HEADER_RECT,
-                OPONNENT_TEXT,
-                OPONNENT_RECT,
-            ]:
-                if window_element is not None:
-                    is_None = False
-
-            if not is_None:
                 self.SCREEN.blit(
-                    self.SMALLER_WINDOWS_BG, (queue_window_x, queue_window_y)
+                    self.SMALLER_WINDOWS_BG,
+                    (
+                        640 * transformation_factors[self.transformation_option][0],
+                        360 * transformation_factors[self.transformation_option][1],
+                    ),
                 )
                 self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
 
@@ -315,9 +327,7 @@ class H5_Lobby(BasicWindow):
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.vpn_client.set_vpn_state(state=False)
-                    pygame.quit()
-                    sys.exit()
+                    self.quit_game_handling()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
                         queue_status = True
@@ -333,27 +343,22 @@ class H5_Lobby(BasicWindow):
                     if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.options_window()
                     if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
-                        self.set_player_offline()
-                        self.vpn_client.set_vpn_state(False)
-                        pygame.quit()
-                        sys.exit()
+                        self.quit_game_handling()
                     if queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
-                            self.game_found_music = False
-                            queue_status = False
+                            queue_status = set_queue_vars(state=False)
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                             pygame.mixer.Channel(self.queue_channel).stop()
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
-                                self.game_found_music = False
-                                queue_status = False
+                                queue_status = set_queue_vars(state=False)
                                 pygame.mixer.Channel(self.queue_channel).stop()
                                 game = AschanArena3_Game()
                                 game.run_processes()
 
             pygame.display.update()
 
-    def queue_window(self, queue_status: bool = False):
+    def queue_window(self):
         overlay_width, overlay_height = (
             self.config["screen_width"] // 3,
             self.config["screen_hight"] // 3,
@@ -361,30 +366,6 @@ class H5_Lobby(BasicWindow):
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(
             self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height)
         )
-        overlay_surface = pygame.Surface((overlay_width, overlay_height))
-        overlay_surface.fill((200, 200, 200))
-        pygame.draw.rect(overlay_surface, (0, 0, 0), overlay_surface.get_rect(), 5)
-
-        CANCEL_BUTTON = None
-        ACCEPT_BUTTON = None
-        HEADER_TEXT = None
-        HEADER_RECT = None
-        OPONNENT_TEXT = None
-        OPONNENT_RECT = None
-
-        if not queue_status:
-            self.get_time = False
-            self.found_game = False
-            self.player_found = False
-            return (
-                overlay_surface,
-                CANCEL_BUTTON,
-                ACCEPT_BUTTON,
-                HEADER_TEXT,
-                HEADER_RECT,
-                OPONNENT_TEXT,
-                OPONNENT_RECT,
-            )
 
         if not self.get_time:
             self.start_time = time.time()
@@ -404,20 +385,19 @@ class H5_Lobby(BasicWindow):
                 )
             )
 
-            # TODO: remove this if statment - ONLY FOR TESTING
-            if seconds == 3:
-                self.found_game = True
-                self.player_found = True
-
         CANCEL_BUTTON = Button(
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
             pos=(overlay_width * 1.5, overlay_height * 1.8),
             text_input="Cancel",
             font=self.get_font(self.font_size[1]),
-            base_color="#d7fcd4",
-            hovering_color="White",
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
         )
+
+        ACCEPT_BUTTON = None
+        OPONNENT_TEXT = None
+        OPONNENT_RECT = None
 
         if self.player_found:
             if not self.game_found_music:
@@ -436,14 +416,9 @@ class H5_Lobby(BasicWindow):
                     self.SCREEN.get_height() / 2.4,
                 )
             )
-
             OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
-                f"Opponent: Piotrek", True, "white"
+                f"Opponent: {self.opponent_str}", True, "white"
             )
-            if self.opponent_str != "":
-                OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
-                    f"Opponent: {self.opponent_str}", True, "white"
-                )
             OPONNENT_RECT = OPONNENT_TEXT.get_rect(
                 center=(
                     self.SCREEN.get_width() / 2,
@@ -456,8 +431,8 @@ class H5_Lobby(BasicWindow):
                 pos=(overlay_width * 1.3, overlay_height * 1.8),
                 text_input="Accept",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
             CANCEL_BUTTON = Button(
                 image=self.CANCEL_BUTTON,
@@ -465,12 +440,11 @@ class H5_Lobby(BasicWindow):
                 pos=(overlay_width * 1.7, overlay_height * 1.8),
                 text_input="Cancel",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
 
         return (
-            overlay_surface,
             CANCEL_BUTTON,
             ACCEPT_BUTTON,
             HEADER_TEXT,
@@ -495,7 +469,7 @@ class H5_Lobby(BasicWindow):
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
-
+            self.cursor.update()
             OPTIONS_MOUSE_POS = pygame.mouse.get_pos()
 
             RESOLUTION_TEXT = self.get_font(self.font_size[1]).render(
@@ -507,7 +481,7 @@ class H5_Lobby(BasicWindow):
                     300 * transformation_factors[self.transformation_option][1],
                 ),
             )
-
+            self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
             BACK_BUTTON = Button(
                 image=self.BUTTON,
                 image_highlited=self.BUTTON_HIGHLIGHTED,
@@ -517,22 +491,16 @@ class H5_Lobby(BasicWindow):
                 ),
                 text_input="Back",
                 font=self.get_font(self.font_size[1]),
-                base_color="#d7fcd4",
-                hovering_color="White",
+                base_color=self.text_color,
+                hovering_color=self.hovering_color,
             )
-            self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
-
-            for button in [BACK_BUTTON]:
-                button.change_color(OPTIONS_MOUSE_POS)
-                button.update(self.SCREEN, OPTIONS_MOUSE_POS)
+            BACK_BUTTON.change_color(OPTIONS_MOUSE_POS)
+            BACK_BUTTON.update(self.SCREEN, OPTIONS_MOUSE_POS)
 
             event_list = pygame.event.get()
             for event in event_list:
                 if event.type == pygame.QUIT:
-                    self.vpn_client.set_vpn_state(state=False)
-                    self.set_player_offline()
-                    pygame.quit()
-                    sys.exit()
+                    self.quit_game_handling()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if BACK_BUTTON.check_for_input(OPTIONS_MOUSE_POS):
                         self.main_menu()
@@ -578,10 +546,8 @@ class H5_Lobby(BasicWindow):
             )
             pygame.display.update()
 
-    def set_player_offline(self):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/set_player_offline/"
-        user_data = {"nickname": self.vpn_client.user_name}
-        requests.post(url, json=user_data)
+    def add_to_queue():
+        url = f"http://{env_dict["SERVER_URL"]}:8000/add_to_queue/"
 
     def run_game(self):
         self.main_menu()

@@ -39,10 +39,10 @@ class Button:
         self,
         image: pygame.Surface,
         pos: tuple[float, float],
-        text_input: str,
         font: pygame.font.Font,
         base_color: str,
         hovering_color: str,
+        text_input: str = "",
         image_highlited: pygame.Surface = None,
     ):
         self.image = image

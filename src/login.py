@@ -1,5 +1,4 @@
 import pygame
-import sys
 import requests
 
 from src.global_vars import fonts_sizes, env_dict
@@ -46,7 +45,6 @@ class LoginWindow(BasicWindow):
         self.input_dims = (200, 40)
         self.transformation_option = "800x600"
         self.font_size = fonts_sizes[self.transformation_option]
-        self.vpn_client = None
 
         self.client_config = load_client_settings()
         self.set_window_caption(title="Login")
@@ -157,8 +155,7 @@ class LoginWindow(BasicWindow):
             event_list = pygame.event.get()
             for event in event_list:
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    self.quit_game_handling()
                 for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
                     input.event(event, is_hidden)
                     if input._enter_pressed == True and input.active:
@@ -293,8 +290,7 @@ class LoginWindow(BasicWindow):
             event_list = pygame.event.get()
             for event in event_list:
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    self.quit_game_handling()
                 for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
                     input.event(event, is_hidden)
                     if input._enter_pressed == True and input.active:
@@ -406,8 +402,7 @@ class LoginWindow(BasicWindow):
             event_list = pygame.event.get()
             for event in event_list:
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    self.quit_game_handling()
                 for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
                     input.event(event, is_hidden)
                     if input._enter_pressed == True and input.active:

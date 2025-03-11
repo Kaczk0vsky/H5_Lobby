@@ -1,8 +1,10 @@
 import pygame
 import os
+import requests
+import sys
 
 from src.settings_reader import load_resolution_settings
-from src.global_vars import bg_sound_volume
+from src.global_vars import bg_sound_volume, env_dict
 from widgets.button import Button
 from widgets.cursor import Cursor
 
@@ -37,6 +39,7 @@ class BasicWindow:
     """
 
     def __init__(self):
+        self.vpn_client = None
         self.text_color = "#d7fcd4"
         self.hovering_color = "White"
         self.config = load_resolution_settings()
@@ -60,6 +63,15 @@ class BasicWindow:
     def stop_background_music(self) -> None:
         pygame.mixer.fadeout(5000)
         pygame.quit()
+
+    def quit_game_handling(self):
+        if self.vpn_client is not None:
+            self.vpn_client.set_vpn_state(False)
+            url = f"http://{env_dict["SERVER_URL"]}:8000/set_player_offline/"
+            user_data = {"nickname": self.vpn_client.user_name}
+            requests.post(url, json=user_data)
+        pygame.quit()
+        sys.exit()
 
     def get_font(self, font_size: int = 75) -> pygame.font.Font:
         return pygame.font.Font("resources/Quivira.otf", font_size)
