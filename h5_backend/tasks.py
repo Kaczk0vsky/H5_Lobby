@@ -1,5 +1,6 @@
-from celery import shared_task
 import subprocess
+
+from celery import shared_task
 
 
 @shared_task

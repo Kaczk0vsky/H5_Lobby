@@ -350,7 +350,7 @@ class LoginWindow(BasicWindow):
             is_active=True,
         )
         EMAIL_INPUT = TextInput(
-            position=(self.input_pos[0], self.input_pos[1] + 65),
+            position=(self.input_pos[0], self.input_pos[1] + 60),
             dimensions=self.input_dims,
         )
         INPUT_BOXES = [

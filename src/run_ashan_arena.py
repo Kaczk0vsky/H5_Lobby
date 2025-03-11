@@ -1,6 +1,6 @@
-from src.settings_reader import load_game_settings
-
 import os
+
+from src.settings_reader import load_game_settings
 
 
 class AschanArena3_Game:

@@ -1,24 +1,21 @@
+import json
+import os
+
+from dotenv import load_dotenv
+
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
 
-from h5_backend.settings_handler import load_server_settings
 from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player
-
-from dotenv import load_dotenv
-
-import json
-import os
 
 
 @csrf_exempt  # Disable CSRF for external requests; for production, secure this with proper auth
 def register_new_player(request):
     load_dotenv()
-    server_settings = load_server_settings()
-    data = {"last_available_ip": server_settings["last_available_ip"]}
 
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
