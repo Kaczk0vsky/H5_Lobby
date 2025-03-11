@@ -23,7 +23,7 @@ class LoginWindow(BasicWindow):
 
     Methods:
         login_window(): Displays the login UI and handles user interactions.
-        register_player():  Displays the register UI and handles user interactions.
+        register_player_window():  Displays the register UI and handles user interactions.
         forgot_password_window():  Displays the forgot password UI and handles user interactions.
         login_player(inputs: list): Send the request for authentication of the user to the server.
         If succesfull creates a VPN client class and H5_Lobby class.
@@ -168,7 +168,7 @@ class LoginWindow(BasicWindow):
                             self.login_player(INPUT_BOXES)
                         if REGISTER_BUTTON.check_for_input(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
-                            self.register_player()
+                            self.register_player_window()
                         if FORGOT_PASSWORD_BUTTON.check_for_input(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.forgot_password_window()
@@ -206,7 +206,7 @@ class LoginWindow(BasicWindow):
 
             pygame.display.update()
 
-    def register_player(self):
+    def register_player_window(self):
         NICKNAME_INPUT = TextInput(
             position=(self.input_pos[0], self.input_pos[1] - 110),
             dimensions=self.input_dims,
@@ -258,7 +258,7 @@ class LoginWindow(BasicWindow):
                 "Email", True, self.text_color
             )
             EMAIL_RECT = PASSWORD_TEXT.get_rect(
-                center=(self.text_pos[0], self.text_pos[1] + 40)
+                center=(self.text_pos[0] + 20, self.text_pos[1] + 40)
             )
 
             self.SCREEN.blit(NICKNAME_TEXT, NICKNAME_RECT)
