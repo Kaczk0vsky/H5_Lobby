@@ -97,6 +97,7 @@ class LoginWindow(BasicWindow):
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
+            self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
             LOGIN_TEXT = self.get_font(self.font_size[0]).render(
@@ -234,6 +235,7 @@ class LoginWindow(BasicWindow):
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
+            self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
             NICKNAME_TEXT = self.get_font(self.font_size[0]).render(
@@ -361,6 +363,7 @@ class LoginWindow(BasicWindow):
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
+            self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
             NICKNAME_TEXT = self.get_font(self.font_size[0]).render(

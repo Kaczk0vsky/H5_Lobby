@@ -4,6 +4,7 @@ import os
 from src.settings_reader import load_resolution_settings
 from src.global_vars import bg_sound_volume
 from widgets.button import Button
+from widgets.cursor import Cursor
 
 
 class BasicWindow:
@@ -39,6 +40,7 @@ class BasicWindow:
         self.text_color = "#d7fcd4"
         self.hovering_color = "White"
         self.config = load_resolution_settings()
+        self.cursor = Cursor()
 
     def set_window_caption(self, title: str) -> None:
         pygame.display.set_caption(

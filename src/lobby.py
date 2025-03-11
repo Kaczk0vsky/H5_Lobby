@@ -146,6 +146,7 @@ class H5_Lobby(BasicWindow):
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
+            self.cursor.update()
             self.SCREEN.blit(
                 self.TOP_BAR,
                 (
