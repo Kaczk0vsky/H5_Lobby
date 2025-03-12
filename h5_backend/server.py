@@ -14,6 +14,8 @@ class Server:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.server_url, self.server_port))
         self.socket.listen(self._max_connections)
+        self.clients = []
+        self.running = True
 
     def start(self):
         broadcast_thread = threading.Thread(target=self.broadcast_message, daemon=True)
@@ -23,12 +25,14 @@ class Server:
             while True:
                 client_socket, client_address = self.socket.accept()
                 print(f"Connected with - {client_address}")
+                self.clients.append(client_socket)
 
                 client_thread = threading.Thread(
                     target=self.handle_client, args=(client_socket,)
                 )
                 client_thread.start()
         except KeyboardInterrupt:
+            self.running = False
             print("\nStoped server...")
         finally:
             self.socket.close()
@@ -46,6 +50,7 @@ class Server:
                 client_socket.send(response.encode())
 
         except ConnectionResetError:
+            self.clients.remove(client_socket)
             print("Client closed connection unexpectedly.")
         finally:
             client_socket.close()
