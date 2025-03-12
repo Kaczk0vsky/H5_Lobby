@@ -1,6 +1,11 @@
 import subprocess
+import socket
+import os
 
 from celery import shared_task
+from django.db import transaction
+
+from h5_backend.models import Player
 
 
 @shared_task
@@ -33,3 +38,23 @@ def add_new_user_to_vpn_server(
     except Exception as e:
         print("General Error:", str(e))
         return False
+
+
+@shared_task
+def check_queue():
+    players_in_queue = Player.objects.filter(player_state=Player.IN_QUEUE).order_by(
+        "joined_at"
+    )
+    print(players_in_queue)
+    # TODO: add enlarging mmr range dependant on time passed
+
+    if players_in_queue.count() >= 2:
+        player1 = players_in_queue[0]
+        player2 = players_in_queue[1]
+        print(f"Fighting: {player1.nickname} vs {player2.nickname}")
+
+        with transaction.atomic():
+            player1.player_state = Player.WAITING_ACCEPTANCE
+            player2.player_state = Player.WAITING_ACCEPTANCE
+            player1.save()
+            player2.save()

@@ -2,6 +2,7 @@ import pygame
 import os
 import toml
 import time
+import requests
 
 from pygame.locals import *
 
@@ -43,10 +44,11 @@ class H5_Lobby(BasicWindow):
             Starts the lobby system by initializing and displaying the main menu.
     """
 
-    def __init__(self, vpn_client):
+    def __init__(self, vpn_client: object, client_config: dict):
         BasicWindow.__init__(self)
 
         self.vpn_client = vpn_client
+        self.client_config = client_config
         self.transformation_option = (
             f"{self.config["screen_width"]}x{self.config["screen_hight"]}"
         )
@@ -65,7 +67,6 @@ class H5_Lobby(BasicWindow):
             self.game_found_music = state
             self.get_time = state
             self.found_game = state
-            self.player_found = state
             queue_status = state
 
             return queue_status
@@ -330,6 +331,7 @@ class H5_Lobby(BasicWindow):
                     self.quit_game_handling()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
+                        self.add_to_queue()
                         queue_status = True
                         continue
                     if VIEW_STATISTICS.check_for_input(MENU_MOUSE_POS):
@@ -349,10 +351,12 @@ class H5_Lobby(BasicWindow):
                             queue_status = set_queue_vars(state=False)
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                             pygame.mixer.Channel(self.queue_channel).stop()
+                            self.remove_from_queue(is_playing=False)
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
                                 queue_status = set_queue_vars(state=False)
                                 pygame.mixer.Channel(self.queue_channel).stop()
+                                self.remove_from_queue(is_playing=True)
                                 game = AschanArena3_Game()
                                 game.run_processes()
 
@@ -399,7 +403,7 @@ class H5_Lobby(BasicWindow):
         OPONNENT_TEXT = None
         OPONNENT_RECT = None
 
-        if self.player_found:
+        if self.found_game:
             if not self.game_found_music:
                 self.queue_channel = play_on_empty(
                     "resources/match_found.wav", volume=bg_sound_volume
@@ -546,8 +550,24 @@ class H5_Lobby(BasicWindow):
             )
             pygame.display.update()
 
-    def add_to_queue():
+    def add_to_queue(self):
         url = f"http://{env_dict["SERVER_URL"]}:8000/add_to_queue/"
+        data = {"nickname": self.client_config["nickname"]}
+        response = requests.post(url, json=data)
+
+        if response.status_code == 200:
+            pass
+
+    def remove_from_queue(self, is_playing: bool):
+        url = f"http://{env_dict["SERVER_URL"]}:8000/remove_from_queue/"
+        data = {
+            "nickname": self.client_config["nickname"],
+            "is_playing": is_playing,
+        }
+        response = requests.post(url, json=data)
+
+        if response.status_code == 200:
+            pass
 
     def run_game(self):
         self.main_menu()

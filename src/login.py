@@ -473,7 +473,10 @@ class LoginWindow(BasicWindow):
                     self.client_config["password"],
                 )
             self.vpn_client.set_vpn_state(state=True)
-            lobby = H5_Lobby(self.vpn_client)
+            lobby = H5_Lobby(
+                vpn_client=self.vpn_client,
+                client_config=self.client_config,
+            )
             lobby.run_game()
 
         self._window_overlay = True

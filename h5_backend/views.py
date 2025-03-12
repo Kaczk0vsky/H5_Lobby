@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
 
-from h5_backend.tasks import add_new_user_to_vpn_server
+from h5_backend.tasks import add_new_user_to_vpn_server, update_queue
 from h5_backend.models import Player
 
 
@@ -99,6 +99,30 @@ def set_player_offline(request):
     return JsonResponse(
         {"success": False, "error": "Invalid request method"}, status=405
     )
+
+
+def add_to_queue(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        nickname = data.get("nickname")
+        try:
+            player = Player.objects.get(nickname=nickname)
+            player.player_state = Player.IN_QUEUE
+        except:
+            pass
+
+
+def remove_from_queue(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        nickname = data.get("nickname")
+        is_playing = data.get("is_playing")
+        player_state = Player.PLAYING if is_playing else Player.ONLINE
+        try:
+            player = Player.objects.get(nickname=nickname)
+            player.player_state = player_state
+        except:
+            pass
 
 
 def ashanarena(request):

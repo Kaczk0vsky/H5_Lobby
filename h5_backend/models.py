@@ -1,4 +1,7 @@
+import datetime
+
 from django.db import models
+from django.utils.timezone import now
 
 
 class Player(models.Model):
@@ -14,12 +17,16 @@ class Player(models.Model):
     OFFLINE = "offline"
     ONLINE = "online"
     BANNED = "banned"
+    IN_QUEUE = "in_queue"
+    WAITING_ACCEPTANCE = "waiting_acceptance"
     PLAYING = "playing"
 
     PLAYER_STATE_CHOICES = [
         (OFFLINE, "offline"),
         (ONLINE, "online"),
         (BANNED, "banned"),
+        (IN_QUEUE, "in_queue"),
+        (WAITING_ACCEPTANCE, "waiting_acceptance"),
         (PLAYING, "playing"),
     ]
     # player state
@@ -31,7 +38,6 @@ class Player(models.Model):
         return f"{self.nickname} - {self.ranking_points} ({self.player_state})"
 
 
-# Create your models here.
 class Game(models.Model):
     # unique id
     id = models.IntegerField(editable=False, primary_key=True, unique=True)
@@ -97,3 +103,26 @@ class Game(models.Model):
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"
+
+
+class PlayersInQueue(models.Model):
+    # unique id of player in queue
+    id = models.IntegerField(editable=False, primary_key=True, unique=True)
+    # player in queue
+    player = models.ForeignKey(
+        Player,
+        on_delete=models.CASCADE,
+        editable=True,
+        null=False,
+        blank=False,
+    )
+    created_at = models.TimeField(auto_now_add=True, editable=False)
+
+    @property
+    def count_time_in_seconds(self):
+        delta = now() - self.created_at
+        seconds = int(delta.total_seconds())
+        return seconds
+
+    def __str__(self):
+        return f"{self.id} - {self.player.nickname}"
