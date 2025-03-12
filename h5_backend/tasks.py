@@ -60,6 +60,6 @@ def check_queue():
 
 
 @worker_ready.connect
-def start_message_server():
+def start_message_server(sender, **kwargs):
     server_thread = threading.Thread(target=Server().start, daemon=True)
     server_thread.start()
