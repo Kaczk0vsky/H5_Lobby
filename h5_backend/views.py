@@ -109,8 +109,12 @@ def add_to_queue(request):
         try:
             player = Player.objects.get(nickname=nickname)
             player.player_state = "in_queue"
+
+            return JsonResponse({"success": True})
         except:
-            pass
+            return JsonResponse(
+                {"success": False, "error": "Invalid credentials"}, status=400
+            )
 
 
 @csrf_exempt
@@ -123,8 +127,12 @@ def remove_from_queue(request):
         try:
             player = Player.objects.get(nickname=nickname)
             player.player_state = player_state
+
+            return JsonResponse({"success": True})
         except:
-            pass
+            return JsonResponse(
+                {"success": False, "error": "Invalid credentials"}, status=400
+            )
 
 
 def ashanarena(request):
