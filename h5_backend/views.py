@@ -109,6 +109,7 @@ def add_to_queue(request):
         try:
             player = Player.objects.get(nickname=nickname)
             player.player_state = "in_queue"
+            player.save()
 
             return JsonResponse({"success": True})
         except:
@@ -127,6 +128,7 @@ def remove_from_queue(request):
         try:
             player = Player.objects.get(nickname=nickname)
             player.player_state = player_state
+            player.save()
 
             return JsonResponse({"success": True})
         except:
