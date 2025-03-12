@@ -59,7 +59,7 @@ def check_queue():
             player2.save()
 
 
-@worker_ready.connect
-def start_message_server(sender, **kwargs):
-    server_thread = threading.Thread(target=Server().start, daemon=True)
-    server_thread.start()
+# @worker_ready.connect
+# def start_message_server(sender, **kwargs):
+#     server_thread = threading.Thread(target=Server().start, daemon=True)
+#     server_thread.start()

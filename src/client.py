@@ -27,9 +27,9 @@ class Client:
             while True:
                 msg = self.socket.recv(1024)
                 if not msg:
-                    print("Serwer zakończył połączenie.")
+                    print("Server terminated connection.")
                     break
-                print("Odebrano:", msg.decode())
+                print(msg.decode())
         except OSError:
             print("Connection aborted!")
         finally:

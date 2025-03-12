@@ -50,7 +50,8 @@ This is simply what the player will see after downloading the installator and ru
 ##### 2. Firewall
 1) `sudo ufw allow 8000`
 2) `sudo ufw allow 22`
-3) `sudo ufw enable`
+3) `sudo ufw allow 5000/tcp`
+4) `sudo ufw enable`
 
 ##### 3. Install Python and create venv
 1) `sudo apt update && sudo apt install -y python3 python3-venv python3-pip`
@@ -111,9 +112,11 @@ User=h5lobby
 Group=h5lobby
 WorkingDirectory=/home/h5lobby/H5_Lobby
 Environment="PATH=/home/h5lobby/H5_Lobby/venv/bin"
-ExecStart=/home/h5lobby/H5_Lobby/venv/bin/celery -A admin_settings worker --loglevel=info
+ExecStart=/bin/sh -c 'celery -A admin_settings worker --loglevel=info -E & celery -A admin_settings beat --loglevel=info'
 Restart=always
 RestartSec=5
+TimeoutStartSec=600
+KillMode=process
 
 [Install]
 WantedBy=multi-user.target

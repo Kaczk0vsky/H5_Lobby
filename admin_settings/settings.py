@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-4k0gyu)u313(8bm$+0+@sbmolvhs4begv6fi3ypzbo+2(a(%^+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["52.169.83.170"]
+ALLOWED_HOSTS = ["52.169.83.170", "h5lobby.internal.cloudapp.net"]
 
 CELERY_BROKER_URL = "amqp://h5admin:Sukub0912@localhost:5672/"
 

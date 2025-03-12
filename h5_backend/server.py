@@ -33,7 +33,7 @@ class Server:
                 client_thread.start()
         except KeyboardInterrupt:
             self.running = False
-            print("\nStoped server...")
+            print("\nStopped server...")
         finally:
             self.socket.close()
 
@@ -46,7 +46,7 @@ class Server:
                     break
                 print(msg.decode())
 
-                response = "👋 Hello from server!"
+                response = "Hello from server!"
                 client_socket.send(response.encode())
 
         except ConnectionResetError:
@@ -57,7 +57,7 @@ class Server:
 
     def broadcast_message(self):
         while self.running:
-            time.sleep(5)  # Cykliczne wysyłanie co 5 sekund
+            time.sleep(5)
             message = "Message from server :)"
             for client in self.clients:
                 try:
