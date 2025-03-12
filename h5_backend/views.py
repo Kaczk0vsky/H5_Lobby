@@ -101,6 +101,7 @@ def set_player_offline(request):
     )
 
 
+@csrf_exempt
 def add_to_queue(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
@@ -112,6 +113,7 @@ def add_to_queue(request):
             pass
 
 
+@csrf_exempt
 def remove_from_queue(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
