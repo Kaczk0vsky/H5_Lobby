@@ -65,7 +65,7 @@ def login_player(request):
             user = authenticate(username=nickname, password=password)
             if user is not None:
                 player = Player.objects.get(nickname=nickname)
-                player.player_state = Player.ONLINE
+                player.player_state = "online"
                 player.save()
                 return JsonResponse({"success": True, "user_id": user.id})
             else:
@@ -86,7 +86,7 @@ def set_player_offline(request):
         nickname = data.get("nickname")
         try:
             player = Player.objects.get(nickname=nickname)
-            player.player_state = Player.OFFLINE
+            player.player_state = "offline"
             player.save()
             if player is not None:
                 return JsonResponse({"success": True, "user_id": player.id})
@@ -107,7 +107,7 @@ def add_to_queue(request):
         nickname = data.get("nickname")
         try:
             player = Player.objects.get(nickname=nickname)
-            player.player_state = Player.IN_QUEUE
+            player.player_state = "in_queue"
         except:
             pass
 
@@ -117,7 +117,7 @@ def remove_from_queue(request):
         data = json.loads(request.body.decode("utf-8"))
         nickname = data.get("nickname")
         is_playing = data.get("is_playing")
-        player_state = Player.PLAYING if is_playing else Player.ONLINE
+        player_state = "playing" if is_playing else "online"
         try:
             player = Player.objects.get(nickname=nickname)
             player.player_state = player_state

@@ -42,9 +42,7 @@ def add_new_user_to_vpn_server(
 
 @shared_task
 def check_queue():
-    players_in_queue = Player.objects.filter(player_state=Player.IN_QUEUE).order_by(
-        "joined_at"
-    )
+    players_in_queue = Player.objects.filter(player_state=Player.IN_QUEUE)
     print(players_in_queue)
     # TODO: add enlarging mmr range dependant on time passed
 
