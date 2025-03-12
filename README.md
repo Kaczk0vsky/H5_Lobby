@@ -27,6 +27,20 @@ This is simply what the player will see after downloading the installator and ru
 6. Run the program:
 `poetry run python main.py`
 
+### Installation guide (only to generate .exe)
+1. Clone the repository.
+2. Install poetry:
+`pip3 install poetry`
+3. Check if poetry is installed:
+`poetry --version`
+4. Install the packages:
+`poetry install`
+5. Run:
+`python -m convert_to_exe.py`
+6. File called AshanArena3.exe should be in dist directory
+7. Copy the resources and settings.toml to the directory where the AshanArena3.exe is
+8. Open the game and enjoy!
+
 ## Instalation from Server side (Linux machine)
 ##### 1. Setting Git
 1) `sudo apt update && sudo apt install git -y`
