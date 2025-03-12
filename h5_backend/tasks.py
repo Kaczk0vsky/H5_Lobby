@@ -1,11 +1,12 @@
 import subprocess
-import socket
-import os
+import threading
 
 from celery import shared_task
+from celery.signals import worker_ready
 from django.db import transaction
 
 from h5_backend.models import Player
+from h5_backend.server import Server
 
 
 @shared_task
@@ -56,3 +57,9 @@ def check_queue():
             player2.player_state = Player.WAITING_ACCEPTANCE
             player1.save()
             player2.save()
+
+
+@worker_ready.connect
+def start_message_server():
+    server_thread = threading.Thread(target=Server().start, daemon=True)
+    server_thread.start()
