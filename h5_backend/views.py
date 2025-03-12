@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
 
-from h5_backend.tasks import add_new_user_to_vpn_server, update_queue
+from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player
 
 
