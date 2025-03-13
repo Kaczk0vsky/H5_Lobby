@@ -1,10 +1,7 @@
 import subprocess
-import threading
 
 from celery import shared_task
-from celery.signals import worker_ready
 from django.db import transaction
-
 
 from h5_backend.models import Player, PlayersMatched
 

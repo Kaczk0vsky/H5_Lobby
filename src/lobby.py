@@ -365,10 +365,10 @@ class H5_Lobby(BasicWindow):
                                     target=self.check_if_oponnent_accepted, deamon=True
                                 )
                                 self.check_acceptance.start()
-                                if self.oponnent_accepted:
-                                    queue_status = set_queue_vars(state=False)
-                                    game = AschanArena3_Game()
-                                    game.run_processes()
+                        if self.oponnent_accepted:
+                            queue_status = set_queue_vars(state=False)
+                            game = AschanArena3_Game()
+                            game.run_processes()
 
             pygame.display.update()
 

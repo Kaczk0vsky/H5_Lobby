@@ -221,8 +221,8 @@ def check_if_oponnent_accepted(request):
             )
 
             if oponnent.player_state == "accepted":
-                oponnent.player_state == "playing"
-                player.player_state == "playing"
+                oponnent.player_state = "playing"
+                player.player_state = "playing"
 
                 oponnent.save()
                 player.save()
