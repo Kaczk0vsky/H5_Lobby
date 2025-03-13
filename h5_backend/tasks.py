@@ -48,13 +48,13 @@ def check_queue():
     if players_in_queue.count() >= 2:
         player1 = players_in_queue[0]
         player2 = players_in_queue[1]
+        PlayersMatched(player_1=player1, player_2=player2).save()
 
         with transaction.atomic():
             player1.player_state = Player.WAITING_ACCEPTANCE
             player2.player_state = Player.WAITING_ACCEPTANCE
             player1.save()
             player2.save()
-            PlayersMatched(player_1=player1, player_2=player2).save()
 
 
 # @worker_ready.connect

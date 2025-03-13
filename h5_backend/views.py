@@ -117,6 +117,9 @@ def add_to_queue(request):
             return JsonResponse(
                 {"success": False, "error": "Invalid credentials"}, status=400
             )
+    return JsonResponse(
+        {"success": False, "error": "Invalid request method"}, status=405
+    )
 
 
 @csrf_exempt
@@ -140,6 +143,9 @@ def remove_from_queue(request):
             return JsonResponse(
                 {"success": False, "error": "Invalid credentials"}, status=400
             )
+    return JsonResponse(
+        {"success": False, "error": "Invalid request method"}, status=405
+    )
 
 
 @csrf_exempt
@@ -147,17 +153,28 @@ def get_players_matched(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         nickname = data.get("nickname")
-        try:
-            players_1_list = PlayersMatched.objects.values_list("player_1_matched")
-            players_2_list = PlayersMatched.objects.values_list("player_2_matched")
-            players_list = players_1_list + players_2_list
-            if nickname in players_list:
-                return JsonResponse({"success": True, "game_found": True})
-        except:
-            return JsonResponse(
-                {"success": False, "error": "Invalid credentials"}, status=400
-            )
-    return JsonResponse({"success": True, "game_found": False})
+        players_in_queue = Player.objects.filter(player_state=Player.IN_QUEUE)
+
+        if players_in_queue.count() >= 2:
+            try:
+                players_1_list = PlayersMatched.objects.values_list(
+                    "player_1_matched", flat=True
+                )
+                players_2_list = PlayersMatched.objects.values_list(
+                    "player_2_matched", flat=True
+                )
+                players_list = players_1_list + players_2_list
+                if nickname in players_list:
+                    return JsonResponse({"success": True, "game_found": True})
+                else:
+                    return JsonResponse({"success": True, "game_found": False})
+            except:
+                return JsonResponse(
+                    {"success": False, "error": "Invalid credentials"}, status=400
+                )
+    return JsonResponse(
+        {"success": False, "error": "Invalid request method"}, status=405
+    )
 
 
 def ashanarena(request):
