@@ -5,6 +5,7 @@ from celery import shared_task
 from celery.signals import worker_ready
 from django.db import transaction
 
+
 from h5_backend.models import Player, PlayersMatched
 
 
@@ -45,7 +46,7 @@ def check_queue():
     players_in_queue = list(Player.objects.filter(player_state=Player.IN_QUEUE))
     # TODO: add enlarging mmr range dependant on time passed
 
-    if players_in_queue.count() >= 2:
+    if len(players_in_queue) >= 2:
         player1 = players_in_queue[0]
         player2 = players_in_queue[1]
 
