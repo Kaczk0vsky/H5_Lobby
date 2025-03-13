@@ -154,9 +154,9 @@ def get_players_matched(request):
         try:
             data = json.loads(request.body.decode("utf-8"))
             nickname = data.get("nickname")
-            players_in_queue = Player.objects.filter(player_state=Player.IN_QUEUE)
+            players_in_queue = list(Player.objects.filter(player_state=Player.IN_QUEUE))
 
-            if players_in_queue.count() < 2:
+            if len(players_in_queue) < 2:
                 return JsonResponse({"success": True, "game_found": False})
 
             players_1_list = list(
