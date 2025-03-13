@@ -49,6 +49,7 @@ def register_new_player(request):
             )
         return JsonResponse({"success": True, "user_id": user.id})
     elif request.method == "GET":
+        data = json.loads(request.body.decode("utf-8"))
         return JsonResponse(data)
 
     return JsonResponse(
