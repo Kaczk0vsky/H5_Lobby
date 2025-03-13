@@ -512,10 +512,8 @@ class LoginWindow(BasicWindow):
         }
 
         headers = {"Content-Type": "application/json"}
-        data = requests.get(url)
         response = requests.post(url, json=user_data, headers=headers)
         if response.status_code == 200:
-            data = data.json()
             self.vpn_client = SoftEtherClient(
                 self.client_config["nickname"],
                 self.client_config["password"],

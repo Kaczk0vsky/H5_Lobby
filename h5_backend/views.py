@@ -48,9 +48,6 @@ def register_new_player(request):
                 {"success": False, "error": "Something went wrong!"}, status=500
             )
         return JsonResponse({"success": True, "user_id": user.id})
-    elif request.method == "GET":
-        data = json.loads(request.body.decode("utf-8"))
-        return JsonResponse(data)
 
     return JsonResponse(
         {"success": False, "error": "Invalid request method"}, status=405
