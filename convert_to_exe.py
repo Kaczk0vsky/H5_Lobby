@@ -3,6 +3,7 @@ import os
 
 SOURCE_FILE = "main.py"
 OBFUSCATED_DIR = "obfuscated"
+BUILD_DIR = "build"
 EXE_NAME = "AshanArena3.exe"
 SOURCE_PATH_SRC = os.path.join(os.getcwd(), "src/")
 DEST_PATH_SRC = "src"
@@ -48,6 +49,11 @@ def create_exe_file():
 
     # Remove the obfuscated directory
     run_command(f"rmdir /S /Q {OBFUSCATED_DIR}")
+
+    # Remove spec file
+    os.remove(os.path.join(os.getcwd(), f"{EXE_NAME}.spec"))
+
+    run_command(f"rmdir /S /Q {BUILD_DIR}")
 
 
 if __name__ == "__main__":
