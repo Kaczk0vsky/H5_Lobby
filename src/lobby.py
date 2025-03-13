@@ -580,10 +580,16 @@ class H5_Lobby(BasicWindow):
         data = {"nickname": self.client_config["nickname"]}
 
         while True:
-            response = requests.post(url, json=data)
-            if response.status_code == 200:
-                if response.text["game_found"]:
-                    return True
+            try:
+                response = requests.post(url, json=data)
+                if response.status_code == 200:
+                    json_response = response.json()
+                    print(json_response.get("game_found"))
+                    if json_response.get("game_found"):
+                        return True
+            except Exception as e:
+                pass
+
             time.sleep(random.randint(1, 5))
 
     def run_game(self):

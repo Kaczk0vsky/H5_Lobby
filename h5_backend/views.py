@@ -151,27 +151,33 @@ def remove_from_queue(request):
 @csrf_exempt
 def get_players_matched(request):
     if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        nickname = data.get("nickname")
-        players_in_queue = Player.objects.filter(player_state=Player.IN_QUEUE)
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            nickname = data.get("nickname")
+            players_in_queue = Player.objects.filter(player_state=Player.IN_QUEUE)
 
-        if players_in_queue.count() >= 2:
-            try:
-                players_1_list = PlayersMatched.objects.values_list(
-                    "player_1_matched", flat=True
-                )
-                players_2_list = PlayersMatched.objects.values_list(
-                    "player_2_matched", flat=True
-                )
-                players_list = players_1_list + players_2_list
-                if nickname in players_list:
-                    return JsonResponse({"success": True, "game_found": True})
-                else:
-                    return JsonResponse({"success": True, "game_found": False})
-            except:
-                return JsonResponse(
-                    {"success": False, "error": "Invalid credentials"}, status=400
-                )
+            if players_in_queue.count() < 2:
+                return JsonResponse({"success": True, "game_found": False})
+
+            players_1_list = list(
+                PlayersMatched.objects.values_list("player_1_matched", flat=True)
+            )
+            players_2_list = list(
+                PlayersMatched.objects.values_list("player_2_matched", flat=True)
+            )
+            players_list = players_1_list + players_2_list
+
+            return JsonResponse(
+                {"success": True, "game_found": nickname in players_list}
+            )
+
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {"success": False, "error": "Invalid JSON format"}, status=400
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
     return JsonResponse(
         {"success": False, "error": "Invalid request method"}, status=405
     )
