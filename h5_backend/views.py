@@ -154,10 +154,6 @@ def get_players_matched(request):
         try:
             data = json.loads(request.body.decode("utf-8"))
             nickname = data.get("nickname")
-            players_in_queue = list(Player.objects.filter(player_state=Player.IN_QUEUE))
-
-            if len(players_in_queue) < 2:
-                return JsonResponse({"success": True, "game_found": False})
 
             players_1_list = list(
                 PlayersMatched.objects.values_list("player_1_matched", flat=True)
@@ -166,9 +162,15 @@ def get_players_matched(request):
                 PlayersMatched.objects.values_list("player_2_matched", flat=True)
             )
             players_list = players_1_list + players_2_list
+            print(players_list)
+            print(nickname in players_list)
 
             return JsonResponse(
-                {"success": True, "game_found": nickname in players_list}
+                {
+                    "success": True,
+                    "game_found": nickname in players_list,
+                    "oponnent_name": "to_be_given",
+                }
             )
 
         except json.JSONDecodeError:
