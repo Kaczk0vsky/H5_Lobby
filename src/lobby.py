@@ -75,7 +75,7 @@ class H5_Lobby(BasicWindow):
 
         set_queue_vars()
         queue_status = False
-        self.opponent_str = ""
+        self.opponent_nickname = ""
         self.queue_channel = 0
         self.button_dims = (
             self.config["screen_width"] / 9,
@@ -424,7 +424,9 @@ class H5_Lobby(BasicWindow):
                 )
             )
             OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
-                f"Opponent: {self.opponent_str}", True, "white"
+                f"Opponent: {self.opponent_nickname} - {self.oponnent_ranking_points} MMR",
+                True,
+                "white",
             )
             OPONNENT_RECT = OPONNENT_TEXT.get_rect(
                 center=(
@@ -559,10 +561,8 @@ class H5_Lobby(BasicWindow):
         response = requests.post(url, json=data)
 
         if response.status_code == 200:
-            self.check_queue = CustomThread(target=self.scan_for_players)
+            self.check_queue = CustomThread(target=self.scan_for_players, deamon=True)
             self.check_queue.start()
-            if self.check_queue.join():
-                self.found_game = True
 
     def remove_from_queue(self, is_playing: bool):
         url = f"http://{env_dict["SERVER_URL"]}:8000/remove_from_queue/"
@@ -584,9 +584,11 @@ class H5_Lobby(BasicWindow):
                 response = requests.post(url, json=data)
                 if response.status_code == 200:
                     json_response = response.json()
-                    print(json_response.get("game_found"))
                     if json_response.get("game_found"):
-                        return True
+                        self.found_game = True
+                        self.opponent_nickname = json_response.get("oponnent")[0]
+                        self.oponnent_ranking_points = json_response.get("oponnent")[1]
+
             except Exception as e:
                 pass
 

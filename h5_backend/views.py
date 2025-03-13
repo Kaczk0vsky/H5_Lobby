@@ -129,10 +129,24 @@ def remove_from_queue(request):
         nickname = data.get("nickname")
         is_playing = data.get("is_playing")
         player_state = "playing" if is_playing else "online"
+
         try:
             player = Player.objects.get(nickname=nickname)
             player.player_state = player_state
             player.save()
+
+            player_matched = PlayersMatched.objects.get(
+                Q(player_1=player) | Q(player_2=player)
+            )
+
+            if not is_playing:
+                oponnent = (
+                    player_matched.player_2
+                    if player == player_matched.player_1
+                    else player_matched.player_1
+                )
+                oponnent.player_state = "in_queue"
+                oponnent.save()
 
             PlayersMatched.objects.filter(
                 Q(player_1=player) | Q(player_2=player)
@@ -162,14 +176,22 @@ def get_players_matched(request):
                 PlayersMatched.objects.values_list("player_2__nickname", flat=True)
             )
             players_list = players_1_list + players_2_list
-            print(players_list)
-            print(nickname in players_list)
+            player = Player.objects.get(nickname=nickname)
+            player_matched = PlayersMatched.objects.get(
+                Q(player_1=player) | Q(player_2=player)
+            )
+
+            oponnent = (
+                player_matched.player_2
+                if player == player_matched.player_1
+                else player_matched.player_1
+            )
 
             return JsonResponse(
                 {
                     "success": True,
                     "game_found": nickname in players_list,
-                    "oponnent_name": "to_be_given",
+                    "oponnent": [oponnent.nickname, oponnent.ranking_points],
                 }
             )
 
