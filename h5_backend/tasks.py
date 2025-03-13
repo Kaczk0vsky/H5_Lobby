@@ -42,15 +42,19 @@ def add_new_user_to_vpn_server(
 
 @shared_task
 def check_queue():
-    players_in_queue = Player.objects.filter(player_state=Player.IN_QUEUE)
+    players_in_queue = list(Player.objects.filter(player_state=Player.IN_QUEUE))
     # TODO: add enlarging mmr range dependant on time passed
 
     if players_in_queue.count() >= 2:
         player1 = players_in_queue[0]
         player2 = players_in_queue[1]
-        PlayersMatched(player_1=player1, player_2=player2).save()
 
         with transaction.atomic():
+            if not PlayersMatched.objects.filter(
+                player_1=player1, player_2=player2
+            ).exists():
+                PlayersMatched.objects.create(player_1=player1, player_2=player2)
+
             player1.player_state = Player.WAITING_ACCEPTANCE
             player2.player_state = Player.WAITING_ACCEPTANCE
             player1.save()
