@@ -142,6 +142,7 @@ def remove_from_queue(request):
             )
 
 
+@csrf_exempt
 def get_players_matched(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
