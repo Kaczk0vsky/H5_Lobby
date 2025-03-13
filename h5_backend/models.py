@@ -19,6 +19,7 @@ class Player(models.Model):
     IN_QUEUE = "in_queue"
     WAITING_ACCEPTANCE = "waiting_acceptance"
     PLAYING = "playing"
+    ACCEPTED = "accepted"
 
     PLAYER_STATE_CHOICES = [
         (OFFLINE, "offline"),
@@ -26,6 +27,7 @@ class Player(models.Model):
         (BANNED, "banned"),
         (IN_QUEUE, "in_queue"),
         (WAITING_ACCEPTANCE, "waiting_acceptance"),
+        (ACCEPTED, "accepted"),
         (PLAYING, "playing"),
     ]
     # player state

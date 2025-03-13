@@ -69,6 +69,8 @@ class H5_Lobby(BasicWindow):
             self.game_found_music = state
             self.get_time = state
             self.found_game = state
+            self.oponnent_accepted = state
+            self.player_accepted = state
             queue_status = state
 
             return queue_status
@@ -353,14 +355,20 @@ class H5_Lobby(BasicWindow):
                             queue_status = set_queue_vars(state=False)
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                             pygame.mixer.Channel(self.queue_channel).stop()
-                            self.remove_from_queue(is_playing=False)
+                            self.remove_from_queue(is_accepted=False)
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
-                                queue_status = set_queue_vars(state=False)
+                                self.player_accepted = True
                                 pygame.mixer.Channel(self.queue_channel).stop()
-                                self.remove_from_queue(is_playing=True)
-                                game = AschanArena3_Game()
-                                game.run_processes()
+                                self.remove_from_queue(is_accepted=True)
+                                self.check_acceptance = CustomThread(
+                                    target=self.check_if_oponnent_accepted, deamon=True
+                                )
+                                self.check_acceptance.start()
+                                if self.oponnent_accepted:
+                                    queue_status = set_queue_vars(state=False)
+                                    game = AschanArena3_Game()
+                                    game.run_processes()
 
             pygame.display.update()
 
@@ -422,8 +430,12 @@ class H5_Lobby(BasicWindow):
                     self.SCREEN.get_height() / 2.4,
                 )
             )
+            if self.player_accepted:
+                information_str = f"Waiting for {self.opponent_nickname} to accept..."
+            else:
+                information_str = f"Opponent: {self.opponent_nickname} - {self.oponnent_ranking_points} MMR"
             OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
-                f"Opponent: {self.opponent_nickname} - {self.oponnent_ranking_points} MMR",
+                information_str,
                 True,
                 "white",
             )
@@ -563,16 +575,13 @@ class H5_Lobby(BasicWindow):
             self.check_queue = CustomThread(target=self.scan_for_players, deamon=True)
             self.check_queue.start()
 
-    def remove_from_queue(self, is_playing: bool):
+    def remove_from_queue(self, is_accepted: bool):
         url = f"http://{env_dict["SERVER_URL"]}:8000/remove_from_queue/"
         data = {
             "nickname": self.client_config["nickname"],
-            "is_playing": is_playing,
+            "is_accepted": is_accepted,
         }
-        response = requests.post(url, json=data)
-
-        if response.status_code == 200:
-            pass
+        requests.post(url, json=data)
 
     def scan_for_players(self):
         url = f"http://{env_dict["SERVER_URL"]}:8000/get_players_matched/"
@@ -587,11 +596,30 @@ class H5_Lobby(BasicWindow):
                         self.found_game = True
                         self.opponent_nickname = json_response.get("oponnent")[0]
                         self.oponnent_ranking_points = json_response.get("oponnent")[1]
+                        break
 
             except Exception as e:
                 pass
 
             time.sleep(random.randint(1, 5))
+
+    def check_if_oponnent_accepted(self):
+        url = f"http://{env_dict["SERVER_URL"]}:8000/check_if_oponnent_accepted/"
+        data = {"nickname": self.client_config["nickname"]}
+
+        while True:
+            try:
+                response = requests.post(url, json=data)
+                if response.status_code == 200:
+                    json_response = response.json()
+                    if json_response.get("oponnent_accepted"):
+                        self.oponnent_accepted = True
+                        break
+
+            except Exception as e:
+                pass
+
+            time.sleep(1)
 
     def run_game(self):
         self.main_menu()

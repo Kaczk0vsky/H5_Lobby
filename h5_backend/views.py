@@ -127,8 +127,8 @@ def remove_from_queue(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         nickname = data.get("nickname")
-        is_playing = data.get("is_playing")
-        player_state = "playing" if is_playing else "online"
+        is_accepted = data.get("is_accepted")
+        player_state = "accepted" if is_accepted else "online"
 
         try:
             player = Player.objects.get(nickname=nickname)
@@ -139,7 +139,7 @@ def remove_from_queue(request):
                 Q(player_1=player) | Q(player_2=player)
             )
 
-            if not is_playing:
+            if not is_accepted:
                 oponnent = (
                     player_matched.player_2
                     if player == player_matched.player_1
@@ -147,10 +147,6 @@ def remove_from_queue(request):
                 )
                 oponnent.player_state = "in_queue"
                 oponnent.save()
-
-            PlayersMatched.objects.filter(
-                Q(player_1=player) | Q(player_2=player)
-            ).delete()
 
             return JsonResponse({"success": True})
         except:
@@ -202,6 +198,48 @@ def get_players_matched(request):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
+    return JsonResponse(
+        {"success": False, "error": "Invalid request method"}, status=405
+    )
+
+
+@csrf_exempt
+def check_if_oponnent_accepted(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            nickname = data.get("nickname")
+
+            player = Player.objects.get(nickname=nickname)
+            player_matched = PlayersMatched.objects.get(
+                Q(player_1=player) | Q(player_2=player)
+            )
+            oponnent = (
+                player_matched.player_2
+                if player == player_matched.player_1
+                else player_matched.player_1
+            )
+
+            if oponnent.player_state == "accepted":
+                oponnent.player_state == "playing"
+                player.player_state == "playing"
+
+                oponnent.save()
+                player.save()
+                PlayersMatched.objects.filter(
+                    Q(player_1=player) | Q(player_2=player)
+                ).delete()
+
+                return JsonResponse({"success": True, "oponnent_accepted": True})
+
+            return JsonResponse({"success": True, "oponnent_accepted": False})
+
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {"success": False, "error": "Invalid JSON format"}, status=400
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
     return JsonResponse(
         {"success": False, "error": "Invalid request method"}, status=405
     )
