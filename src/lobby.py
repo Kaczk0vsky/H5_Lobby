@@ -352,8 +352,7 @@ class H5_Lobby(BasicWindow):
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
                             queue_status = set_queue_vars(state=False)
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
-                            if self.found_game:
-                                pygame.mixer.Channel(self.queue_channel).stop()
+                            pygame.mixer.Channel(self.queue_channel).stop()
                             self.remove_from_queue(is_playing=False)
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
