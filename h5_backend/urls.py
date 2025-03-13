@@ -9,4 +9,5 @@ urlpatterns = [
     path("set_player_offline/", views.set_player_offline, name="set_player_offline"),
     path("add_to_queue/", views.add_to_queue, name="add_to_queue"),
     path("remove_from_queue/", views.remove_from_queue, name="remove_from_queue"),
+    path("get_players_matched/", views.get_players_matched, name="get_players_matched"),
 ]

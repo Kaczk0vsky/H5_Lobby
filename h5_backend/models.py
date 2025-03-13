@@ -1,7 +1,6 @@
 import datetime
 
 from django.db import models
-from django.utils.timezone import now
 
 
 class Player(models.Model):
@@ -49,7 +48,7 @@ class Game(models.Model):
         null=True,
         blank=True,
         db_column="player_1",
-        related_name="game_as_player_1",  # Unique related_name for player_1
+        related_name="game_as_player_1",
     )
     player_2 = models.ForeignKey(
         Player,
@@ -58,7 +57,7 @@ class Game(models.Model):
         null=True,
         blank=True,
         db_column="player_2",
-        related_name="game_as_player_2",  # Unique related_name for player_2
+        related_name="game_as_player_2",
     )
     # castles
     HEAVEN = "heaven"
@@ -94,7 +93,7 @@ class Game(models.Model):
         editable=True,
         null=False,
         blank=False,
-        related_name="player_who_won",  # Unique related_name for who_won
+        related_name="player_who_won",
     )
     points_change = models.IntegerField(
         editable=False,
@@ -103,3 +102,29 @@ class Game(models.Model):
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"
+
+
+class PlayersMatched(models.Model):
+    id = models.IntegerField(editable=False, primary_key=True, unique=True)
+    player_1 = models.ForeignKey(
+        Player,
+        on_delete=models.CASCADE,
+        editable=True,
+        null=True,
+        blank=True,
+        db_column="player_1_matched",
+        related_name="matched_player_1",
+    )
+    player_2 = models.ForeignKey(
+        Player,
+        on_delete=models.CASCADE,
+        editable=True,
+        null=True,
+        blank=True,
+        db_column="player_2_matched",
+        related_name="matched_player_2",
+    )
+    created_at = models.TimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Found {self.player_1} vs. {self.player_2}"

@@ -8,9 +8,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
+from django.db.models import Q
 
 from h5_backend.tasks import add_new_user_to_vpn_server
-from h5_backend.models import Player
+from h5_backend.models import Player, PlayersMatched
 
 
 @csrf_exempt  # Disable CSRF for external requests; for production, secure this with proper auth
@@ -130,11 +131,32 @@ def remove_from_queue(request):
             player.player_state = player_state
             player.save()
 
+            PlayersMatched.objects.filter(
+                Q(player_1=player) | Q(player_2=player)
+            ).delete()
+
             return JsonResponse({"success": True})
         except:
             return JsonResponse(
                 {"success": False, "error": "Invalid credentials"}, status=400
             )
+
+
+def get_players_matched(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        nickname = data.get("nickname")
+        try:
+            players_1_list = PlayersMatched.objects.values_list("player_1_matched")
+            players_2_list = PlayersMatched.objects.values_list("player_2_matched")
+            players_list = players_1_list + players_2_list
+            if nickname in players_list:
+                return JsonResponse({"success": True, "game_found": True})
+        except:
+            return JsonResponse(
+                {"success": False, "error": "Invalid credentials"}, status=400
+            )
+    return JsonResponse({"success": True, "game_found": False})
 
 
 def ashanarena(request):

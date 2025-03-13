@@ -3,6 +3,7 @@ import os
 import toml
 import time
 import requests
+import random
 
 from pygame.locals import *
 
@@ -16,6 +17,7 @@ from src.global_vars import (
 from src.basic_window import BasicWindow
 from src.run_ashan_arena import AschanArena3_Game
 from src.helpers import play_on_empty, calculate_time_passed
+from src.custom_thread import CustomThread
 from widgets.button import Button
 from widgets.option_box import OptionBox
 
@@ -557,7 +559,10 @@ class H5_Lobby(BasicWindow):
         response = requests.post(url, json=data)
 
         if response.status_code == 200:
-            pass
+            self.check_queue = CustomThread(target=self.scan_for_players)
+            self.check_queue.start()
+            if self.check_queue.join():
+                self.found_game = True
 
     def remove_from_queue(self, is_playing: bool):
         url = f"http://{env_dict["SERVER_URL"]}:8000/remove_from_queue/"
@@ -569,6 +574,17 @@ class H5_Lobby(BasicWindow):
 
         if response.status_code == 200:
             pass
+
+    def scan_for_players(self):
+        url = f"http://{env_dict["SERVER_URL"]}:8000/get_players_matched/"
+        data = {"nickname": self.client_config["nickname"]}
+
+        while True:
+            response = requests.post(url, json=data)
+            if response.status_code == 200:
+                if response.text["game_found"]:
+                    return True
+            time.sleep(random.randint(1, 5))
 
     def run_game(self):
         self.main_menu()

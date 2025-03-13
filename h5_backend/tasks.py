@@ -5,8 +5,7 @@ from celery import shared_task
 from celery.signals import worker_ready
 from django.db import transaction
 
-from h5_backend.models import Player
-from h5_backend.server import Server
+from h5_backend.models import Player, PlayersMatched
 
 
 @shared_task
@@ -44,19 +43,18 @@ def add_new_user_to_vpn_server(
 @shared_task
 def check_queue():
     players_in_queue = Player.objects.filter(player_state=Player.IN_QUEUE)
-    print(players_in_queue)
     # TODO: add enlarging mmr range dependant on time passed
 
     if players_in_queue.count() >= 2:
         player1 = players_in_queue[0]
         player2 = players_in_queue[1]
-        print(f"Fighting: {player1.nickname} vs {player2.nickname}")
 
         with transaction.atomic():
             player1.player_state = Player.WAITING_ACCEPTANCE
             player2.player_state = Player.WAITING_ACCEPTANCE
             player1.save()
             player2.save()
+            PlayersMatched(player_1=player1, player_2=player2).save()
 
 
 # @worker_ready.connect

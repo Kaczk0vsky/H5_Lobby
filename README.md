@@ -98,8 +98,8 @@ WantedBy=multi-user.target
 5) `sudo systemctl start django`
 6) `sudo systemctl status django`
 
-##### 7. Create celery service file
-1) `sudo nano /etc/systemd/system/celery.service`
+##### 7. Create celery-worker and celery-beat service files
+1) `sudo nano /etc/systemd/system/celery-worker.service`
 2) paste into the file:
 ```
 [Unit]
@@ -107,24 +107,46 @@ Description=Celery Worker
 After=network.target rabbitmq-server.service
 
 [Service]
-Type=forking
+Type=simple
 User=h5lobby
 Group=h5lobby
 WorkingDirectory=/home/h5lobby/H5_Lobby
 Environment="PATH=/home/h5lobby/H5_Lobby/venv/bin"
-ExecStart=/bin/sh -c 'celery -A admin_settings worker --loglevel=info -E & celery -A admin_settings beat --loglevel=info'
+ExecStart=/home/h5lobby/H5_Lobby/venv/bin/celery -A admin_settings worker --loglevel=info -E
 Restart=always
 RestartSec=5
 TimeoutStartSec=600
-KillMode=process
 
 [Install]
 WantedBy=multi-user.target
 ```
-3) `sudo systemctl daemon-reload`
-4) `sudo systemctl enable celery`
-5) `sudo systemctl start celery`
-6) `sudo systemctl status celery`
+3) `sudo nano /etc/systemd/system/celery-beat.service`
+4) paste into the file:
+```
+[Unit]
+Description=Celery Beat Scheduler
+After=network.target rabbitmq-server.service
+
+[Service]
+Type=simple
+User=h5lobby
+Group=h5lobby
+WorkingDirectory=/home/h5lobby/H5_Lobby
+Environment="PATH=/home/h5lobby/H5_Lobby/venv/bin"
+ExecStart=/home/h5lobby/H5_Lobby/venv/bin/celery -A admin_settings beat --loglevel=info
+Restart=always
+RestartSec=5
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target
+```
+5) `sudo systemctl daemon-reload`
+6) `sudo systemctl enable celery-worker.service`
+7) `sudo systemctl enable celery-beat.service`
+8) `sudo systemctl start celery-wroker.service`
+9) `sudo systemctl start celery-beat.service`
+
 
 ##### 8. SoftEtherVPN server creation
 1) `sudo apt-get install lynx -y`
