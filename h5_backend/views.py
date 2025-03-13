@@ -156,10 +156,10 @@ def get_players_matched(request):
             nickname = data.get("nickname")
 
             players_1_list = list(
-                PlayersMatched.objects.values_list("player_1_matched", flat=True)
+                PlayersMatched.objects.values_list("player_1__nickname", flat=True)
             )
             players_2_list = list(
-                PlayersMatched.objects.values_list("player_2_matched", flat=True)
+                PlayersMatched.objects.values_list("player_2__nickname", flat=True)
             )
             players_list = players_1_list + players_2_list
             print(players_list)
