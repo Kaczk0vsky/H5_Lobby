@@ -1,0 +1,14 @@
+[resolution]
+screen_width = 1920
+screen_hight = 1080
+
+[game]
+game_path = ""
+
+[soft_ether]
+vpn_path = ""
+
+[client_settings]
+nickname = ""
+password = ""
+remember_password = false

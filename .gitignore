@@ -162,5 +162,6 @@ cython_debug/
 #.idea/
 # config files for wireguard
 *.conf
-SI.bin
+SI.bin  
 .vscode/
+settings.toml
