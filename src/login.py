@@ -1,13 +1,15 @@
 import pygame
 import requests
+import time
 
 from src.global_vars import fonts_sizes, env_dict
 from src.basic_window import BasicWindow
 from src.lobby import H5_Lobby
-from src.helpers import delete_objects, send_email
+from src.helpers import delete_objects, send_email, calculate_time_passed
 from src.vpn_handling import SoftEtherClient
 from src.settings_reader import load_client_settings
 from src.settings_writer import save_login_information
+from src.decorators import run_in_thread
 from widgets.text_input import TextInput
 from widgets.button import Button
 from widgets.check_box import CheckBox
@@ -33,6 +35,11 @@ class LoginWindow(BasicWindow):
 
     _window_overlay = False
     _wrong_credentials_status = False
+    _error_status = False
+    _connection_error = False
+    _fields_empty = False
+    _remove_all_widgets = False
+    _connection_timer = None
 
     def __init__(self):
         BasicWindow.__init__(self)
@@ -177,10 +184,14 @@ class LoginWindow(BasicWindow):
                                 not self.client_config["remember_password"]
                             )
                     else:
-                        if self._wrong_credentials_status:
+                        if self._error_status:
                             if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
+                                if self._wrong_credentials_status:
+                                    self._wrong_credentials_status = False
+                                elif self._connection_error:
+                                    self._connection_error = False
                                 self._window_overlay = False
-                                self._wrong_credentials_status = False
+                                self._error_status = False
                                 LOGIN_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
@@ -195,14 +206,31 @@ class LoginWindow(BasicWindow):
                     input.draw(self.SCREEN)
 
             if self._wrong_credentials_status:
+                self._window_overlay = True
+                error_text = "Given password is not correct!"
+            
+            if self._connection_timer:
+                time_passed = calculate_time_passed(start_time=self._connection_timer)[1]
+                if time_passed >= 3:
+                    self._window_overlay = True
+                    self._error_status = True
+                    error_text = f"Connecting for {time_passed} seconds..."
+
+            if self._connection_error:
+                self._connection_timer = None
+                self._window_overlay = True
+                error_text = "Error occured while trying to connect to server!"
+
+            if self._error_status:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = (
-                    self.error_window(text="Given password is not correct!")
+                    self.error_window(text=error_text)
                 )
 
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                BACK_BUTTON.change_color(MENU_MOUSE_POS)
-                BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                if not self._connection_timer:
+                    BACK_BUTTON.change_color(MENU_MOUSE_POS)
+                    BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             pygame.display.update()
 
@@ -294,32 +322,23 @@ class LoginWindow(BasicWindow):
                 for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
                     input.event(event, is_hidden)
                     if input._enter_pressed == True and input.active:
-                        if_succesfull = self.register_new_player(INPUT_BOXES)
-                        if if_succesfull:
-                            delete_objects(INPUT_BOXES)
-                            self.login_window()
-                        else:
-                            self._window_overlay = True
-                            self._wrong_credentials_status = True
+                        self.register_new_player(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if not self._window_overlay:
                         if REGISTER_ACCOUNT_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            if_succesfull = self.register_new_player(INPUT_BOXES)
-                            if if_succesfull:
-                                delete_objects(INPUT_BOXES)
-                                self.login_window()
-                            else:
-                                self._window_overlay = True
-                                self._wrong_credentials_status = True
+                            self.register_new_player(INPUT_BOXES)
                         elif BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            delete_objects(INPUT_BOXES)
-                            self.login_window()
+                            self._remove_all_widgets = True
                     else:
-                        if self._wrong_credentials_status:
+                        if self._error_status:
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
+                                if self._wrong_credentials_status:
+                                    self._wrong_credentials_status = False
+                                elif self._connection_error:
+                                    self._connection_error = False
                                 self._window_overlay = False
-                                self._wrong_credentials_status = False
+                                self._error_status = False
                                 NICKNAME_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
@@ -332,14 +351,36 @@ class LoginWindow(BasicWindow):
                     input.draw(self.SCREEN)
 
             if self._wrong_credentials_status:
+                self._window_overlay = True
+                error_text = "Given password is not correct!"
+            
+            if self._connection_timer:
+                time_passed = calculate_time_passed(start_time=self._connection_timer)[1]
+                if time_passed >= 3:
+                    self._window_overlay = True
+                    self._error_status = True
+                    error_text = f"Connecting for {time_passed} seconds..."
+
+            if self._connection_error:
+                self._connection_timer = None
+                self._window_overlay = True
+                error_text = "Error occured while trying to connect to server!"
+
+            if self._error_status:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(text="Username and Email already taken!")
+                    self.error_window(text=error_text)
                 )
 
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                RETURN_BUTTON.change_color(MENU_MOUSE_POS)
-                RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                if not self._connection_timer:
+                    RETURN_BUTTON.change_color(MENU_MOUSE_POS)
+                    RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+
+            if self._remove_all_widgets:
+                self._remove_all_widgets = False
+                delete_objects(INPUT_BOXES)
+                self.login_window()
 
             pygame.display.update()
 
@@ -406,55 +447,75 @@ class LoginWindow(BasicWindow):
                 for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
                     input.event(event, is_hidden)
                     if input._enter_pressed == True and input.active:
-                        if_succesfull = self.set_new_password(INPUT_BOXES)
-                        if if_succesfull:
-                            delete_objects(INPUT_BOXES)
-                            self.login_window()
-                        else:
-                            self._window_overlay = True
-                            self._wrong_credentials_status = True
+                        self.set_new_password(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if not self._window_overlay:
                         if SUBMIT_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            if_succesfull = self.set_new_password(INPUT_BOXES)
-                            if if_succesfull:
-                                delete_objects(INPUT_BOXES)
-                                self.login_window()
-                            else:
-                                self._window_overlay = True
-                                self._wrong_credentials_status = True
+                            self.set_new_password(INPUT_BOXES)
                         if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            delete_objects(INPUT_BOXES)
-                            self.login_window()
+                            self._remove_all_widgets = True
                     else:
-                        if self._wrong_credentials_status:
+                        if self._error_status:
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
+                                if self._wrong_credentials_status:
+                                    self._wrong_credentials_status = False
+                                elif self._connection_error:
+                                    self._connection_error = False
+                                elif self._fields_empty:
+                                    self._fields_empty = False
                                 self._window_overlay = False
-                                self._wrong_credentials_status = False
+                                self._error_status = False
                                 NICKNAME_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
-                BACK_BUTTON.change_color(MENU_MOUSE_POS)
-                BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
                 SUBMIT_BUTTON.change_color(MENU_MOUSE_POS)
                 SUBMIT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                BACK_BUTTON.change_color(MENU_MOUSE_POS)
+                BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
                 for input in INPUT_BOXES:
                     input.update()
                     input.draw(self.SCREEN)
 
             if self._wrong_credentials_status:
+                self._window_overlay = True
+                error_text = "Given password is not correct!"
+            
+            if self._connection_timer:
+                time_passed = calculate_time_passed(start_time=self._connection_timer)[1]
+                if time_passed >= 3:
+                    self._window_overlay = True
+                    self._error_status = True
+                    error_text = f"Connecting for {time_passed} seconds..."
+
+            if self._connection_error:
+                self._connection_timer = None
+                self._window_overlay = True
+                error_text = "Error occured while trying to connect to server!"
+            
+            if self._fields_empty:
+                self._window_overlay = True
+                error_text = "Fields cannot be empty!"
+
+            if self._error_status:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(text="Given Username and Email do not match!")
+                    self.error_window(text=error_text)
                 )
 
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                RETURN_BUTTON.change_color(MENU_MOUSE_POS)
-                RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                if not self._connection_timer:
+                    RETURN_BUTTON.change_color(MENU_MOUSE_POS)
+                    RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+
+            if self._remove_all_widgets:
+                self._remove_all_widgets = False
+                delete_objects(INPUT_BOXES)
+                self.login_window()
 
             pygame.display.update()
 
+    @run_in_thread
     def login_player(self, inputs: list):
         url = f"http://{env_dict["SERVER_URL"]}:8000/login/"
         self.client_config = {
@@ -462,26 +523,36 @@ class LoginWindow(BasicWindow):
             "password": inputs[1].get_string(),
             "remember_password": self.client_config["remember_password"],
         }
-        response = requests.post(url, json=self.client_config)
+        self._connection_timer = time.time()
+        try:
+            response = requests.post(url, json=self.client_config)
 
-        if response.status_code == 200:
-            save_login_information(self.client_config)
-            self.stop_background_music()
-            if self.vpn_client is None:
-                self.vpn_client = SoftEtherClient(
-                    self.client_config["nickname"],
-                    self.client_config["password"],
+            if response.status_code == 200:
+                save_login_information(self.client_config)
+                self.stop_background_music()
+                if self.vpn_client is None:
+                    self.vpn_client = SoftEtherClient(
+                        self.client_config["nickname"],
+                        self.client_config["password"],
+                    )
+                self.vpn_client.set_vpn_state(state=True)
+                lobby = H5_Lobby(
+                    vpn_client=self.vpn_client,
+                    client_config=self.client_config,
                 )
-            self.vpn_client.set_vpn_state(state=True)
-            lobby = H5_Lobby(
-                vpn_client=self.vpn_client,
-                client_config=self.client_config,
-            )
-            lobby.run_game()
+                lobby.run_game()
 
-        self._window_overlay = True
-        self._wrong_credentials_status = True
+            elif response.status_code == 400:
+                self._window_overlay = True
+                self._wrong_credentials_status = True
+                self._error_status = True
+        
+        except requests.exceptions.ConnectTimeout:
+            self._window_overlay = True
+            self._connection_error = True
+            self._error_status = True
 
+    @run_in_thread
     def register_new_player(self, inputs: list):
         url = f"http://{env_dict["SERVER_URL"]}:8000/register/"
         user_data = {
@@ -496,47 +567,81 @@ class LoginWindow(BasicWindow):
 
         if user_data["password"] != user_data["repeat_password"]:
             # TODO: passwords do not match handling
-            return False
+            self._window_overlay = True
+            self._wrong_credentials_status = True
+            self._error_status = True
 
         if len(user_data["password"]) < 8:
             # TODO: special conditions for password
-            return False
+            self._window_overlay = True
+            self._wrong_credentials_status = True
+            self._error_status = True
 
         # TODO: check for nickname special conditions
         pass
 
-        self.client_config = {
-            "nickname": user_data["nickname"],
-            "password": user_data["password"],
-            "remember_password": False,
-        }
+        if not self._error_status:
+            self.client_config = {
+                "nickname": user_data["nickname"],
+                "password": user_data["password"],
+                "remember_password": False,
+            }
+            self._connection_timer = time.time()
+            headers = {"Content-Type": "application/json"}
+            try:
+                response = requests.post(url, json=user_data, headers=headers)
+                if response.status_code == 200:
+                    self.vpn_client = SoftEtherClient(
+                        self.client_config["nickname"],
+                        self.client_config["password"],
+                    )
+                    self._remove_all_widgets = self.vpn_client.create_new_client()
 
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(url, json=user_data, headers=headers)
-        if response.status_code == 200:
-            self.vpn_client = SoftEtherClient(
-                self.client_config["nickname"],
-                self.client_config["password"],
-            )
-            is_succesfull = self.vpn_client.create_new_client()
-            if is_succesfull:
-                return True
-        return False
+                elif response.status_code == 400:
+                    self._window_overlay = True
+                    self._wrong_credentials_status = True
+                    self._error_status = True
 
+            except requests.exceptions.ConnectTimeout:
+                self._window_overlay = True
+                self._connection_error = True
+                self._error_status = True
+
+    @run_in_thread
     def set_new_password(self, inputs: list):
+        url = f"http://{env_dict["SERVER_URL"]}:8000/change_password/"
         user_data = {
             "nickname": inputs[0].get_string(),
             "email": inputs[1].get_string(),
         }
+        if not user_data["nickname"] or not user_data["email"]:
+            self._window_overlay = True
+            self._fields_empty = True
+            self._error_status = True
 
-        # TODO: check if username and email exist in database in this combination
-        pass
+        if not self._error_status:
+            self._connection_timer = time.time()
+            headers = {"Content-Type": "application/json"}
+            try:
+                response = requests.post(url, json=user_data, headers=headers)
+                if response.status_code == 200:
+                    self.vpn_client = SoftEtherClient(
+                        self.client_config["nickname"],
+                        self.client_config["password"],
+                    )
+                    self._remove_all_widgets = self.vpn_client.create_new_client()
 
-        is_sent = send_email(user_data)
+                elif response.status_code == 400:
+                    self._window_overlay = True
+                    self._wrong_credentials_status = True
+                    self._error_status = True
 
-        if is_sent:
-            return True
-        return False
+            except requests.exceptions.ConnectTimeout:
+                    self._window_overlay = True
+                    self._connection_error = True
+                    self._error_status = True
+
+        self._remove_all_widgets = send_email(user_data)
 
     def run_game(self):
         self.login_window()

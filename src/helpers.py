@@ -1,4 +1,3 @@
-import ctypes
 import pygame
 import os
 import ssl

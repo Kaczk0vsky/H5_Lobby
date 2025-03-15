@@ -31,14 +31,17 @@ class Cursor:
             ),
             (60, 60),
         )
-        self.cursor = pygame.cursors.Cursor((8, 8), self.CURSOR_IMAGE)
-        self.cursor_clicked = pygame.cursors.Cursor((8, 8), self.CURSOR_IMAGE_CLICKED)
-        self.cursor_cursed = pygame.cursors.Cursor((30, 30), self.CURSOR_IMAGE_CURSED)
+        self.cursor = pygame.Cursor((8, 8), self.CURSOR_IMAGE)
+        self.cursor_clicked = pygame.Cursor((8, 8), self.CURSOR_IMAGE_CLICKED)
+        self.cursor_cursed = pygame.Cursor((30, 30), self.CURSOR_IMAGE_CURSED)
 
     def update(self):
         if pygame.mouse.get_pressed()[0]:
-            pygame.mouse.set_cursor(self.cursor_clicked)
+            if self.cursor_clicked:
+                pygame.mouse.set_cursor(self.cursor_clicked)
         elif pygame.mouse.get_pressed()[2]:
-            pygame.mouse.set_cursor(self.cursor_cursed)
+            if self.cursor_cursed:
+                pygame.mouse.set_cursor(self.cursor_cursed)
         else:
-            pygame.mouse.set_cursor(self.cursor)
+            if self.cursor:
+                pygame.mouse.set_cursor(self.cursor)
