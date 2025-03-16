@@ -345,6 +345,8 @@ class LoginWindow(BasicWindow):
                                     self._wrong_credentials_status = False
                                 elif self._connection_error:
                                     self._connection_error = False
+                                elif self._fields_empty:
+                                    self._fields_empty = False
                                 self._window_overlay = False
                                 self._error_status = False
                                 NICKNAME_INPUT.set_active(self.SCREEN)
@@ -375,6 +377,10 @@ class LoginWindow(BasicWindow):
                 self._connection_timer = None
                 self._window_overlay = True
                 error_text = "Error occured while trying to connect to server!"
+
+            if self._fields_empty:
+                self._window_overlay = True
+                error_text = "Fields cannot be empty!"
 
             if self._error_status:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
@@ -576,6 +582,13 @@ class LoginWindow(BasicWindow):
             "repeat_password": inputs[2].get_string(),
             "email": inputs[3].get_string(),
         }
+
+        for value in user_data.values():
+            if not value:
+                self._window_overlay = True
+                self._fields_empty = True
+                self._error_status = True
+                return
 
         # TODO: check if the useres already exists and email is free
         pass
