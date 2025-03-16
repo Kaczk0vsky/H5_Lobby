@@ -39,6 +39,8 @@ class LoginWindow(BasicWindow):
     _connection_error = False
     _fields_empty = False
     _remove_all_widgets = False
+    _email_not_sent = False
+    _allow_login = False
     _connection_timer = None
 
     def __init__(self):
@@ -207,10 +209,12 @@ class LoginWindow(BasicWindow):
 
             if self._wrong_credentials_status:
                 self._window_overlay = True
-                error_text = "Given password is not correct!"
-            
+                error_text = "Login doesn`t match password!"
+
             if self._connection_timer:
-                time_passed = calculate_time_passed(start_time=self._connection_timer)[1]
+                time_passed = calculate_time_passed(start_time=self._connection_timer)[
+                    1
+                ]
                 if time_passed >= 3:
                     self._window_overlay = True
                     self._error_status = True
@@ -231,6 +235,10 @@ class LoginWindow(BasicWindow):
                 if not self._connection_timer:
                     BACK_BUTTON.change_color(MENU_MOUSE_POS)
                     BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+
+            if self._allow_login:
+                self._allow_login = False
+                self.run_lobby()
 
             pygame.display.update()
 
@@ -353,9 +361,11 @@ class LoginWindow(BasicWindow):
             if self._wrong_credentials_status:
                 self._window_overlay = True
                 error_text = "Given password is not correct!"
-            
+
             if self._connection_timer:
-                time_passed = calculate_time_passed(start_time=self._connection_timer)[1]
+                time_passed = calculate_time_passed(start_time=self._connection_timer)[
+                    1
+                ]
                 if time_passed >= 3:
                     self._window_overlay = True
                     self._error_status = True
@@ -464,6 +474,8 @@ class LoginWindow(BasicWindow):
                                     self._connection_error = False
                                 elif self._fields_empty:
                                     self._fields_empty = False
+                                elif self._email_not_sent:
+                                    self._email_not_sent = False
                                 self._window_overlay = False
                                 self._error_status = False
                                 NICKNAME_INPUT.set_active(self.SCREEN)
@@ -479,10 +491,12 @@ class LoginWindow(BasicWindow):
 
             if self._wrong_credentials_status:
                 self._window_overlay = True
-                error_text = "Given password is not correct!"
-            
+                error_text = "User with this email doesn`t exist!"
+
             if self._connection_timer:
-                time_passed = calculate_time_passed(start_time=self._connection_timer)[1]
+                time_passed = calculate_time_passed(start_time=self._connection_timer)[
+                    1
+                ]
                 if time_passed >= 3:
                     self._window_overlay = True
                     self._error_status = True
@@ -492,10 +506,14 @@ class LoginWindow(BasicWindow):
                 self._connection_timer = None
                 self._window_overlay = True
                 error_text = "Error occured while trying to connect to server!"
-            
+
             if self._fields_empty:
                 self._window_overlay = True
                 error_text = "Fields cannot be empty!"
+
+            if self._email_not_sent:
+                self._window_overlay = True
+                error_text = "Error occured during sending email!"
 
             if self._error_status:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
@@ -524,29 +542,26 @@ class LoginWindow(BasicWindow):
             "remember_password": self.client_config["remember_password"],
         }
         self._connection_timer = time.time()
+
         try:
             response = requests.post(url, json=self.client_config)
-
             if response.status_code == 200:
+                self._connection_timer = None
                 save_login_information(self.client_config)
-                self.stop_background_music()
                 if self.vpn_client is None:
                     self.vpn_client = SoftEtherClient(
                         self.client_config["nickname"],
                         self.client_config["password"],
                     )
                 self.vpn_client.set_vpn_state(state=True)
-                lobby = H5_Lobby(
-                    vpn_client=self.vpn_client,
-                    client_config=self.client_config,
-                )
-                lobby.run_game()
+                self._allow_login = True
 
             elif response.status_code == 400:
                 self._window_overlay = True
                 self._wrong_credentials_status = True
                 self._error_status = True
-        
+                self._connection_timer = None
+
         except requests.exceptions.ConnectTimeout:
             self._window_overlay = True
             self._connection_error = True
@@ -580,17 +595,19 @@ class LoginWindow(BasicWindow):
         # TODO: check for nickname special conditions
         pass
 
+        self.client_config = {
+            "nickname": user_data["nickname"],
+            "password": user_data["password"],
+            "remember_password": False,
+        }
+
         if not self._error_status:
-            self.client_config = {
-                "nickname": user_data["nickname"],
-                "password": user_data["password"],
-                "remember_password": False,
-            }
             self._connection_timer = time.time()
             headers = {"Content-Type": "application/json"}
             try:
                 response = requests.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
+                    self._connection_timer = None
                     self.vpn_client = SoftEtherClient(
                         self.client_config["nickname"],
                         self.client_config["password"],
@@ -601,6 +618,7 @@ class LoginWindow(BasicWindow):
                     self._window_overlay = True
                     self._wrong_credentials_status = True
                     self._error_status = True
+                    self._connection_timer = None
 
             except requests.exceptions.ConnectTimeout:
                 self._window_overlay = True
@@ -623,25 +641,35 @@ class LoginWindow(BasicWindow):
             self._connection_timer = time.time()
             headers = {"Content-Type": "application/json"}
             try:
-                response = requests.post(url, json=user_data, headers=headers)
+                response = requests.get(url, params=user_data, headers=headers)
                 if response.status_code == 200:
-                    self.vpn_client = SoftEtherClient(
-                        self.client_config["nickname"],
-                        self.client_config["password"],
-                    )
-                    self._remove_all_widgets = self.vpn_client.create_new_client()
+                    if send_email(user_data):
+                        # self._remove_all_widgets = self.vpn_client.create_new_client()
+                        self._remove_all_widgets = True
+                    else:
+                        self._window_overlay = True
+                        self._email_not_sent = True
+                        self._error_status = True
+                        self._connection_timer = None
 
-                elif response.status_code == 400:
+                elif response.status_code == 400 or response.status_code == 404:
                     self._window_overlay = True
                     self._wrong_credentials_status = True
                     self._error_status = True
+                    self._connection_timer = None
 
             except requests.exceptions.ConnectTimeout:
-                    self._window_overlay = True
-                    self._connection_error = True
-                    self._error_status = True
-
-        self._remove_all_widgets = send_email(user_data)
+                self._window_overlay = True
+                self._connection_error = True
+                self._error_status = True
 
     def run_game(self):
         self.login_window()
+
+    def run_lobby(self):
+        self.stop_background_music()
+        lobby = H5_Lobby(
+            vpn_client=self.vpn_client,
+            client_config=self.client_config,
+        )
+        lobby.run_game()

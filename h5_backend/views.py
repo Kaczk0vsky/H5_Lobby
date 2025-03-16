@@ -79,6 +79,32 @@ def login_player(request):
 
 
 @csrf_exempt
+def change_password(request):
+    if request.method == "GET":
+        nickname = request.GET.get("nickname")
+        email = request.GET.get("email")
+        if not nickname or not email:
+            return JsonResponse(
+                {"success": False, "error": "Missing parameters"}, status=400
+            )
+        try:
+            user = User.objects.get(username=nickname)
+            if user.email == email:
+                return JsonResponse({"success": True})
+            else:
+                return JsonResponse(
+                    {"success": False, "error": "Invalid email or user"}, status=400
+                )
+        except User.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "error": "User not found"}, status=404
+            )
+    return JsonResponse(
+        {"success": False, "error": "Invalid request method"}, status=405
+    )
+
+
+@csrf_exempt
 def set_player_offline(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))

@@ -24,7 +24,7 @@ def play_on_empty(path: str, volume: float = 1) -> int:
             return index
 
 
-def send_email(userdata: dict) -> bool:
+def send_email(userdata: dict[str, str]) -> bool:
     SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 465
     EMAIL_SENDER = "ashanarena3@gmail.com"
