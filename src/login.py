@@ -75,6 +75,49 @@ class LoginWindow(BasicWindow):
         self.LONG_BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.BUTTON_HIGHLIGHTED, self.long_buttons_dims
         )
+        LOGIN_TEXT = self.get_font(self.font_size[0]).render(
+            "Username:", True, self.text_color
+        )
+        LOGIN_RECT = LOGIN_TEXT.get_rect(center=(self.text_pos[0], self.text_pos[1]))
+        PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
+            "Password:", True, self.text_color
+        )
+        PASSWORD_RECT = PASSWORD_TEXT.get_rect(
+            center=(self.text_pos[0], self.text_pos[1] + 60)
+        )
+        REMEMBER_LOGIN_TEXT = self.get_font(self.font_size[0]).render(
+            "Remeber me:", True, self.text_color
+        )
+        REMEMBER_LOGIN_RECT = REMEMBER_LOGIN_TEXT.get_rect(
+            center=(self.text_pos[0] + 100, self.text_pos[1] + 105)
+        )
+        LOGIN_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(self.buttons_pos[0], self.buttons_pos[1]),
+            text_input="Login",
+            font=self.get_font(font_size=30),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        REGISTER_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
+            text_input="Register",
+            font=self.get_font(font_size=30),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        FORGOT_PASSWORD_BUTTON = Button(
+            image=self.LONG_BUTTON,
+            image_highlited=self.LONG_BUTTON_HIGHLIGHTED,
+            pos=(self.buttons_pos[0], self.buttons_pos[1] + 130),
+            text_input="Forgot Password",
+            font=self.get_font(font_size=30),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
         CHECK_BOX_PASSWORD = CheckBox(
             surface=self.SCREEN,
             position=(self.SCREEN.get_width() / 1.7, self.SCREEN.get_height() / 1.675),
@@ -108,58 +151,9 @@ class LoginWindow(BasicWindow):
             self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-            LOGIN_TEXT = self.get_font(self.font_size[0]).render(
-                "Username:", True, self.text_color
-            )
-            LOGIN_RECT = LOGIN_TEXT.get_rect(
-                center=(self.text_pos[0], self.text_pos[1])
-            )
-            PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
-                "Password:", True, self.text_color
-            )
-            PASSWORD_RECT = PASSWORD_TEXT.get_rect(
-                center=(self.text_pos[0], self.text_pos[1] + 60)
-            )
-            REMEMBER_LOGIN_TEXT = self.get_font(self.font_size[0]).render(
-                "Remeber me:", True, self.text_color
-            )
-            REMEMBER_LOGIN_RECT = REMEMBER_LOGIN_TEXT.get_rect(
-                center=(self.text_pos[0] + 100, self.text_pos[1] + 105)
-            )
-
             self.SCREEN.blit(LOGIN_TEXT, LOGIN_RECT)
             self.SCREEN.blit(PASSWORD_TEXT, PASSWORD_RECT)
             self.SCREEN.blit(REMEMBER_LOGIN_TEXT, REMEMBER_LOGIN_RECT)
-
-            LOGIN_BUTTON = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(self.buttons_pos[0], self.buttons_pos[1]),
-                text_input="Login",
-                font=self.get_font(font_size=30),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-
-            REGISTER_BUTTON = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
-                text_input="Register",
-                font=self.get_font(font_size=30),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-
-            FORGOT_PASSWORD_BUTTON = Button(
-                image=self.LONG_BUTTON,
-                image_highlited=self.LONG_BUTTON_HIGHLIGHTED,
-                pos=(self.buttons_pos[0], self.buttons_pos[1] + 130),
-                text_input="Forgot Password",
-                font=self.get_font(font_size=30),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
 
             event_list = pygame.event.get()
             for event in event_list:
@@ -243,6 +237,48 @@ class LoginWindow(BasicWindow):
             pygame.display.update()
 
     def register_player_window(self):
+        NICKNAME_TEXT = self.get_font(self.font_size[0]).render(
+            "Username", True, self.text_color
+        )
+        NICKNAME_RECT = NICKNAME_TEXT.get_rect(
+            center=(self.text_pos[0], self.text_pos[1] - 110)
+        )
+        PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
+            "Password", True, self.text_color
+        )
+        PASSWORD_RECT = PASSWORD_TEXT.get_rect(
+            center=(self.text_pos[0], self.text_pos[1] - 60)
+        )
+        REPEAT_PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
+            "Repeat Password", True, self.text_color
+        )
+        REPEAT_PASSWORD_RECT = REPEAT_PASSWORD_TEXT.get_rect(
+            center=(self.text_pos[0], self.text_pos[1] - 10)
+        )
+        EMAIL_TEXT = self.get_font(self.font_size[0]).render(
+            "Email", True, self.text_color
+        )
+        EMAIL_RECT = PASSWORD_TEXT.get_rect(
+            center=(self.text_pos[0] + 20, self.text_pos[1] + 40)
+        )
+        REGISTER_ACCOUNT_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(self.buttons_pos[0], self.buttons_pos[1]),
+            text_input="Submit",
+            font=self.get_font(font_size=30),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        BACK_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
+            text_input="Back",
+            font=self.get_font(font_size=30),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
         NICKNAME_INPUT = TextInput(
             position=(self.input_pos[0], self.input_pos[1] - 110),
             dimensions=self.input_dims,
@@ -273,55 +309,10 @@ class LoginWindow(BasicWindow):
             self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-            NICKNAME_TEXT = self.get_font(self.font_size[0]).render(
-                "Username", True, self.text_color
-            )
-            NICKNAME_RECT = NICKNAME_TEXT.get_rect(
-                center=(self.text_pos[0], self.text_pos[1] - 110)
-            )
-            PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
-                "Password", True, self.text_color
-            )
-            PASSWORD_RECT = PASSWORD_TEXT.get_rect(
-                center=(self.text_pos[0], self.text_pos[1] - 60)
-            )
-            REPEAT_PASSWORD_TEXT = self.get_font(self.font_size[0]).render(
-                "Repeat Password", True, self.text_color
-            )
-            REPEAT_PASSWORD_RECT = REPEAT_PASSWORD_TEXT.get_rect(
-                center=(self.text_pos[0], self.text_pos[1] - 10)
-            )
-            EMAIL_TEXT = self.get_font(self.font_size[0]).render(
-                "Email", True, self.text_color
-            )
-            EMAIL_RECT = PASSWORD_TEXT.get_rect(
-                center=(self.text_pos[0] + 20, self.text_pos[1] + 40)
-            )
-
             self.SCREEN.blit(NICKNAME_TEXT, NICKNAME_RECT)
             self.SCREEN.blit(PASSWORD_TEXT, PASSWORD_RECT)
             self.SCREEN.blit(REPEAT_PASSWORD_TEXT, REPEAT_PASSWORD_RECT)
             self.SCREEN.blit(EMAIL_TEXT, EMAIL_RECT)
-
-            REGISTER_ACCOUNT_BUTTON = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(self.buttons_pos[0], self.buttons_pos[1]),
-                text_input="Submit",
-                font=self.get_font(font_size=30),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-
-            BACK_BUTTON = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
-                text_input="Back",
-                font=self.get_font(font_size=30),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
 
             event_list = pygame.event.get()
             for event in event_list:
@@ -401,6 +392,36 @@ class LoginWindow(BasicWindow):
             pygame.display.update()
 
     def forgot_password_window(self):
+        NICKNAME_TEXT = self.get_font(self.font_size[0]).render(
+            "Username:", True, self.text_color
+        )
+        NICKNAME_RECT = NICKNAME_TEXT.get_rect(
+            center=(self.text_pos[0], self.text_pos[1])
+        )
+        EMAIL_TEXT = self.get_font(self.font_size[0]).render(
+            "Email:", True, self.text_color
+        )
+        EMAIL_RECT = EMAIL_TEXT.get_rect(
+            center=(self.text_pos[0], self.text_pos[1] + 60)
+        )
+        SUBMIT_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(self.buttons_pos[0], self.buttons_pos[1]),
+            text_input="Submit",
+            font=self.get_font(font_size=30),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        BACK_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
+            text_input="Back",
+            font=self.get_font(font_size=30),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
         NICKNAME_INPUT = TextInput(
             position=(self.input_pos[0], self.input_pos[1]),
             dimensions=self.input_dims,
@@ -421,40 +442,8 @@ class LoginWindow(BasicWindow):
             self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-            NICKNAME_TEXT = self.get_font(self.font_size[0]).render(
-                "Username:", True, self.text_color
-            )
-            NICKNAME_RECT = NICKNAME_TEXT.get_rect(
-                center=(self.text_pos[0], self.text_pos[1])
-            )
-            EMAIL_TEXT = self.get_font(self.font_size[0]).render(
-                "Email:", True, self.text_color
-            )
-            EMAIL_RECT = EMAIL_TEXT.get_rect(
-                center=(self.text_pos[0], self.text_pos[1] + 60)
-            )
             self.SCREEN.blit(NICKNAME_TEXT, NICKNAME_RECT)
             self.SCREEN.blit(EMAIL_TEXT, EMAIL_RECT)
-
-            SUBMIT_BUTTON = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(self.buttons_pos[0], self.buttons_pos[1]),
-                text_input="Submit",
-                font=self.get_font(font_size=30),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-
-            BACK_BUTTON = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
-                text_input="Back",
-                font=self.get_font(font_size=30),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
 
             event_list = pygame.event.get()
             for event in event_list:

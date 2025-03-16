@@ -171,6 +171,7 @@ def remove_from_queue(request):
                 )
                 oponnent.player_state = "in_queue"
                 oponnent.save()
+                player_matched.delete()
 
             return JsonResponse({"success": True})
         except:

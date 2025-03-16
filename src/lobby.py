@@ -72,15 +72,16 @@ class H5_Lobby(BasicWindow):
             self.found_game = state
             self.oponnent_accepted = state
             self.player_accepted = state
+            self.elapsed_time = None
+            self.opponent_nickname = ""
+            self.queue_channel = None
             queue_status = state
 
             return queue_status
 
         set_queue_vars()
         queue_status = False
-        elapsed_time = 0.0
-        self.opponent_nickname = ""
-        self.queue_channel = 0
+
         self.button_dims = (
             self.config["screen_width"] / 9,
             self.config["screen_hight"] / 17,
@@ -171,6 +172,87 @@ class H5_Lobby(BasicWindow):
             self.CANCEL_BUTTON_HIGHLIGHTED,
             self.button_dims,
         )
+        FIND_GAME_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(
+                830 * (transformation_factors[self.transformation_option][0]),
+                50 * (transformation_factors[self.transformation_option][1]),
+            ),
+            text_input="Find Game",
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        VIEW_STATISTICS = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(
+                1080 * (transformation_factors[self.transformation_option][0]),
+                50 * (transformation_factors[self.transformation_option][1]),
+            ),
+            text_input="View Statistics",
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        NEWS = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(
+                1330 * (transformation_factors[self.transformation_option][0]),
+                50 * (transformation_factors[self.transformation_option][1]),
+            ),
+            text_input="News",
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        MY_PROFILE = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(
+                1580 * (transformation_factors[self.transformation_option][0]),
+                50 * (transformation_factors[self.transformation_option][1]),
+            ),
+            text_input="My Account",
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        PLAYER_PROFILE = Button(
+            image=self.ICON_SQUARE,
+            image_highlited=self.ICON_SQUARE_HIGHLIGHTED,
+            pos=(
+                1730 * (transformation_factors[self.transformation_option][0]),
+                50 * (transformation_factors[self.transformation_option][1]),
+            ),
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        OPTIONS_BUTTON = Button(
+            image=self.OPTIONS,
+            image_highlited=self.OPTIONS_HIGHLIGHTED,
+            pos=(
+                1800 * (transformation_factors[self.transformation_option][0]),
+                50 * (transformation_factors[self.transformation_option][1]),
+            ),
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        QUIT_BUTTON = Button(
+            image=self.QUIT,
+            image_highlited=self.QUIT_HIGHLIGHTED,
+            pos=(
+                1870 * (transformation_factors[self.transformation_option][0]),
+                50 * (transformation_factors[self.transformation_option][1]),
+            ),
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -208,88 +290,6 @@ class H5_Lobby(BasicWindow):
             #         100 * (transformation_factors[self.transformation_option][1]),
             #     ),
             # )
-
-            FIND_GAME_BUTTON = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(
-                    830 * (transformation_factors[self.transformation_option][0]),
-                    50 * (transformation_factors[self.transformation_option][1]),
-                ),
-                text_input="Find Game",
-                font=self.get_font(self.font_size[1]),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-            VIEW_STATISTICS = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(
-                    1080 * (transformation_factors[self.transformation_option][0]),
-                    50 * (transformation_factors[self.transformation_option][1]),
-                ),
-                text_input="View Statistics",
-                font=self.get_font(self.font_size[1]),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-            NEWS = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(
-                    1330 * (transformation_factors[self.transformation_option][0]),
-                    50 * (transformation_factors[self.transformation_option][1]),
-                ),
-                text_input="News",
-                font=self.get_font(self.font_size[1]),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-            MY_PROFILE = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(
-                    1580 * (transformation_factors[self.transformation_option][0]),
-                    50 * (transformation_factors[self.transformation_option][1]),
-                ),
-                text_input="My Account",
-                font=self.get_font(self.font_size[1]),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-            PLAYER_PROFILE = Button(
-                image=self.ICON_SQUARE,
-                image_highlited=self.ICON_SQUARE_HIGHLIGHTED,
-                pos=(
-                    1730 * (transformation_factors[self.transformation_option][0]),
-                    50 * (transformation_factors[self.transformation_option][1]),
-                ),
-                font=self.get_font(self.font_size[1]),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-            OPTIONS_BUTTON = Button(
-                image=self.OPTIONS,
-                image_highlited=self.OPTIONS_HIGHLIGHTED,
-                pos=(
-                    1800 * (transformation_factors[self.transformation_option][0]),
-                    50 * (transformation_factors[self.transformation_option][1]),
-                ),
-                font=self.get_font(self.font_size[1]),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
-            QUIT_BUTTON = Button(
-                image=self.QUIT,
-                image_highlited=self.QUIT_HIGHLIGHTED,
-                pos=(
-                    1870 * (transformation_factors[self.transformation_option][0]),
-                    50 * (transformation_factors[self.transformation_option][1]),
-                ),
-                font=self.get_font(self.font_size[1]),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
 
             for button in [
                 FIND_GAME_BUTTON,
@@ -333,8 +333,10 @@ class H5_Lobby(BasicWindow):
                 if OPONNENT_TEXT is not None and OPONNENT_RECT is not None:
                     self.SCREEN.blit(OPONNENT_TEXT, OPONNENT_RECT)
                 if PROGRESS_BAR is not None and not self.player_accepted:
-                    cancel_bar = PROGRESS_BAR.draw(self.SCREEN, elapsed_time)
+                    cancel_bar = PROGRESS_BAR.draw(self.SCREEN, self.elapsed_time)
                     if cancel_bar:
+                        pygame.mixer.Channel(0).set_volume(bg_sound_volume)
+                        pygame.mixer.Channel(self.queue_channel).stop()
                         queue_status = set_queue_vars(state=False)
                         continue
 
@@ -344,7 +346,6 @@ class H5_Lobby(BasicWindow):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
                         queue_status = True
-                        elapsed_time = time.time()
                         self.add_to_queue()
                         continue
                     if VIEW_STATISTICS.check_for_input(MENU_MOUSE_POS):
@@ -361,14 +362,13 @@ class H5_Lobby(BasicWindow):
                         self.quit_game_handling()
                     if queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
-                            queue_status = set_queue_vars(state=False)
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                             pygame.mixer.Channel(self.queue_channel).stop()
+                            queue_status = set_queue_vars(state=False)
                             self.remove_from_queue(is_accepted=False)
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
                                 self.player_accepted = True
-                                pygame.mixer.Channel(self.queue_channel).stop()
                                 self.remove_from_queue(is_accepted=True)
                                 self.check_acceptance = CustomThread(
                                     target=self.check_if_oponnent_accepted, deamon=True
@@ -399,7 +399,7 @@ class H5_Lobby(BasicWindow):
             HEADER_TEXT = self.get_font(self.font_size[0]).render(
                 f"Waiting for opponent: {minutes}:{seconds:02d}",
                 True,
-                "white",
+                self.text_color,
             )
             HEADER_RECT = HEADER_TEXT.get_rect(
                 center=(
@@ -424,6 +424,8 @@ class H5_Lobby(BasicWindow):
         PROGRESS_BAR = None
 
         if self.found_game:
+            if not self.elapsed_time:
+                self.elapsed_time = time.time()
             if not self.game_found_music:
                 self.queue_channel = play_on_empty(
                     "resources/match_found.wav", volume=bg_sound_volume
@@ -432,7 +434,7 @@ class H5_Lobby(BasicWindow):
                 self.game_found_music = True
 
             HEADER_TEXT = self.get_font(self.font_size[0]).render(
-                "GAME FOUND", True, "white"
+                "GAME FOUND", True, self.text_color
             )
             HEADER_RECT = HEADER_TEXT.get_rect(
                 center=(
@@ -447,7 +449,7 @@ class H5_Lobby(BasicWindow):
             OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
                 information_str,
                 True,
-                "white",
+                self.text_color,
             )
             OPONNENT_RECT = OPONNENT_TEXT.get_rect(
                 center=(
@@ -489,6 +491,27 @@ class H5_Lobby(BasicWindow):
         )
 
     def options_window(self):
+        RESOLUTION_TEXT = self.get_font(self.font_size[1]).render(
+            "Select resolution", True, "#d7fcd4"
+        )
+        RESOLUTION_RECT = RESOLUTION_TEXT.get_rect(
+            center=(
+                130 * (transformation_factors[self.transformation_option][0]),
+                300 * transformation_factors[self.transformation_option][1],
+            ),
+        )
+        BACK_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            pos=(
+                290 * (transformation_factors[self.transformation_option][0]),
+                800 * (transformation_factors[self.transformation_option][1]),
+            ),
+            text_input="Back",
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
         RESOLUTION_CHOICES = OptionBox(
             position=(
                 (self.SCREEN.get_width() / 6.5),
@@ -507,28 +530,8 @@ class H5_Lobby(BasicWindow):
             self.cursor.update()
             OPTIONS_MOUSE_POS = pygame.mouse.get_pos()
 
-            RESOLUTION_TEXT = self.get_font(self.font_size[1]).render(
-                "Select resolution", True, "#d7fcd4"
-            )
-            RESOLUTION_RECT = RESOLUTION_TEXT.get_rect(
-                center=(
-                    130 * (transformation_factors[self.transformation_option][0]),
-                    300 * transformation_factors[self.transformation_option][1],
-                ),
-            )
             self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
-            BACK_BUTTON = Button(
-                image=self.BUTTON,
-                image_highlited=self.BUTTON_HIGHLIGHTED,
-                pos=(
-                    290 * (transformation_factors[self.transformation_option][0]),
-                    800 * (transformation_factors[self.transformation_option][1]),
-                ),
-                text_input="Back",
-                font=self.get_font(self.font_size[1]),
-                base_color=self.text_color,
-                hovering_color=self.hovering_color,
-            )
+
             BACK_BUTTON.change_color(OPTIONS_MOUSE_POS)
             BACK_BUTTON.update(self.SCREEN, OPTIONS_MOUSE_POS)
 
