@@ -38,10 +38,17 @@ class Cursor:
     def update(self):
         if pygame.mouse.get_pressed()[0]:
             if self.cursor_clicked:
-                pygame.mouse.set_cursor(self.cursor_clicked)
+                self.set_cursor(self.cursor_clicked)
         elif pygame.mouse.get_pressed()[2]:
             if self.cursor_cursed:
-                pygame.mouse.set_cursor(self.cursor_cursed)
+                self.set_cursor(self.cursor_cursed)
         else:
             if self.cursor:
-                pygame.mouse.set_cursor(self.cursor)
+                self.set_cursor(self.cursor)
+
+    @staticmethod
+    def set_cursor(cursor: pygame.Cursor):
+        try:
+            pygame.mouse.set_cursor(cursor)
+        except pygame.error:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
