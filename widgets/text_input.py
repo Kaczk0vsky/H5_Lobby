@@ -73,8 +73,8 @@ class TextInput:
         self.fill_active = fill_active
         self.hidden_text = text
         self.text = text
-        self.FONT = pygame.font.Font("resources/ASansrounded.ttf", font_size)
-        self.txt_surface = self.FONT.render(text, True, self.text_color)
+        self.font = pygame.font.Font("resources/ASansrounded.ttf", font_size)
+        self.txt_surface = self.font.render(text, True, self.text_color)
         self.active = is_active
         self.last_backspace_time = 0
 
@@ -111,7 +111,7 @@ class TextInput:
                         self.hidden_text += event.unicode
                     else:
                         self.text += event.unicode
-                self.txt_surface = self.FONT.render(self.text, True, self.text_color)
+                self.txt_surface = self.font.render(self.text, True, self.text_color)
 
         if event.type == pygame.KEYUP:
             if self.active:
@@ -134,7 +134,7 @@ class TextInput:
                     self.text = self.text[:-1]
                     if self.hidden_text:
                         self.hidden_text = self.hidden_text[:-1]
-                    self.txt_surface = self.FONT.render(
+                    self.txt_surface = self.font.render(
                         self.text, True, self.text_color
                     )
                 self.last_backspace_time = current_time

@@ -20,6 +20,7 @@ from src.helpers import play_on_empty, calculate_time_passed
 from src.custom_thread import CustomThread
 from widgets.button import Button
 from widgets.option_box import OptionBox
+from widgets.progress_bar import ProgressBar
 
 
 class H5_Lobby(BasicWindow):
@@ -77,6 +78,7 @@ class H5_Lobby(BasicWindow):
 
         set_queue_vars()
         queue_status = False
+        elapsed_time = 0.0
         self.opponent_nickname = ""
         self.queue_channel = 0
         self.button_dims = (
@@ -309,6 +311,7 @@ class H5_Lobby(BasicWindow):
                     HEADER_RECT,
                     OPONNENT_TEXT,
                     OPONNENT_RECT,
+                    PROGRESS_BAR,
                 ) = self.queue_window()
 
                 self.SCREEN.blit(
@@ -329,14 +332,20 @@ class H5_Lobby(BasicWindow):
                     self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
                 if OPONNENT_TEXT is not None and OPONNENT_RECT is not None:
                     self.SCREEN.blit(OPONNENT_TEXT, OPONNENT_RECT)
+                if PROGRESS_BAR is not None and not self.player_accepted:
+                    cancel_bar = PROGRESS_BAR.draw(self.SCREEN, elapsed_time)
+                    if cancel_bar:
+                        queue_status = set_queue_vars(state=False)
+                        continue
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.quit_game_handling()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
-                        self.add_to_queue()
                         queue_status = True
+                        elapsed_time = time.time()
+                        self.add_to_queue()
                         continue
                     if VIEW_STATISTICS.check_for_input(MENU_MOUSE_POS):
                         pass
@@ -412,6 +421,7 @@ class H5_Lobby(BasicWindow):
         ACCEPT_BUTTON = None
         OPONNENT_TEXT = None
         OPONNENT_RECT = None
+        PROGRESS_BAR = None
 
         if self.found_game:
             if not self.game_found_music:
@@ -463,6 +473,10 @@ class H5_Lobby(BasicWindow):
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
             )
+            PROGRESS_BAR = ProgressBar(
+                position=(overlay_width * 1.1, overlay_height * 1.6),
+                dimensions=(overlay_width * 0.8, 30),
+            )
 
         return (
             CANCEL_BUTTON,
@@ -471,6 +485,7 @@ class H5_Lobby(BasicWindow):
             HEADER_RECT,
             OPONNENT_TEXT,
             OPONNENT_RECT,
+            PROGRESS_BAR,
         )
 
     def options_window(self):
