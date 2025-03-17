@@ -144,6 +144,19 @@ class BasicWindow:
                     os.getcwd(), "resources/game_search/green_button_highlighted.png"
                 )
             )
+            self.PROGRESS_BAR_FRAME = pygame.image.load(
+                os.path.join(
+                    os.getcwd(), "resources/progress_bar/progress_bar_frame.png"
+                )
+            )
+            self.PROGRESS_BAR_BG = pygame.image.load(
+                os.path.join(os.getcwd(), "resources/progress_bar/progress_bar_bg.png")
+            )
+            self.PROGRESS_BAR_EDGE = pygame.image.load(
+                os.path.join(
+                    os.getcwd(), "resources/progress_bar/progress_bar_edge.png"
+                )
+            )
 
     def error_window(self, text: str) -> tuple:
         overlay_width, overlay_height = (

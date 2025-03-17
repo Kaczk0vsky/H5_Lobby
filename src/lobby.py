@@ -172,6 +172,18 @@ class H5_Lobby(BasicWindow):
             self.CANCEL_BUTTON_HIGHLIGHTED,
             self.button_dims,
         )
+        self.PROGRESS_BAR_FRAME = pygame.transform.scale(
+            self.PROGRESS_BAR_FRAME,
+            (580, 60),
+        )
+        self.PROGRESS_BAR_BG = pygame.transform.scale(
+            self.PROGRESS_BAR_BG,
+            (500, 30),
+        )
+        self.PROGRESS_BAR_EDGE = pygame.transform.scale(
+            self.PROGRESS_BAR_EDGE,
+            (60, 80),
+        )
         FIND_GAME_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
@@ -445,7 +457,9 @@ class H5_Lobby(BasicWindow):
             if self.player_accepted:
                 information_str = f"Waiting for {self.opponent_nickname} to accept..."
             else:
-                information_str = f"Opponent: {self.opponent_nickname} - {self.oponnent_ranking_points} MMR"
+                information_str = (
+                    f"{self.opponent_nickname} - {self.oponnent_ranking_points} RP"
+                )
             OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
                 information_str,
                 True,
@@ -454,7 +468,7 @@ class H5_Lobby(BasicWindow):
             OPONNENT_RECT = OPONNENT_TEXT.get_rect(
                 center=(
                     self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() / 2,
+                    self.SCREEN.get_height() / 2.12,
                 )
             )
             ACCEPT_BUTTON = Button(
@@ -476,8 +490,11 @@ class H5_Lobby(BasicWindow):
                 hovering_color=self.hovering_color,
             )
             PROGRESS_BAR = ProgressBar(
-                position=(overlay_width * 1.1, overlay_height * 1.6),
+                position=(overlay_width * 1.5, overlay_height * 1.6),
                 dimensions=(overlay_width * 0.8, 30),
+                image_frame=self.PROGRESS_BAR_FRAME,
+                image_bg=self.PROGRESS_BAR_BG,
+                image_edge=self.PROGRESS_BAR_EDGE,
             )
 
         return (

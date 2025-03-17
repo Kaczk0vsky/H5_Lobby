@@ -22,6 +22,7 @@ def save_login_information(user_data: dict):
 
 def check_for_missing_paths() -> dict:
     is_saved = False
+    # TODO: add flags for only one time repeat
     with open(os.path.join(os.getcwd(), "settings.toml"), "r") as f:
         data = toml.load(f)
         while True:
