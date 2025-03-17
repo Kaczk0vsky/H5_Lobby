@@ -47,6 +47,10 @@ class H5_Lobby(BasicWindow):
             Starts the lobby system by initializing and displaying the main menu.
     """
 
+    _error_status = False
+    _queue_canceled = False
+    _window_overlay = False
+
     def __init__(self, vpn_client: object, client_config: dict):
         BasicWindow.__init__(self)
 
@@ -347,6 +351,9 @@ class H5_Lobby(BasicWindow):
                 if PROGRESS_BAR is not None and not self.player_accepted:
                     cancel_bar = PROGRESS_BAR.draw(self.SCREEN, self.elapsed_time)
                     if cancel_bar:
+                        self._queue_canceled = True
+                        self._error_status = True
+                        self._window_overlay = True
                         pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                         pygame.mixer.Channel(self.queue_channel).stop()
                         queue_status = set_queue_vars(state=False)
@@ -390,6 +397,38 @@ class H5_Lobby(BasicWindow):
                             queue_status = set_queue_vars(state=False)
                             game = AschanArena3_Game()
                             game.run_processes()
+
+                    if self._window_overlay:
+                        if self._error_status:
+                            if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
+                                if self._queue_canceled:
+                                    self._queue_canceled = False
+                                self._window_overlay = False
+                                self._error_status = False
+
+            if self._queue_canceled:
+                error_text = "Queue has been declined"
+
+            if self._error_status:
+                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
+                    self.error_window(text=error_text)
+                )
+                screen_width, screen_height = (
+                    self.SCREEN.get_width(),
+                    self.SCREEN.get_height(),
+                )
+                window_width, window_height = (
+                    self.SMALLER_WINDOWS_BG.get_width(),
+                    self.SMALLER_WINDOWS_BG.get_height(),
+                )
+
+                x_position = (screen_width - window_width) // 2
+                y_position = (screen_height - window_height) // 2
+
+                self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (x_position, y_position))
+                self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
+                RETURN_BUTTON.change_color(MENU_MOUSE_POS)
+                RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
 
             pygame.display.update()
 

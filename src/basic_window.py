@@ -159,10 +159,10 @@ class BasicWindow:
             )
 
     def error_window(self, text: str) -> tuple:
-        overlay_width, overlay_height = (
-            600,
-            400,
-        )
+        overlay_width, overlay_height = 600, 400
+        screen_width, screen_height = pygame.display.get_surface().get_size()
+        overlay_y = (screen_height - overlay_height) // 2
+
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(
             self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height)
         )
@@ -171,16 +171,13 @@ class BasicWindow:
             text, True, self.text_color
         )
         WRONG_PASSOWRD_RECT = WRONG_PASSWORD_TEXT.get_rect(
-            center=(
-                self.SCREEN.get_width() / 2,
-                self.SCREEN.get_height() / 2.5,
-            )
+            center=(screen_width // 2, overlay_y + overlay_height // 3)
         )
 
         BACK_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(self.SCREEN.get_width() / 2, self.SCREEN.get_height() / 1.5),
+            pos=(screen_width // 2, overlay_y + overlay_height * 2 // 3),
             text_input="Back",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
