@@ -142,9 +142,9 @@ class LoginWindow(BasicWindow):
                 if self.client_config["remember_password"]
                 else ""
             ),
+            hide_text=True,
         )
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
-        HIDE_INPUT = [False, True]
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -159,8 +159,8 @@ class LoginWindow(BasicWindow):
             for event in event_list:
                 if event.type == pygame.QUIT:
                     self.quit_game_handling()
-                for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
-                    input.event(event, is_hidden)
+                for input in INPUT_BOXES:
+                    input.event(event)
                     if input._enter_pressed == True and input.active:
                         self.login_player(INPUT_BOXES)
 
@@ -287,10 +287,12 @@ class LoginWindow(BasicWindow):
         PASSWORD_INPUT = TextInput(
             position=(self.input_pos[0], self.input_pos[1] - 60),
             dimensions=self.input_dims,
+            hide_text=True,
         )
         REPEAT_PASSWORD_INPUT = TextInput(
             position=(self.input_pos[0], self.input_pos[1] - 10),
             dimensions=self.input_dims,
+            hide_text=True,
         )
         EMAIL_INPUT = TextInput(
             position=(self.input_pos[0], self.input_pos[1] + 40),
@@ -302,7 +304,6 @@ class LoginWindow(BasicWindow):
             REPEAT_PASSWORD_INPUT,
             EMAIL_INPUT,
         ]
-        HIDE_INPUT = [False, True, True, False]
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -318,8 +319,8 @@ class LoginWindow(BasicWindow):
             for event in event_list:
                 if event.type == pygame.QUIT:
                     self.quit_game_handling()
-                for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
-                    input.event(event, is_hidden)
+                for input in INPUT_BOXES:
+                    input.event(event)
                     if input._enter_pressed == True and input.active:
                         self.register_new_player(INPUT_BOXES)
 
@@ -435,7 +436,6 @@ class LoginWindow(BasicWindow):
             NICKNAME_INPUT,
             EMAIL_INPUT,
         ]
-        HIDE_INPUT = [False, False]
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -449,8 +449,8 @@ class LoginWindow(BasicWindow):
             for event in event_list:
                 if event.type == pygame.QUIT:
                     self.quit_game_handling()
-                for input, is_hidden in zip(INPUT_BOXES, HIDE_INPUT):
-                    input.event(event, is_hidden)
+                for input in INPUT_BOXES:
+                    input.event(event)
                     if input._enter_pressed == True and input.active:
                         self.set_new_password(INPUT_BOXES)
 

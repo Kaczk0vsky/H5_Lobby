@@ -24,12 +24,13 @@ class TextInput:
         txt_surface (pygame.Surface): The rendered text surface.
         active (bool): Determines whether the text input is currently active.
         last_backspace_time (int): Tracks the last recorded backspace press time.
+        hide_text (bool): If true then the text input remains hidden.
 
     Methods:
         delete_instance() -> None:
             Removes the current instance from `_instances` and resets `_id` if no instances remain.
 
-        event(event: pygame.event.Event, hide_text: bool = False) -> None:
+        event(event: pygame.event.Event) -> None:
             Handles user input events such as typing, clicking, and special key presses.
 
         get_string() -> str:
@@ -65,16 +66,22 @@ class TextInput:
         font_size: int = 20,
         text: str = "",
         is_active: bool = False,
+        hide_text: bool = False,
     ):
         self.id = TextInput.__id
         self.rect = pygame.Rect(position[0], position[1], dimensions[0], dimensions[1])
         self.text_color = text_color
         self.fill_inactive = fill_inactive
         self.fill_active = fill_active
+        self.hide_text = hide_text
         self.hidden_text = text
         self.text = text
         self.font = pygame.font.Font("resources/ASansrounded.ttf", font_size)
-        self.txt_surface = self.font.render(text, True, self.text_color)
+        self.txt_surface = self.font.render(
+            len(self.text) * "*" if self.hide_text else self.text,
+            True,
+            self.text_color,
+        )
         self.active = is_active
         self.last_backspace_time = 0
 
@@ -88,7 +95,7 @@ class TextInput:
         if not TextInput._instances:
             TextInput.__id = 0
 
-    def event(self, event: pygame.event.Event, hide_text: bool = False) -> None:
+    def event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.active = False
             if self.rect.collidepoint(event.pos):
@@ -106,12 +113,11 @@ class TextInput:
                 elif event.key == pygame.K_ESCAPE:
                     self.active = False
                 else:
-                    if hide_text:
+                    if self.hide_text:
                         self.text += "*"
                         self.hidden_text += event.unicode
                     else:
                         self.text += event.unicode
-                self.txt_surface = self.font.render(self.text, True, self.text_color)
 
         if event.type == pygame.KEYUP:
             if self.active:
@@ -120,6 +126,12 @@ class TextInput:
                 for instance in TextInput._instances:
                     instance._tab_pressed = False
                     TextInput._enter_pressed = False
+
+        self.txt_surface = self.font.render(
+            len(self.text) * "*" if self.hide_text else self.text,
+            True,
+            self.text_color,
+        )
 
     def get_string(self) -> str:
         if len(self.text) == len(self.hidden_text):
@@ -135,7 +147,9 @@ class TextInput:
                     if self.hidden_text:
                         self.hidden_text = self.hidden_text[:-1]
                     self.txt_surface = self.font.render(
-                        self.text, True, self.text_color
+                        len(self.text) * "*" if self.hide_text else self.text,
+                        True,
+                        self.text_color,
                     )
                 self.last_backspace_time = current_time
 
