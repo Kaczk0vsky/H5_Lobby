@@ -3,6 +3,30 @@ import time
 
 
 class ProgressBar:
+    """
+    A graphical progress bar for tracking elapsed time in a Pygame application.
+
+    This class visually represents the progress of a timer using images for
+    the frame, background, and edge, updating the display based on elapsed time.
+
+    Attributes:
+        x (float): The x-coordinate of the progress bar's center.
+        y (float): The y-coordinate of the progress bar's center.
+        length (int): The total length of the progress bar.
+        width (int): The width of the progress bar.
+        image_frame (pygame.Surface): The image representing the progress bar's frame.
+        image_bg (pygame.Surface): The image representing the progress bar's background.
+        image_edge (pygame.Surface): The image representing the moving edge of the progress bar.
+        max_wait_time (int): The maximum duration (in seconds) before the progress bar is fully filled.
+        rect (pygame.Rect): The rectangle representing the position of the frame image.
+        rect_bg (pygame.Rect): The rectangle representing the position of the background image.
+
+    Methods:
+        draw(screen: pygame.Surface, elapsed_time: float) -> bool:
+            Updates and renders the progress bar on the given screen surface based on the elapsed time.
+            Returns True when the progress bar is fully filled, otherwise returns False.
+    """
+
     def __init__(
         self,
         position: tuple[float, float],
