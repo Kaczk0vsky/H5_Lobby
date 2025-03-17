@@ -50,6 +50,18 @@ class H5_Lobby(BasicWindow):
     _error_status = False
     _queue_canceled = False
     _window_overlay = False
+    _game_found_music = False
+    _get_time = False
+    _found_game = False
+    _oponnent_accepted = False
+    _player_accepted = False
+    _queue_status = False
+    _queue_canceled = False
+    _error_status = False
+    _window_overlay = False
+    _elapsed_time = None
+    _queue_channel = None
+    _opponent_nickname = ""
 
     def __init__(self, vpn_client: object, client_config: dict):
         BasicWindow.__init__(self)
@@ -71,20 +83,15 @@ class H5_Lobby(BasicWindow):
 
     def main_menu(self):
         def set_queue_vars(state: bool = False) -> bool:
-            self.game_found_music = state
-            self.get_time = state
-            self.found_game = state
-            self.oponnent_accepted = state
-            self.player_accepted = state
-            self.elapsed_time = None
-            self.opponent_nickname = ""
-            self.queue_channel = None
-            queue_status = state
-
-            return queue_status
-
-        set_queue_vars()
-        queue_status = False
+            self._game_found_music = state
+            self._get_time = state
+            self._found_game = state
+            self._oponnent_accepted = state
+            self._player_accepted = state
+            self._queue_status = state
+            self._elapsed_time = None
+            self._queue_channel = None
+            self._opponent_nickname = ""
 
         self.button_dims = (
             self.config["screen_width"] / 9,
@@ -319,7 +326,7 @@ class H5_Lobby(BasicWindow):
                 button.change_color(MENU_MOUSE_POS)
                 button.update(self.SCREEN, MENU_MOUSE_POS)
 
-            if queue_status:
+            if self._queue_status:
                 (
                     CANCEL_QUEUE,
                     ACCEPT_QUEUE,
@@ -348,15 +355,16 @@ class H5_Lobby(BasicWindow):
                     self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
                 if OPONNENT_TEXT is not None and OPONNENT_RECT is not None:
                     self.SCREEN.blit(OPONNENT_TEXT, OPONNENT_RECT)
-                if PROGRESS_BAR is not None and not self.player_accepted:
-                    cancel_bar = PROGRESS_BAR.draw(self.SCREEN, self.elapsed_time)
+                if PROGRESS_BAR is not None and not self._player_accepted:
+                    cancel_bar = PROGRESS_BAR.draw(self.SCREEN, self._elapsed_time)
                     if cancel_bar:
                         self._queue_canceled = True
                         self._error_status = True
                         self._window_overlay = True
                         pygame.mixer.Channel(0).set_volume(bg_sound_volume)
-                        pygame.mixer.Channel(self.queue_channel).stop()
-                        queue_status = set_queue_vars(state=False)
+                        pygame.mixer.Channel(self._queue_channel).stop()
+                        set_queue_vars(state=False)
+                        self.remove_from_queue(is_accepted=False)
                         continue
 
             for event in pygame.event.get():
@@ -364,7 +372,7 @@ class H5_Lobby(BasicWindow):
                     self.quit_game_handling()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
-                        queue_status = True
+                        self._queue_status = True
                         self.add_to_queue()
                         continue
                     if VIEW_STATISTICS.check_for_input(MENU_MOUSE_POS):
@@ -379,22 +387,22 @@ class H5_Lobby(BasicWindow):
                         self.options_window()
                     if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.quit_game_handling()
-                    if queue_status:
+                    if self._queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
-                            pygame.mixer.Channel(self.queue_channel).stop()
-                            queue_status = set_queue_vars(state=False)
+                            pygame.mixer.Channel(self._queue_channel).stop()
+                            set_queue_vars(state=False)
                             self.remove_from_queue(is_accepted=False)
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
-                                self.player_accepted = True
+                                self._player_accepted = True
                                 self.remove_from_queue(is_accepted=True)
                                 self.check_acceptance = CustomThread(
                                     target=self.check_if_oponnent_accepted, deamon=True
                                 )
                                 self.check_acceptance.start()
-                        if self.oponnent_accepted:
-                            queue_status = set_queue_vars(state=False)
+                        if self._oponnent_accepted:
+                            set_queue_vars(state=False)
                             game = AschanArena3_Game()
                             game.run_processes()
 
@@ -441,12 +449,12 @@ class H5_Lobby(BasicWindow):
             self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height)
         )
 
-        if not self.get_time:
+        if not self._get_time:
             self.start_time = time.time()
-            self.get_time = True
+            self._get_time = True
         minutes, seconds = calculate_time_passed(self.start_time)
 
-        if not self.found_game:
+        if not self._found_game:
             HEADER_TEXT = self.get_font(self.font_size[0]).render(
                 f"Waiting for opponent: {minutes}:{seconds:02d}",
                 True,
@@ -474,15 +482,15 @@ class H5_Lobby(BasicWindow):
         OPONNENT_RECT = None
         PROGRESS_BAR = None
 
-        if self.found_game:
-            if not self.elapsed_time:
-                self.elapsed_time = time.time()
-            if not self.game_found_music:
-                self.queue_channel = play_on_empty(
+        if self._found_game:
+            if not self._elapsed_time:
+                self._elapsed_time = time.time()
+            if not self._game_found_music:
+                self._queue_channel = play_on_empty(
                     "resources/match_found.wav", volume=bg_sound_volume
                 )
                 pygame.mixer.Channel(0).set_volume(0.0)
-                self.game_found_music = True
+                self._game_found_music = True
 
             HEADER_TEXT = self.get_font(self.font_size[0]).render(
                 "GAME FOUND", True, self.text_color
@@ -493,11 +501,11 @@ class H5_Lobby(BasicWindow):
                     self.SCREEN.get_height() / 2.4,
                 )
             )
-            if self.player_accepted:
-                information_str = f"Waiting for {self.opponent_nickname} to accept..."
+            if self._player_accepted:
+                information_str = f"Waiting for {self._opponent_nickname} to accept..."
             else:
                 information_str = (
-                    f"{self.opponent_nickname} - {self.oponnent_ranking_points} RP"
+                    f"{self._opponent_nickname} - {self.oponnent_ranking_points} RP"
                 )
             OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
                 information_str,
@@ -667,8 +675,8 @@ class H5_Lobby(BasicWindow):
                 if response.status_code == 200:
                     json_response = response.json()
                     if json_response.get("game_found"):
-                        self.found_game = True
-                        self.opponent_nickname = json_response.get("oponnent")[0]
+                        self._found_game = True
+                        self._opponent_nickname = json_response.get("oponnent")[0]
                         self.oponnent_ranking_points = json_response.get("oponnent")[1]
                         break
 
@@ -687,7 +695,7 @@ class H5_Lobby(BasicWindow):
                 if response.status_code == 200:
                     json_response = response.json()
                     if json_response.get("oponnent_accepted"):
-                        self.oponnent_accepted = True
+                        self._oponnent_accepted = True
                         break
 
             except Exception as e:

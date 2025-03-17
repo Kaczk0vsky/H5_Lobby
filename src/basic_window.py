@@ -74,7 +74,7 @@ class BasicWindow:
         sys.exit()
 
     def get_font(self, font_size: int = 75) -> pygame.font.Font:
-        return pygame.font.Font("resources/Quivira.otf", font_size)
+        return pygame.font.Font("resources/ASansrounded.ttf", font_size)
 
     def create_window_elements(self, is_extended: bool = False) -> None:
         self.BG = pygame.image.load(
