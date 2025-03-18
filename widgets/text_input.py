@@ -55,9 +55,9 @@ class TextInput:
     __id = 0
     _instances = []
     _tab_pressed = False
-    _enter_pressed = False
     _backspace_pressed = False
     _time_constant = 100
+    _chars_deleted = 0
 
     def __init__(
         self,
@@ -88,6 +88,7 @@ class TextInput:
         self.active = is_active
         self.last_backspace_time = 0
         self.scroll_offset = 0
+        self.enter_pressed = False
 
         TextInput.__id += 1
         TextInput._instances.append(self)
@@ -113,7 +114,7 @@ class TextInput:
                     if not self._tab_pressed:
                         self.jump_to_next_input()
                 elif event.key == pygame.K_RETURN:
-                    TextInput._enter_pressed = True
+                    self.enter_pressed = True
                 elif event.key == pygame.K_ESCAPE:
                     self.active = False
                 else:
@@ -127,9 +128,11 @@ class TextInput:
             if self.active:
                 if event.key == pygame.K_BACKSPACE:
                     self._backspace_pressed = False
-                for instance in TextInput._instances:
+                    self._chars_deleted = 0
+                    self._time_constant = 100
+                for instance in self._instances:
                     instance._tab_pressed = False
-                    TextInput._enter_pressed = False
+                    self.enter_pressed = False
 
         self.txt_surface = self.font.render(
             len(self.text) * "*" if self.hide_text else self.text,
@@ -145,8 +148,11 @@ class TextInput:
     def update(self) -> None:
         current_time = pygame.time.get_ticks()
         if self.active and self._backspace_pressed:
-            if current_time - self.last_backspace_time > TextInput._time_constant:
+            if current_time - self.last_backspace_time > self._time_constant:
                 if self.text:
+                    self._chars_deleted += 1
+                    if self._chars_deleted == 5:
+                        self._time_constant = 40
                     self.text = self.text[:-1]
                     if self.hidden_text:
                         self.hidden_text = self.hidden_text[:-1]
@@ -175,12 +181,12 @@ class TextInput:
         next_id = self.id + 1
 
         next_instance = None
-        for instance in TextInput._instances:
+        for instance in self._instances:
             if instance.id == next_id:
                 next_instance = instance
                 break
         if not next_instance:
-            next_instance = TextInput._instances[0]
+            next_instance = self._instances[0]
 
         next_instance.active = True
         next_instance._tab_pressed = True

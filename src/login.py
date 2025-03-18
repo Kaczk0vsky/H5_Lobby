@@ -161,7 +161,7 @@ class LoginWindow(BasicWindow):
                     self.quit_game_handling()
                 for input in INPUT_BOXES:
                     input.event(event)
-                    if input._enter_pressed == True and input.active:
+                    if input.enter_pressed == True and input.active:
                         self.login_player(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -321,7 +321,7 @@ class LoginWindow(BasicWindow):
                     self.quit_game_handling()
                 for input in INPUT_BOXES:
                     input.event(event)
-                    if input._enter_pressed == True and input.active:
+                    if input.enter_pressed == True and input.active:
                         self.register_new_player(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -451,7 +451,7 @@ class LoginWindow(BasicWindow):
                     self.quit_game_handling()
                 for input in INPUT_BOXES:
                     input.event(event)
-                    if input._enter_pressed == True and input.active:
+                    if input.enter_pressed == True and input.active:
                         self.set_new_password(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
