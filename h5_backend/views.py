@@ -245,7 +245,10 @@ def check_if_oponnent_accepted(request):
                 else player_matched.player_1
             )
 
-            if oponnent.player_state == "accepted":
+            if (
+                oponnent.player_state == "accepted"
+                or oponnent.player_state == "playing"
+            ):
                 oponnent.player_state = "playing"
                 player.player_state = "playing"
 
