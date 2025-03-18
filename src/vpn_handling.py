@@ -60,7 +60,7 @@ class SoftEtherClient:
     def create_new_client(self):
         vpn_server_ip = self.server_url
         vpn_hub = self.hub_name
-        vpn_port = "443"
+        vpn_port = "5555"
 
         commands = [
             f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD NicCreate VPN',
