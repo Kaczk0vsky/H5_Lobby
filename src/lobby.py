@@ -18,6 +18,7 @@ from src.basic_window import BasicWindow
 from src.run_ashan_arena import AschanArena3_Game
 from src.helpers import play_on_empty, calculate_time_passed
 from src.custom_thread import CustomThread
+from src.decorators import run_in_thread
 from widgets.button import Button
 from widgets.option_box import OptionBox
 from widgets.progress_bar import ProgressBar
@@ -397,14 +398,9 @@ class H5_Lobby(BasicWindow):
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
                                 self._player_accepted = True
                                 self.remove_from_queue(is_accepted=True)
-                                self.check_acceptance = CustomThread(
-                                    target=self.check_if_oponnent_accepted, deamon=True
+                                self.check_acceptance = (
+                                    self.check_if_oponnent_accepted()
                                 )
-                                self.check_acceptance.start()
-                        if self._oponnent_accepted:
-                            set_queue_vars(state=False)
-                            game = AschanArena3_Game()
-                            game.run_processes()
 
                     if self._window_overlay:
                         if self._error_status:
@@ -413,6 +409,12 @@ class H5_Lobby(BasicWindow):
                                     self._queue_canceled = False
                                 self._window_overlay = False
                                 self._error_status = False
+
+            if self._oponnent_accepted:
+                pygame.mixer.Channel(self._queue_channel).stop()
+                set_queue_vars(state=False)
+                game = AschanArena3_Game()
+                game.run_processes()
 
             if self._queue_canceled:
                 error_text = "Queue has been declined"
@@ -685,6 +687,7 @@ class H5_Lobby(BasicWindow):
 
             time.sleep(random.randint(1, 5))
 
+    @run_in_thread
     def check_if_oponnent_accepted(self):
         url = f"http://{env_dict["SERVER_URL"]}:8000/check_if_oponnent_accepted/"
         data = {"nickname": self.client_config["nickname"]}
