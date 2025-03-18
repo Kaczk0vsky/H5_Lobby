@@ -47,6 +47,9 @@ class TextInput:
 
         set_active(screen: pygame.Surface) -> None:
             Activates the input box and redraws it on the screen.
+
+        update_text_surface() -> None:
+            Calculates the offset value for the text render fucntion.
     """
 
     __id = 0
@@ -84,6 +87,7 @@ class TextInput:
         )
         self.active = is_active
         self.last_backspace_time = 0
+        self.scroll_offset = 0
 
         TextInput.__id += 1
         TextInput._instances.append(self)
@@ -152,11 +156,17 @@ class TextInput:
                         self.text_color,
                     )
                 self.last_backspace_time = current_time
+        self.update_text_surface()
 
     def draw(self, screen: pygame.Surface) -> None:
         fill_color = self.fill_active if self.active else self.fill_inactive
         pygame.draw.rect(screen, fill_color, self.rect)
-        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
+        text_surface_clipped = pygame.Surface(
+            (self.rect.width - 10, self.rect.height), pygame.SRCALPHA
+        )
+        text_surface_clipped.blit(self.txt_surface, (-self.scroll_offset, 0))
+        screen.blit(text_surface_clipped, (self.rect.x + 5, self.rect.y + 5))
+
         pygame.draw.rect(screen, self.text_color, self.rect, 2)
 
     def jump_to_next_input(self) -> None:
@@ -178,3 +188,10 @@ class TextInput:
     def set_active(self, screen: pygame.Surface) -> None:
         self.active = True
         self.draw(screen)
+
+    def update_text_surface(self) -> None:
+        text_width = self.txt_surface.get_width()
+        if text_width > self.rect.width - 10:
+            self.scroll_offset = text_width - (self.rect.width - 10)
+        else:
+            self.scroll_offset = 0
