@@ -27,7 +27,7 @@ def check_for_missing_paths() -> dict:
         path_str = str(data["game"]["game_path"]).lower()
         if "bin".lower() not in path_str:
             data["game"]["game_path"] = easygui.diropenbox(
-                msg="Plese select the path to AshanArena3.exe",
+                msg="Plese select the path to directory with Arena3.exe",
                 title="AshanArena3",
                 default="*",
             )
@@ -36,7 +36,7 @@ def check_for_missing_paths() -> dict:
         path_str = str(data["soft_ether"]["vpn_path"]).lower()
         if "SoftEther".lower() not in path_str:
             data["soft_ether"]["vpn_path"] = easygui.diropenbox(
-                msg="Plese select the path to SoftEtherVPN.exe",
+                msg="Plese select the path to directory with SoftEtherVPN.exe",
                 title="SoftEtherVPN",
             )
             is_saved = True
