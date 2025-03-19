@@ -2,6 +2,7 @@ import subprocess
 
 from celery import shared_task
 from django.db import transaction
+from django.db.models import Q
 
 from h5_backend.models import Player, PlayersMatched
 
@@ -48,10 +49,15 @@ def check_queue():
         player2 = players_in_queue[1]
 
         with transaction.atomic():
+            player1 = Player.objects.select_for_update().get(id=player1.id)
+            player2 = Player.objects.select_for_update().get(id=player2.id)
             if not PlayersMatched.objects.filter(
-                player_1=player1, player_2=player2
+                Q(player_1=player1, player_2=player2)
+                | Q(player_1=player2, player_2=player1)
             ).exists():
-                PlayersMatched.objects.create(player_1=player1, player_2=player2)
+                PlayersMatched.objects.create(
+                    player_1=player1, player_2=player2, to_delete=False
+                )
 
             player1.player_state = Player.WAITING_ACCEPTANCE
             player2.player_state = Player.WAITING_ACCEPTANCE
