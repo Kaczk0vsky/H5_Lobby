@@ -96,7 +96,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             pos=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Login",
-            font=self.get_font(font_size=30),
+            font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -105,7 +105,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Register",
-            font=self.get_font(font_size=30),
+            font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -114,7 +114,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.LONG_BUTTON_HIGHLIGHTED,
             pos=(self.buttons_pos[0], self.buttons_pos[1] + 130),
             text_input="Forgot Password",
-            font=self.get_font(font_size=30),
+            font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -264,7 +264,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             pos=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Submit",
-            font=self.get_font(font_size=30),
+            font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -273,7 +273,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Back",
-            font=self.get_font(font_size=30),
+            font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -405,7 +405,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             pos=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Submit",
-            font=self.get_font(font_size=30),
+            font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -414,7 +414,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Back",
-            font=self.get_font(font_size=30),
+            font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
