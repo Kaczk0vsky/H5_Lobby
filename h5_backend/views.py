@@ -189,19 +189,20 @@ def get_players_matched(request):
             data = json.loads(request.body.decode("utf-8"))
             nickname = data.get("nickname")
 
-            players_1_list = list(
-                PlayersMatched.objects.values_list("player_1__nickname", flat=True)
-            )
-            players_2_list = list(
-                PlayersMatched.objects.values_list("player_2__nickname", flat=True)
-            )
-            players_list = players_1_list + players_2_list
-            player = Player.objects.get(nickname=nickname)
-            player_matched = PlayersMatched.objects.get(
-                Q(player_1=player) | Q(player_2=player)
-            )
+            player = Player.objects.filter(nickname=nickname).first()
+            if not player:
+                return JsonResponse(
+                    {"success": False, "error": "Player not found"}, status=404
+                )
 
-            oponnent = (
+            player_matched = PlayersMatched.objects.filter(
+                Q(player_1=player) | Q(player_2=player)
+            ).first()
+
+            if not player_matched:
+                return JsonResponse({"success": False, "game_found": False})
+
+            opponent = (
                 player_matched.player_2
                 if player == player_matched.player_1
                 else player_matched.player_1
@@ -210,8 +211,8 @@ def get_players_matched(request):
             return JsonResponse(
                 {
                     "success": True,
-                    "game_found": nickname in players_list,
-                    "oponnent": [oponnent.nickname, oponnent.ranking_points],
+                    "game_found": True,
+                    "opponent": [opponent.nickname, opponent.ranking_points],
                 }
             )
 

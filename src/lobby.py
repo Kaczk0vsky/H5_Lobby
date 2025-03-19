@@ -391,7 +391,8 @@ class H5_Lobby(BasicWindow):
                     if self._queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
-                            pygame.mixer.Channel(self._queue_channel).stop()
+                            if self._queue_channel:
+                                pygame.mixer.Channel(self._queue_channel).stop()
                             set_queue_vars(state=False)
                             self.remove_from_queue(is_accepted=False)
                         if ACCEPT_QUEUE is not None:
@@ -678,8 +679,8 @@ class H5_Lobby(BasicWindow):
                     json_response = response.json()
                     if json_response.get("game_found"):
                         self._found_game = True
-                        self._opponent_nickname = json_response.get("oponnent")[0]
-                        self.oponnent_ranking_points = json_response.get("oponnent")[1]
+                        self._opponent_nickname = json_response.get("opponent")[0]
+                        self.oponnent_ranking_points = json_response.get("opponent")[1]
                         break
 
             except Exception as e:
