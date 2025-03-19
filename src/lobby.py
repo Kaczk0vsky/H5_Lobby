@@ -58,7 +58,6 @@ class H5_Lobby(BasicWindow):
     _opponent_declined = False
     _player_accepted = False
     _queue_status = False
-    _queue_canceled = False
     _error_status = False
     _window_overlay = False
     _update_queue_status = False
@@ -409,6 +408,7 @@ class H5_Lobby(BasicWindow):
                         pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                         pygame.mixer.Channel(self._queue_channel).stop()
                         set_queue_vars(state=False)
+                        set_all_buttons_active(True)
                         self.remove_from_queue(is_accepted=False)
                         continue
 
@@ -466,9 +466,11 @@ class H5_Lobby(BasicWindow):
 
             if self._opponent_declined:
                 self._update_queue_status = True
+                self._opponent_declined = False
                 self._found_game = False
                 self._player_accepted = False
                 self._game_found_music = False
+                self._elapsed_time = None
                 pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                 if self._queue_channel:
                     pygame.mixer.Channel(self._queue_channel).stop()
