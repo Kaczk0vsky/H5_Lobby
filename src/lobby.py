@@ -60,6 +60,7 @@ class H5_Lobby(BasicWindow):
     _queue_canceled = False
     _error_status = False
     _window_overlay = False
+    _update_queue_status = False
     _elapsed_time = None
     _queue_channel = None
     _opponent_nickname = ""
@@ -83,7 +84,7 @@ class H5_Lobby(BasicWindow):
         )
 
     def main_menu(self):
-        def set_queue_vars(state: bool = False) -> bool:
+        def set_queue_vars(state: bool = False) -> None:
             self._game_found_music = state
             self._get_time = state
             self._found_game = state
@@ -93,6 +94,13 @@ class H5_Lobby(BasicWindow):
             self._elapsed_time = None
             self._queue_channel = None
             self._opponent_nickname = ""
+
+        def set_all_buttons_active(is_active: bool = False) -> None:
+            FIND_GAME_BUTTON.set_active(is_active)
+            VIEW_STATISTICS.set_active(is_active)
+            NEWS.set_active(is_active)
+            MY_PROFILE.set_active(is_active)
+            # OPTIONS_BUTTON.set_active(is_active)
 
         self.button_dims = (
             self.config["screen_width"] / 9,
@@ -176,12 +184,20 @@ class H5_Lobby(BasicWindow):
             self.ACCEPT_BUTTON_HIGHLIGHTED,
             self.button_dims,
         )
+        self.ACCEPT_BUTTON_INACTIVE = pygame.transform.scale(
+            self.ACCEPT_BUTTON_INACTIVE,
+            self.button_dims,
+        )
         self.CANCEL_BUTTON = pygame.transform.scale(
             self.CANCEL_BUTTON,
             self.button_dims,
         )
         self.CANCEL_BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.CANCEL_BUTTON_HIGHLIGHTED,
+            self.button_dims,
+        )
+        self.CANCEL_BUTTON_INACTIVE = pygame.transform.scale(
+            self.CANCEL_BUTTON_INACTIVE,
             self.button_dims,
         )
         self.PROGRESS_BAR_FRAME = pygame.transform.scale(
@@ -197,8 +213,9 @@ class H5_Lobby(BasicWindow):
             (60, 80),
         )
         FIND_GAME_BUTTON = Button(
-            image=self.BUTTON,
-            image_highlited=self.BUTTON_HIGHLIGHTED,
+            image=self.CANCEL_BUTTON,
+            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
+            image_inactive=self.CANCEL_BUTTON_INACTIVE,
             pos=(
                 830 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -207,10 +224,12 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
         )
         VIEW_STATISTICS = Button(
-            image=self.BUTTON,
-            image_highlited=self.BUTTON_HIGHLIGHTED,
+            image=self.CANCEL_BUTTON,
+            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
+            image_inactive=self.CANCEL_BUTTON_INACTIVE,
             pos=(
                 1080 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -219,10 +238,12 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
         )
         NEWS = Button(
-            image=self.BUTTON,
-            image_highlited=self.BUTTON_HIGHLIGHTED,
+            image=self.CANCEL_BUTTON,
+            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
+            image_inactive=self.CANCEL_BUTTON_INACTIVE,
             pos=(
                 1330 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -231,10 +252,12 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
         )
         MY_PROFILE = Button(
-            image=self.BUTTON,
-            image_highlited=self.BUTTON_HIGHLIGHTED,
+            image=self.CANCEL_BUTTON,
+            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
+            image_inactive=self.CANCEL_BUTTON_INACTIVE,
             pos=(
                 1580 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -243,6 +266,7 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
         )
         PLAYER_PROFILE = Button(
             image=self.ICON_SQUARE,
@@ -324,19 +348,19 @@ class H5_Lobby(BasicWindow):
                 OPTIONS_BUTTON,
                 QUIT_BUTTON,
             ]:
-                button.change_color(MENU_MOUSE_POS)
-                button.update(self.SCREEN, MENU_MOUSE_POS)
+                button.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self._queue_status:
-                (
-                    CANCEL_QUEUE,
-                    ACCEPT_QUEUE,
-                    HEADER_TEXT,
-                    HEADER_RECT,
-                    OPONNENT_TEXT,
-                    OPONNENT_RECT,
-                    PROGRESS_BAR,
-                ) = self.queue_window()
+                if self._update_queue_status:
+                    (
+                        CANCEL_QUEUE,
+                        ACCEPT_QUEUE,
+                        OPONNENT_TEXT,
+                        OPONNENT_RECT,
+                        PROGRESS_BAR,
+                    ) = self.queue_window()
+                    ACCEPT_QUEUE.set_active(False) if self._player_accepted else None
+                    self._update_queue_status = False
 
                 self.SCREEN.blit(
                     self.SMALLER_WINDOWS_BG,
@@ -345,15 +369,34 @@ class H5_Lobby(BasicWindow):
                         360 * transformation_factors[self.transformation_option][1],
                     ),
                 )
-                self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
 
-                CANCEL_QUEUE.change_color(MENU_MOUSE_POS)
-                CANCEL_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
+                CANCEL_QUEUE.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 if ACCEPT_QUEUE is not None:
-                    ACCEPT_QUEUE.change_color(MENU_MOUSE_POS)
-                    ACCEPT_QUEUE.update(self.SCREEN, MENU_MOUSE_POS)
-                if HEADER_TEXT is not None and HEADER_RECT is not None:
-                    self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
+                    ACCEPT_QUEUE.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                if not self._found_game:
+                    minutes, seconds = calculate_time_passed(self.start_time)
+                    HEADER_TEXT = self.get_font(self.font_size[0]).render(
+                        f"Waiting for opponent: {minutes}:{seconds:02d}",
+                        True,
+                        self.text_color,
+                    )
+                    HEADER_RECT = HEADER_TEXT.get_rect(
+                        center=(
+                            self.SCREEN.get_width() / 2,
+                            self.SCREEN.get_height() / 2.4,
+                        )
+                    )
+                else:
+                    HEADER_TEXT = self.get_font(self.font_size[0]).render(
+                        "GAME FOUND", True, self.text_color
+                    )
+                    HEADER_RECT = HEADER_TEXT.get_rect(
+                        center=(
+                            self.SCREEN.get_width() / 2,
+                            self.SCREEN.get_height() / 2.4,
+                        )
+                    )
+                self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
                 if OPONNENT_TEXT is not None and OPONNENT_RECT is not None:
                     self.SCREEN.blit(OPONNENT_TEXT, OPONNENT_RECT)
                 if PROGRESS_BAR is not None and not self._player_accepted:
@@ -373,7 +416,9 @@ class H5_Lobby(BasicWindow):
                     self.quit_game_handling()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
+                        self._update_queue_status = True
                         self._queue_status = True
+                        set_all_buttons_active(is_active=False)
                         self.add_to_queue()
                         continue
                     if VIEW_STATISTICS.check_for_input(MENU_MOUSE_POS):
@@ -390,6 +435,7 @@ class H5_Lobby(BasicWindow):
                         self.quit_game_handling()
                     if self._queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
+                            set_all_buttons_active(is_active=True)
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                             if self._queue_channel:
                                 pygame.mixer.Channel(self._queue_channel).stop()
@@ -397,7 +443,9 @@ class H5_Lobby(BasicWindow):
                             self.remove_from_queue(is_accepted=False)
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
+                                self._update_queue_status = True
                                 self._player_accepted = True
+                                set_all_buttons_active(is_active=False)
                                 self.remove_from_queue(is_accepted=True)
                                 self.check_if_oponnent_accepted()
 
@@ -436,10 +484,8 @@ class H5_Lobby(BasicWindow):
 
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (x_position, y_position))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                RETURN_BUTTON.change_color(MENU_MOUSE_POS)
-                RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
-            if self._oponnent_accepted:
-                print(self._player_accepted, self._oponnent_accepted)
+                RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+
             pygame.display.update()
 
     def queue_window(self):
@@ -454,20 +500,6 @@ class H5_Lobby(BasicWindow):
         if not self._get_time:
             self.start_time = time.time()
             self._get_time = True
-        minutes, seconds = calculate_time_passed(self.start_time)
-
-        if not self._found_game:
-            HEADER_TEXT = self.get_font(self.font_size[0]).render(
-                f"Waiting for opponent: {minutes}:{seconds:02d}",
-                True,
-                self.text_color,
-            )
-            HEADER_RECT = HEADER_TEXT.get_rect(
-                center=(
-                    self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() / 2.4,
-                )
-            )
 
         CANCEL_BUTTON = Button(
             image=self.CANCEL_BUTTON,
@@ -494,15 +526,6 @@ class H5_Lobby(BasicWindow):
                 pygame.mixer.Channel(0).set_volume(0.0)
                 self._game_found_music = True
 
-            HEADER_TEXT = self.get_font(self.font_size[0]).render(
-                "GAME FOUND", True, self.text_color
-            )
-            HEADER_RECT = HEADER_TEXT.get_rect(
-                center=(
-                    self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() / 2.4,
-                )
-            )
             if self._player_accepted:
                 information_str = f"Waiting for {self._opponent_nickname} to accept..."
             else:
@@ -523,20 +546,24 @@ class H5_Lobby(BasicWindow):
             ACCEPT_BUTTON = Button(
                 image=self.ACCEPT_BUTTON,
                 image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
+                image_inactive=self.ACCEPT_BUTTON_INACTIVE,
                 pos=(overlay_width * 1.3, overlay_height * 1.8),
                 text_input="Accept",
                 font=self.get_font(self.font_size[1]),
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
+                inactive_color=self.inactive_color,
             )
             CANCEL_BUTTON = Button(
                 image=self.CANCEL_BUTTON,
                 image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
+                image_inactive=self.CANCEL_BUTTON_INACTIVE,
                 pos=(overlay_width * 1.7, overlay_height * 1.8),
                 text_input="Cancel",
                 font=self.get_font(self.font_size[1]),
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
+                inactive_color=self.inactive_color,
             )
             if not self._player_accepted:
                 PROGRESS_BAR = ProgressBar(
@@ -550,8 +577,6 @@ class H5_Lobby(BasicWindow):
         return (
             CANCEL_BUTTON,
             ACCEPT_BUTTON,
-            HEADER_TEXT,
-            HEADER_RECT,
             OPONNENT_TEXT,
             OPONNENT_RECT,
             PROGRESS_BAR,
@@ -599,8 +624,7 @@ class H5_Lobby(BasicWindow):
 
             self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
 
-            BACK_BUTTON.change_color(OPTIONS_MOUSE_POS)
-            BACK_BUTTON.update(self.SCREEN, OPTIONS_MOUSE_POS)
+            BACK_BUTTON.handle_button(self.SCREEN, OPTIONS_MOUSE_POS)
 
             event_list = pygame.event.get()
             for event in event_list:
@@ -678,6 +702,7 @@ class H5_Lobby(BasicWindow):
                 if response.status_code == 200:
                     json_response = response.json()
                     if json_response.get("game_found"):
+                        self._update_queue_status = True
                         self._found_game = True
                         self._opponent_nickname = json_response.get("opponent")[0]
                         self.oponnent_ranking_points = json_response.get("opponent")[1]

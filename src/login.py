@@ -195,8 +195,7 @@ class LoginWindow(BasicWindow):
 
                 CHECK_BOX_PASSWORD.update()
                 for button in buttons:
-                    button.change_color(MENU_MOUSE_POS)
-                    button.update(self.SCREEN, MENU_MOUSE_POS)
+                    button.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 for input in INPUT_BOXES:
                     input.update()
                     input.draw(self.SCREEN)
@@ -227,8 +226,7 @@ class LoginWindow(BasicWindow):
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
                 if not self._connection_timer:
-                    BACK_BUTTON.change_color(MENU_MOUSE_POS)
-                    BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                    BACK_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self._allow_login:
                 self._allow_login = False
@@ -344,10 +342,8 @@ class LoginWindow(BasicWindow):
                                 NICKNAME_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
-                REGISTER_ACCOUNT_BUTTON.change_color(MENU_MOUSE_POS)
-                REGISTER_ACCOUNT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
-                BACK_BUTTON.change_color(MENU_MOUSE_POS)
-                BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                REGISTER_ACCOUNT_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                BACK_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 for input in INPUT_BOXES:
                     input.update()
                     input.draw(self.SCREEN)
@@ -382,8 +378,7 @@ class LoginWindow(BasicWindow):
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
                 if not self._connection_timer:
-                    RETURN_BUTTON.change_color(MENU_MOUSE_POS)
-                    RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                    RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self._remove_all_widgets:
                 self._remove_all_widgets = False
@@ -476,10 +471,8 @@ class LoginWindow(BasicWindow):
                                 NICKNAME_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
-                SUBMIT_BUTTON.change_color(MENU_MOUSE_POS)
-                SUBMIT_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
-                BACK_BUTTON.change_color(MENU_MOUSE_POS)
-                BACK_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                SUBMIT_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                BACK_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 for input in INPUT_BOXES:
                     input.update()
                     input.draw(self.SCREEN)
@@ -518,8 +511,7 @@ class LoginWindow(BasicWindow):
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
                 if not self._connection_timer:
-                    RETURN_BUTTON.change_color(MENU_MOUSE_POS)
-                    RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
+                    RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self._remove_all_widgets:
                 self._remove_all_widgets = False

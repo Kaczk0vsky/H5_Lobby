@@ -41,7 +41,8 @@ class BasicWindow:
     def __init__(self):
         self.vpn_client = None
         self.text_color = "#d7fcd4"
-        self.hovering_color = "White"
+        self.hovering_color = "#FFFFFF"
+        self.inactive_color = "#A9A9A9"
         self.config = load_resolution_settings()
         self.cursor = Cursor()
 
@@ -136,12 +137,24 @@ class BasicWindow:
                     os.getcwd(), "resources/game_search/red_button_highlighted.png"
                 )
             )
+            self.CANCEL_BUTTON_INACTIVE = pygame.image.load(
+                os.path.join(
+                    os.getcwd(),
+                    "resources/game_search/red_button_inactive.png",
+                )
+            )
             self.ACCEPT_BUTTON = pygame.image.load(
                 os.path.join(os.getcwd(), "resources/game_search/green_button_dark.png")
             )
             self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.image.load(
                 os.path.join(
                     os.getcwd(), "resources/game_search/green_button_highlighted.png"
+                )
+            )
+            self.ACCEPT_BUTTON_INACTIVE = pygame.image.load(
+                os.path.join(
+                    os.getcwd(),
+                    "resources/game_search/green_button_inactive.png",
                 )
             )
             self.PROGRESS_BAR_FRAME = pygame.image.load(
