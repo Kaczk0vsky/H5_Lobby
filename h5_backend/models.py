@@ -127,6 +127,7 @@ class PlayersMatched(models.Model):
         related_name="matched_player_2",
     )
     created_at = models.TimeField(auto_now_add=True)
+    to_delete = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Found {self.player_1} vs. {self.player_2}"
+        return f"{self.player_1} vs. {self.player_2}"

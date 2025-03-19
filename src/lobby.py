@@ -398,9 +398,7 @@ class H5_Lobby(BasicWindow):
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
                                 self._player_accepted = True
                                 self.remove_from_queue(is_accepted=True)
-                                self.check_acceptance = (
-                                    self.check_if_oponnent_accepted()
-                                )
+                                self.check_if_oponnent_accepted()
 
                     if self._window_overlay:
                         if self._error_status:
@@ -410,7 +408,7 @@ class H5_Lobby(BasicWindow):
                                 self._window_overlay = False
                                 self._error_status = False
 
-            if self._oponnent_accepted:
+            if self._oponnent_accepted and self._player_accepted:
                 pygame.mixer.Channel(self._queue_channel).stop()
                 set_queue_vars(state=False)
                 game = AschanArena3_Game()
@@ -439,7 +437,8 @@ class H5_Lobby(BasicWindow):
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
                 RETURN_BUTTON.change_color(MENU_MOUSE_POS)
                 RETURN_BUTTON.update(self.SCREEN, MENU_MOUSE_POS)
-
+            if self._oponnent_accepted:
+                print(self._player_accepted, self._oponnent_accepted)
             pygame.display.update()
 
     def queue_window(self):
@@ -538,13 +537,14 @@ class H5_Lobby(BasicWindow):
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
             )
-            PROGRESS_BAR = ProgressBar(
-                position=(overlay_width * 1.5, overlay_height * 1.6),
-                dimensions=(overlay_width * 0.8, 30),
-                image_frame=self.PROGRESS_BAR_FRAME,
-                image_bg=self.PROGRESS_BAR_BG,
-                image_edge=self.PROGRESS_BAR_EDGE,
-            )
+            if not self._player_accepted:
+                PROGRESS_BAR = ProgressBar(
+                    position=(overlay_width * 1.5, overlay_height * 1.6),
+                    dimensions=(overlay_width * 0.8, 30),
+                    image_frame=self.PROGRESS_BAR_FRAME,
+                    image_bg=self.PROGRESS_BAR_BG,
+                    image_edge=self.PROGRESS_BAR_EDGE,
+                )
 
         return (
             CANCEL_BUTTON,

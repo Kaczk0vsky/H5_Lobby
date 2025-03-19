@@ -159,11 +159,10 @@ def remove_from_queue(request):
             player.player_state = player_state
             player.save()
 
-            player_matched = PlayersMatched.objects.get(
-                Q(player_1=player) | Q(player_2=player)
-            )
-
             if not is_accepted:
+                player_matched = PlayersMatched.objects.get(
+                    Q(player_1=player) | Q(player_2=player)
+                )
                 oponnent = (
                     player_matched.player_2
                     if player == player_matched.player_1
@@ -254,9 +253,12 @@ def check_if_oponnent_accepted(request):
 
                 oponnent.save()
                 player.save()
-                PlayersMatched.objects.filter(
-                    Q(player_1=player) | Q(player_2=player)
-                ).delete()
+
+                if player_matched.to_delete:
+                    player_matched.delete()
+                else:
+                    player_matched.to_delete = True
+                    player_matched.save()
 
                 return JsonResponse({"success": True, "oponnent_accepted": True})
 
