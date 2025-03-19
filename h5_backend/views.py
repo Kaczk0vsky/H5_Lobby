@@ -272,6 +272,7 @@ def check_if_oponnent_accepted(request):
             elif (
                 oponnent.player_state == "online" or oponnent.player_state == "offline"
             ):
+                player_matched.delete()
                 player.player_state = "in_queue"
                 player.save()
 
