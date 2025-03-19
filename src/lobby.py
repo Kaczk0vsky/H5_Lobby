@@ -54,7 +54,8 @@ class H5_Lobby(BasicWindow):
     _game_found_music = False
     _get_time = False
     _found_game = False
-    _oponnent_accepted = False
+    _opponent_accepted = False
+    _opponent_declined = False
     _player_accepted = False
     _queue_status = False
     _queue_canceled = False
@@ -88,7 +89,7 @@ class H5_Lobby(BasicWindow):
             self._game_found_music = state
             self._get_time = state
             self._found_game = state
-            self._oponnent_accepted = state
+            self._opponent_accepted = state
             self._player_accepted = state
             self._queue_status = state
             self._elapsed_time = None
@@ -457,11 +458,20 @@ class H5_Lobby(BasicWindow):
                                 self._window_overlay = False
                                 self._error_status = False
 
-            if self._oponnent_accepted and self._player_accepted:
+            if self._opponent_accepted and self._player_accepted:
                 pygame.mixer.Channel(self._queue_channel).stop()
                 set_queue_vars(state=False)
                 game = AschanArena3_Game()
                 game.run_processes()
+
+            if self._opponent_declined:
+                self._update_queue_status = True
+                self._found_game = False
+                self._player_accepted = False
+                self._game_found_music = False
+                pygame.mixer.Channel(0).set_volume(bg_sound_volume)
+                if self._queue_channel:
+                    pygame.mixer.Channel(self._queue_channel).stop()
 
             if self._queue_canceled:
                 error_text = "Queue has been declined"
@@ -724,7 +734,10 @@ class H5_Lobby(BasicWindow):
                 if response.status_code == 200:
                     json_response = response.json()
                     if json_response.get("oponnent_accepted"):
-                        self._oponnent_accepted = True
+                        self._opponent_accepted = True
+                        break
+                    elif json_response.get("oponnent_declined"):
+                        self._opponent_declined = True
                         break
 
             except Exception as e:

@@ -261,7 +261,27 @@ def check_if_oponnent_accepted(request):
                     player_matched.to_delete = True
                     player_matched.save()
 
-                return JsonResponse({"success": True, "oponnent_accepted": True})
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "oponnent_accepted": True,
+                        "oponnent_declined": False,
+                    }
+                )
+
+            elif (
+                oponnent.player_state == "online" or oponnent.player_state == "offline"
+            ):
+                player.player_state = "in_queue"
+                player.save()
+
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "oponnent_accepted": False,
+                        "oponnent_declined": True,
+                    }
+                )
 
             return JsonResponse({"success": True, "oponnent_accepted": False})
 
