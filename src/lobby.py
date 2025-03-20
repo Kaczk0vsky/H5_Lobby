@@ -728,7 +728,7 @@ class H5_Lobby(BasicWindow):
 
     @run_in_thread
     def check_if_oponnent_accepted(self):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/check_if_oponnent_accepted/"
+        url = f"http://{env_dict["SERVER_URL"]}:8000/check_if_opponent_accepted/"
         data = {"nickname": self.client_config["nickname"]}
 
         while True:
