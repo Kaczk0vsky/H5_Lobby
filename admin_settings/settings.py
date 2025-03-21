@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -52,11 +53,23 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# CORS Settings
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "http://52.169.83.170",
+    "http://localhost",
+    "http://127.0.0.1",
+]
+
 # CSRF Settings
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = False  # set to True for HTTPS
 CSRF_COOKIE_SAMESITE = "Lax"  # allows for CRSF in different domains
-CSRF_TRUSTED_ORIGINS = ["http://52.169.83.170"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://52.169.83.170",
+    "http://localhost",
+    "http://127.0.0.1",
+]
 
 ROOT_URLCONF = "admin_settings.urls"
 
