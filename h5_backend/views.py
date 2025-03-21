@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST, require_GET
 from django.db import transaction
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.middleware.csrf import get_token
 
 from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player, PlayersMatched
@@ -23,11 +24,8 @@ logger = logging.getLogger(__name__)
 
 @ensure_csrf_cookie
 def get_csrf_token(request):
-    response = JsonResponse({"message": "CSRF cookie set"})
-    response.set_cookie(
-        "csrftoken", request.COOKIES.get("csrftoken", ""), httponly=False
-    )
-    return response
+    token = get_token(request)
+    return JsonResponse({"csrftoken": token})
 
 
 @require_POST
