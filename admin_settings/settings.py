@@ -56,7 +56,7 @@ MIDDLEWARE = [
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = False  # set to True for HTTPS
 CSRF_COOKIE_SAMESITE = "Lax"  # allows for CRSF in different domains
-CSRF_TRUSTED_ORIGINS = [os.getenv("SERVER_URL")]
+CSRF_TRUSTED_ORIGINS = [f"http://{os.getenv("SERVER_URL")}"]
 
 ROOT_URLCONF = "admin_settings.urls"
 
