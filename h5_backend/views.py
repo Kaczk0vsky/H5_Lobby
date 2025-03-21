@@ -23,7 +23,9 @@ logger = logging.getLogger(__name__)
 
 @ensure_csrf_cookie
 def get_csrf_token(request):
+    logger.warning("Getting cookie!")
     response = JsonResponse({"message": "CSRF cookie set"})
+    logger.warning(response)
     response.set_cookie(
         "csrftoken", request.COOKIES.get("csrftoken", ""), httponly=False
     )
