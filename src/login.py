@@ -66,6 +66,8 @@ class LoginWindow(BasicWindow):
             (800, 600),
         )
 
+        self.session = requests.Session()
+
     def login_window(self):
         self.BUTTON = pygame.transform.scale(self.BUTTON, self.buttons_dims)
         self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
@@ -529,6 +531,7 @@ class LoginWindow(BasicWindow):
             "remember_password": self.client_config["remember_password"],
         }
         self._connection_timer = time.time()
+        "get_csrf_token"
 
         try:
             response = requests.post(url, json=self.client_config)
@@ -626,6 +629,15 @@ class LoginWindow(BasicWindow):
             "nickname": inputs[0].get_string(),
             "email": inputs[1].get_string(),
         }
+        csrf_token = self.get_csrf_token()
+        if not csrf_token:
+            self._window_overlay = True
+            self._wrong_credentials_status = True
+            self._error_status = True
+            return
+
+        self.client_config["crsf_token"] = csrf_token
+
         if not user_data["nickname"] or not user_data["email"]:
             self._window_overlay = True
             self._fields_empty = True
@@ -633,7 +645,10 @@ class LoginWindow(BasicWindow):
 
         if not self._error_status:
             self._connection_timer = time.time()
-            headers = {"Content-Type": "application/json"}
+            headers = {
+                "X-CSRFToken": self.csrf_token,
+                "Content-Type": "application/json",
+            }
             try:
                 response = requests.get(url, params=user_data, headers=headers)
                 if response.status_code == 200:
@@ -656,6 +671,18 @@ class LoginWindow(BasicWindow):
                 self._window_overlay = True
                 self._connection_error = True
                 self._error_status = True
+
+    def get_csrf_token(self):
+        url = f"http://{env_dict["SERVER_URL"]}:8000/get_csrf_token/"
+        try:
+            response = self.session.get(url)
+            if response.status_code == 200:
+                return response.json().get("csrftoken")
+            return None
+        except requests.exceptions.ConnectTimeout:
+            self._window_overlay = True
+            self._connection_error = True
+            self._error_status = True
 
     def run_game(self):
         self.login_window()

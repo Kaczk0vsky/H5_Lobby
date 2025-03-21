@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from django.contrib.auth.models import User
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
 from django.db.models import Q
@@ -19,6 +19,11 @@ from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player, PlayersMatched
 
 logger = logging.getLogger(__name__)
+
+
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    return JsonResponse({"csrftoken": request.COOKIES.get("csrftoken", "")})
 
 
 @require_POST
@@ -74,6 +79,7 @@ def register_new_player(request):
         )
 
 
+@csrf_protect
 @require_POST
 def login_player(request):
     try:
