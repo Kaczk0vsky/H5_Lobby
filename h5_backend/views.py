@@ -15,6 +15,7 @@ from django.db import transaction
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.middleware.csrf import get_token
+from django_ratelimit.decorators import ratelimit
 
 from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player, PlayersMatched
@@ -28,7 +29,9 @@ def get_csrf_token(request):
     return JsonResponse({"csrftoken": token})
 
 
+@csrf_protect
 @require_POST
+@ratelimit(key="ip", rate="3/m", method="POST", block=True)
 def register_new_player(request):
     load_dotenv()
     try:
@@ -83,6 +86,7 @@ def register_new_player(request):
 
 @csrf_protect
 @require_POST
+@ratelimit(key="ip", rate="3/m", method="POST", block=True)
 def login_player(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -125,7 +129,9 @@ def login_player(request):
         )
 
 
+@csrf_protect
 @require_GET
+@ratelimit(key="ip", rate="3/m", method="POST", block=True)
 def change_password(request):
     try:
         nickname = request.GET.get("nickname")

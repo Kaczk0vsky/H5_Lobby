@@ -66,6 +66,8 @@ class LoginWindow(BasicWindow):
             (800, 600),
         )
 
+        self.session = requests.Session()
+
     def login_window(self):
         self.BUTTON = pygame.transform.scale(self.BUTTON, self.buttons_dims)
         self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
@@ -522,10 +524,11 @@ class LoginWindow(BasicWindow):
 
     @run_in_thread
     def login_player(self, inputs: list):
-        self.session = requests.Session()
         url = f"http://{env_dict['SERVER_URL']}:8000/login/"
-        csrf_token = self.get_csrf_token()
-        if not csrf_token:
+        if not self.csrf_token:
+            self.csrf_token = self.get_csrf_token()
+
+        if not self.csrf_token:
             self._window_overlay = True
             self._wrong_credentials_status = True
             self._error_status = True
@@ -538,11 +541,10 @@ class LoginWindow(BasicWindow):
         }
 
         headers = {
-            "X-CSRFToken": csrf_token,
+            "X-CSRFToken": self.csrf_token,
             "Content-Type": "application/json",
         }
-
-        self.session.cookies.set("csrftoken", csrf_token)
+        self.session.cookies.set("csrftoken", self.csrf_token)
 
         self._connection_timer = time.time()
         try:
@@ -573,6 +575,15 @@ class LoginWindow(BasicWindow):
     @run_in_thread
     def register_new_player(self, inputs: list):
         url = f"http://{env_dict["SERVER_URL"]}:8000/register/"
+        if not self.csrf_token:
+            self.csrf_token = self.get_csrf_token()
+
+        if not self.csrf_token:
+            self._window_overlay = True
+            self._wrong_credentials_status = True
+            self._error_status = True
+            return
+
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
@@ -609,13 +620,18 @@ class LoginWindow(BasicWindow):
             "nickname": user_data["nickname"],
             "password": user_data["password"],
             "remember_password": False,
+            "crsf_token": self.csrf_token,
         }
 
         if not self._error_status:
+            headers = {
+                "X-CSRFToken": self.csrf_token,
+                "Content-Type": "application/json",
+            }
+            self.session.cookies.set("csrftoken", self.csrf_token)
             self._connection_timer = time.time()
-            headers = {"Content-Type": "application/json"}
             try:
-                response = requests.post(url, json=user_data, headers=headers)
+                response = self.session.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
                     self._connection_timer = None
                     self.vpn_client = SoftEtherClient(
@@ -638,6 +654,14 @@ class LoginWindow(BasicWindow):
     @run_in_thread
     def set_new_password(self, inputs: list):
         url = f"http://{env_dict["SERVER_URL"]}:8000/change_password/"
+        if not self.csrf_token:
+            self.csrf_token = self.get_csrf_token()
+        if not self.csrf_token:
+            self._window_overlay = True
+            self._wrong_credentials_status = True
+            self._error_status = True
+            return
+
         user_data = {
             "nickname": inputs[0].get_string(),
             "email": inputs[1].get_string(),
@@ -649,10 +673,14 @@ class LoginWindow(BasicWindow):
             self._error_status = True
 
         if not self._error_status:
+            headers = {
+                "X-CSRFToken": self.csrf_token,
+                "Content-Type": "application/json",
+            }
+            self.session.cookies.set("csrftoken", self.csrf_token)
             self._connection_timer = time.time()
-            headers = {"Content-Type": "application/json"}
             try:
-                response = requests.get(url, params=user_data, headers=headers)
+                response = self.session.get(url, params=user_data, headers=headers)
                 if response.status_code == 200:
                     if send_email(user_data):
                         # self._remove_all_widgets = self.vpn_client.create_new_client()
@@ -676,7 +704,6 @@ class LoginWindow(BasicWindow):
 
     def get_csrf_token(self):
         url = f"http://{env_dict['SERVER_URL']}:8000/get_csrf_token/"
-        self.session = requests.Session()
         response = self.session.get(url)
         if "csrftoken" in response.cookies:
             return response.cookies["csrftoken"]
