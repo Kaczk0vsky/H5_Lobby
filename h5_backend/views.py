@@ -113,6 +113,7 @@ def login_player(request):
             return JsonResponse(
                 {"success": False, "error": "Player profile not found"}, status=400
             )
+        return JsonResponse({"success": True})
     except json.JSONDecodeError:
         return JsonResponse(
             {"success": False, "error": "Invalid JSON format"}, status=400

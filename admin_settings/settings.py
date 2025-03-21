@@ -25,7 +25,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["52.169.83.170", "h5lobby.internal.cloudapp.net"]
+ALLOWED_HOSTS = [os.getenv("SERVER_URL"), "h5lobby.internal.cloudapp.net"]
 
 CELERY_BROKER_URL = "amqp://h5admin:Sukub0912@localhost:5672/"
 
@@ -56,7 +56,7 @@ MIDDLEWARE = [
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = False  # set to True for HTTPS
 CSRF_COOKIE_SAMESITE = "Lax"  # allows for CRSF in different domains
-CSRF_TRUSTED_ORIGINS = ["http://52.169.83.170"]
+CSRF_TRUSTED_ORIGINS = [os.getenv("SERVER_URL")]
 
 ROOT_URLCONF = "admin_settings.urls"
 

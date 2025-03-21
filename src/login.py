@@ -66,8 +66,6 @@ class LoginWindow(BasicWindow):
             (800, 600),
         )
 
-        self.session = requests.Session()
-
     def login_window(self):
         self.BUTTON = pygame.transform.scale(self.BUTTON, self.buttons_dims)
         self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
@@ -524,17 +522,32 @@ class LoginWindow(BasicWindow):
 
     @run_in_thread
     def login_player(self, inputs: list):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/login/"
+        self.session = requests.Session()
+        url = f"http://{env_dict['SERVER_URL']}:8000/login/"
+        csrf_token = self.get_csrf_token()
+        if not csrf_token:
+            self._window_overlay = True
+            self._wrong_credentials_status = True
+            self._error_status = True
+            return
+
         self.client_config = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
             "remember_password": self.client_config["remember_password"],
         }
-        self._connection_timer = time.time()
-        "get_csrf_token"
 
+        headers = {
+            "X-CSRFToken": csrf_token,
+            "Content-Type": "application/json",
+        }
+
+        self.session.cookies.set("csrftoken", csrf_token)
+
+        self._connection_timer = time.time()
         try:
-            response = requests.post(url, json=self.client_config)
+            response = self.session.post(url, json=self.client_config, headers=headers)
+
             if response.status_code == 200:
                 self._connection_timer = None
                 save_login_information(self.client_config)
@@ -629,14 +642,6 @@ class LoginWindow(BasicWindow):
             "nickname": inputs[0].get_string(),
             "email": inputs[1].get_string(),
         }
-        csrf_token = self.get_csrf_token()
-        if not csrf_token:
-            self._window_overlay = True
-            self._wrong_credentials_status = True
-            self._error_status = True
-            return
-
-        self.client_config["crsf_token"] = csrf_token
 
         if not user_data["nickname"] or not user_data["email"]:
             self._window_overlay = True
@@ -645,10 +650,7 @@ class LoginWindow(BasicWindow):
 
         if not self._error_status:
             self._connection_timer = time.time()
-            headers = {
-                "X-CSRFToken": self.csrf_token,
-                "Content-Type": "application/json",
-            }
+            headers = {"Content-Type": "application/json"}
             try:
                 response = requests.get(url, params=user_data, headers=headers)
                 if response.status_code == 200:
@@ -673,16 +675,12 @@ class LoginWindow(BasicWindow):
                 self._error_status = True
 
     def get_csrf_token(self):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/get_csrf_token/"
-        try:
-            response = self.session.get(url)
-            if response.status_code == 200:
-                return response.json().get("csrftoken")
-            return None
-        except requests.exceptions.ConnectTimeout:
-            self._window_overlay = True
-            self._connection_error = True
-            self._error_status = True
+        url = f"http://{env_dict['SERVER_URL']}:8000/get_csrf_token/"
+        self.session = requests.Session()
+        response = self.session.get(url)
+        if "csrftoken" in response.cookies:
+            return response.cookies["csrftoken"]
+        return None
 
     def run_game(self):
         self.login_window()
