@@ -18,10 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from h5_backend import views
-
 urlpatterns = [
     path("", include("h5_backend.urls")),
     path("admin/", admin.site.urls),
-    path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
 ]
