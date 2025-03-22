@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [os.getenv("SERVER_URL"), "h5lobby.internal.cloudapp.net"]
 
-CELERY_BROKER_URL = "amqp://h5admin:Sukub0912@localhost:5672/"
+CELERY_BROKER_URL = f"amqp://{os.getenv('CELERY_BROKER_LOGIN')}:{os.getenv('CELERY_BROKER_PASSWORD')}@localhost:5672/"
 
 # Application definition
 
@@ -42,7 +42,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
