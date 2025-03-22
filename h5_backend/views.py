@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+import re
 
 from dotenv import load_dotenv
 
@@ -31,7 +32,7 @@ def get_csrf_token(request):
 
 @csrf_protect
 @require_POST
-@ratelimit(key="ip", rate="3/m", method="POST", block=True)
+@ratelimit(key="user_or_ip", rate="3/m", method="POST", block=True)
 def register_new_player(request):
     load_dotenv()
     try:
@@ -51,6 +52,21 @@ def register_new_player(request):
         if not (nickname and password and email):
             return JsonResponse(
                 {"success": False, "error": "Missing required fields"}, status=400
+            )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", email):
+            return JsonResponse(
+                {"success": False, "error": "Invalid email format"}, status=400
+            )
+
+        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^&+=!]{8,}$", password):
+            return JsonResponse(
+                {"success": False, "error": "Invalid password"}, status=400
             )
 
         try:
@@ -86,7 +102,7 @@ def register_new_player(request):
 
 @csrf_protect
 @require_POST
-@ratelimit(key="ip", rate="3/m", method="POST", block=True)
+@ratelimit(key="user_or_ip", rate="3/m", method="POST", block=True)
 def login_player(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -101,6 +117,16 @@ def login_player(request):
         if not nickname.isalnum():
             return JsonResponse(
                 {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^&+=!]{8,}$", password):
+            return JsonResponse(
+                {"success": False, "error": "Invalid password"}, status=400
             )
 
         user = authenticate(username=nickname, password=password)
@@ -131,7 +157,7 @@ def login_player(request):
 
 @csrf_protect
 @require_GET
-@ratelimit(key="ip", rate="3/m", method="GET", block=True)
+@ratelimit(key="user_or_ip", rate="3/m", method="GET", block=True)
 def change_password(request):
     try:
         nickname = request.GET.get("nickname")
@@ -140,6 +166,17 @@ def change_password(request):
             return JsonResponse(
                 {"success": False, "error": "Missing required fields"}, status=400
             )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", email):
+            return JsonResponse(
+                {"success": False, "error": "Invalid email format"}, status=400
+            )
+
         try:
             user = User.objects.get(username=nickname)
             if user.email == email:
@@ -161,7 +198,7 @@ def change_password(request):
 
 @csrf_protect
 @require_POST
-@ratelimit(key="ip", rate="1/m", method="POST", block=True)
+@ratelimit(key="user_or_ip", rate="1/m", method="POST", block=True)
 def set_player_offline(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -173,6 +210,11 @@ def set_player_offline(request):
             )
 
         if not nickname.isalnum():
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
             return JsonResponse(
                 {"success": False, "error": "Invalid nickname format"}, status=400
             )
@@ -200,7 +242,7 @@ def set_player_offline(request):
 
 @csrf_protect
 @require_POST
-@ratelimit(key="ip", rate="3/m", method="POST", block=True)
+@ratelimit(key="user_or_ip", rate="3/m", method="POST", block=True)
 def add_to_queue(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -215,6 +257,12 @@ def add_to_queue(request):
             return JsonResponse(
                 {"success": False, "error": "Invalid nickname format"}, status=400
             )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
         try:
             player = Player.objects.get(nickname=nickname)
             player.player_state = "in_queue"
@@ -238,7 +286,7 @@ def add_to_queue(request):
 
 @csrf_protect
 @require_POST
-@ratelimit(key="ip", rate="3/m", method="POST", block=True)
+@ratelimit(key="user_or_ip", rate="3/m", method="POST", block=True)
 def remove_from_queue(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -252,6 +300,11 @@ def remove_from_queue(request):
             )
 
         if not nickname.isalnum():
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
             return JsonResponse(
                 {"success": False, "error": "Invalid nickname format"}, status=400
             )
@@ -300,7 +353,7 @@ def remove_from_queue(request):
 
 @csrf_protect
 @require_POST
-@ratelimit(key="ip", rate="60/m", method="POST", block=True)
+@ratelimit(key="user_or_ip", rate="60/m", method="POST", block=True)
 def get_players_matched(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -312,6 +365,11 @@ def get_players_matched(request):
             )
 
         if not nickname.isalnum():
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
             return JsonResponse(
                 {"success": False, "error": "Invalid nickname format"}, status=400
             )
@@ -356,7 +414,7 @@ def get_players_matched(request):
 
 @csrf_protect
 @require_POST
-@ratelimit(key="ip", rate="60/m", method="POST", block=True)
+@ratelimit(key="user_or_ip", rate="60/m", method="POST", block=True)
 def check_if_opponent_accepted(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -368,6 +426,11 @@ def check_if_opponent_accepted(request):
             )
 
         if not nickname.isalnum():
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
             return JsonResponse(
                 {"success": False, "error": "Invalid nickname format"}, status=400
             )
