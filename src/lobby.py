@@ -55,6 +55,7 @@ class H5_Lobby(BasicWindow):
     _get_time = False
     _found_game = False
     _opponent_accepted = False
+    _authentication_error = False
     _opponent_declined = False
     _player_accepted = False
     _queue_status = False
@@ -737,7 +738,7 @@ class H5_Lobby(BasicWindow):
             "Content-Type": "application/json",
         }
 
-        requests.post(url, json=user_data, headers=headers)
+        self.session.post(url, json=user_data, headers=headers)
 
     def scan_for_players(self):
         url = f"http://{env_dict["SERVER_URL"]}:8000/get_players_matched/"
@@ -787,7 +788,7 @@ class H5_Lobby(BasicWindow):
 
         while True:
             try:
-                response = requests.post(url, json=user_data, headers=headers)
+                response = self.session.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
                     json_response = response.json()
                     if json_response.get("oponnent_accepted"):
