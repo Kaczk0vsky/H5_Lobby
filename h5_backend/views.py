@@ -268,18 +268,24 @@ def remove_from_queue(request):
 
         if not is_accepted:
             with transaction.atomic():
-                player_matched = PlayersMatched.objects.get(
-                    Q(player_1=player) | Q(player_2=player)
-                )
-                oponnent = (
-                    player_matched.player_2
-                    if player == player_matched.player_1
-                    else player_matched.player_1
-                )
-                oponnent.player_state = "in_queue"
-                oponnent.save()
-                player_matched.delete()
-                return JsonResponse({"success": True})
+                try:
+                    player_matched = PlayersMatched.objects.get(
+                        Q(player_1=player) | Q(player_2=player)
+                    )
+                    oponnent = (
+                        player_matched.player_2
+                        if player == player_matched.player_1
+                        else player_matched.player_1
+                    )
+                    oponnent.player_state = "in_queue"
+                    oponnent.save()
+                    player_matched.delete()
+
+                except PlayersMatched.DoesNotExist:
+                    return JsonResponse(
+                        {"success": False, "error": "Match not found"}, status=400
+                    )
+        return JsonResponse({"success": True})
 
     except json.JSONDecodeError:
         return JsonResponse(
