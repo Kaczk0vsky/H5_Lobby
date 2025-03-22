@@ -67,6 +67,7 @@ class LoginWindow(BasicWindow):
         )
 
         self.session = requests.Session()
+        self.csrf_token = None
 
     def login_window(self):
         self.BUTTON = pygame.transform.scale(self.BUTTON, self.buttons_dims)
@@ -717,5 +718,7 @@ class LoginWindow(BasicWindow):
         lobby = H5_Lobby(
             vpn_client=self.vpn_client,
             client_config=self.client_config,
+            crsf_token=self.csrf_token,
+            session=self.session,
         )
         lobby.run_game()

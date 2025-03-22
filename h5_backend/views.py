@@ -131,7 +131,7 @@ def login_player(request):
 
 @csrf_protect
 @require_GET
-@ratelimit(key="ip", rate="3/m", method="POST", block=True)
+@ratelimit(key="ip", rate="3/m", method="GET", block=True)
 def change_password(request):
     try:
         nickname = request.GET.get("nickname")
@@ -159,7 +159,9 @@ def change_password(request):
         )
 
 
+@csrf_protect
 @require_POST
+@ratelimit(key="ip", rate="1/m", method="POST", block=True)
 def set_player_offline(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -196,7 +198,9 @@ def set_player_offline(request):
         )
 
 
+@csrf_protect
 @require_POST
+@ratelimit(key="ip", rate="3/m", method="POST", block=True)
 def add_to_queue(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -232,7 +236,9 @@ def add_to_queue(request):
         )
 
 
+@csrf_protect
 @require_POST
+@ratelimit(key="ip", rate="3/m", method="POST", block=True)
 def remove_from_queue(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -286,7 +292,9 @@ def remove_from_queue(request):
         )
 
 
+@csrf_protect
 @require_POST
+@ratelimit(key="ip", rate="60/m", method="POST", block=True)
 def get_players_matched(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -340,7 +348,9 @@ def get_players_matched(request):
         )
 
 
+@csrf_protect
 @require_POST
+@ratelimit(key="ip", rate="60/m", method="POST", block=True)
 def check_if_opponent_accepted(request):
     try:
         data = json.loads(request.body.decode("utf-8"))

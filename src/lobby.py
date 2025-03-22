@@ -65,11 +65,19 @@ class H5_Lobby(BasicWindow):
     _queue_channel = None
     _opponent_nickname = ""
 
-    def __init__(self, vpn_client: object, client_config: dict):
+    def __init__(
+        self,
+        vpn_client: object,
+        client_config: dict,
+        crsf_token: str,
+        session: requests.Session,
+    ):
         BasicWindow.__init__(self)
 
         self.vpn_client = vpn_client
         self.client_config = client_config
+        self.crsf_token = crsf_token
+        self.session = session
         self.transformation_option = (
             f"{self.config["screen_width"]}x{self.config["screen_hight"]}"
         )
@@ -455,6 +463,8 @@ class H5_Lobby(BasicWindow):
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
                                 if self._queue_canceled:
                                     self._queue_canceled = False
+                                elif self._authentication_error:
+                                    self._authentication_error = False
                                 self._window_overlay = False
                                 self._error_status = False
 
@@ -478,6 +488,9 @@ class H5_Lobby(BasicWindow):
 
             if self._queue_canceled:
                 error_text = "Queue has been declined"
+
+            if self._authentication_error:
+                error_text = "CRSF Token is not valid"
 
             if self._error_status:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
@@ -690,28 +703,59 @@ class H5_Lobby(BasicWindow):
 
     def add_to_queue(self):
         url = f"http://{env_dict["SERVER_URL"]}:8000/add_to_queue/"
-        data = {"nickname": self.client_config["nickname"]}
-        response = requests.post(url, json=data)
+        if not self.crsf_token:
+            self._window_overlay = True
+            self._authentication_error = True
+            self._error_status = True
+            return
+
+        user_data = {"nickname": self.client_config["nickname"]}
+        headers = {
+            "X-CSRFToken": self.crsf_token,
+            "Content-Type": "application/json",
+        }
+        response = self.session.post(url, json=user_data, headers=headers)
 
         if response.status_code == 200:
-            self.check_queue = CustomThread(target=self.scan_for_players, deamon=True)
+            self.check_queue = CustomThread(target=self.scan_for_players, daemon=True)
             self.check_queue.start()
 
     def remove_from_queue(self, is_accepted: bool):
         url = f"http://{env_dict["SERVER_URL"]}:8000/remove_from_queue/"
-        data = {
+        if not self.crsf_token:
+            self._window_overlay = True
+            self._authentication_error = True
+            self._error_status = True
+            return
+
+        user_data = {
             "nickname": self.client_config["nickname"],
             "is_accepted": is_accepted,
         }
-        requests.post(url, json=data)
+        headers = {
+            "X-CSRFToken": self.crsf_token,
+            "Content-Type": "application/json",
+        }
+
+        requests.post(url, json=user_data, headers=headers)
 
     def scan_for_players(self):
         url = f"http://{env_dict["SERVER_URL"]}:8000/get_players_matched/"
-        data = {"nickname": self.client_config["nickname"]}
+        if not self.crsf_token:
+            self._window_overlay = True
+            self._authentication_error = True
+            self._error_status = True
+            return
+
+        user_data = {"nickname": self.client_config["nickname"]}
+        headers = {
+            "X-CSRFToken": self.crsf_token,
+            "Content-Type": "application/json",
+        }
 
         while True:
             try:
-                response = requests.post(url, json=data)
+                response = self.session.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
                     json_response = response.json()
                     if json_response.get("game_found"):
@@ -729,11 +773,21 @@ class H5_Lobby(BasicWindow):
     @run_in_thread
     def check_if_oponnent_accepted(self):
         url = f"http://{env_dict["SERVER_URL"]}:8000/check_if_opponent_accepted/"
-        data = {"nickname": self.client_config["nickname"]}
+        if not self.crsf_token:
+            self._window_overlay = True
+            self._authentication_error = True
+            self._error_status = True
+            return
+
+        user_data = {"nickname": self.client_config["nickname"]}
+        headers = {
+            "X-CSRFToken": self.crsf_token,
+            "Content-Type": "application/json",
+        }
 
         while True:
             try:
-                response = requests.post(url, json=data)
+                response = requests.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
                     json_response = response.json()
                     if json_response.get("oponnent_accepted"):

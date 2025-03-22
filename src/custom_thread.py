@@ -10,9 +10,9 @@ class CustomThread(Thread):
         args=(),
         kwargs={},
         verbose=None,
-        deamon=None,
+        daemon=None,
     ):
-        super().__init__(group, target, name, args, kwargs, daemon=deamon)
+        super().__init__(group, target, name, args, kwargs, daemon=daemon)
         self._return = None
 
     def run(self):
