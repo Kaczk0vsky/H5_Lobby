@@ -44,4 +44,13 @@ env_dict = {
     "VPN_HUB_NAME": os.getenv("VPN_HUB_NAME"),
     "VPN_HUB_VPN_PASSWORD": os.getenv("VPN_HUB_VPN_PASSWORD"),
     "VPN_IPSEC_SHARED_KEY": os.getenv("VPN_IPSEC_SHARED_KEY"),
+    "PATH_TOKEN": os.getenv("PATH_TOKEN"),
+    "PATH_REGISTER": os.getenv("PATH_REGISTER"),
+    "PATH_LOGIN": os.getenv("PATH_LOGIN"),
+    "PATH_CHANGE_PASSWORD": os.getenv("PATH_CHANGE_PASSWORD"),
+    "PATH_PLAYER_OFFLINE": os.getenv("PATH_PLAYER_OFFLINE"),
+    "PATH_ADD": os.getenv("PATH_ADD"),
+    "PATH_REMOVE": os.getenv("PATH_REMOVE"),
+    "PATH_GET_PLAYERS": os.getenv("PATH_GET_PLAYERS"),
+    "PATH_CHECK_OPONNENT": os.getenv("PATH_CHECK_OPONNENT"),
 }

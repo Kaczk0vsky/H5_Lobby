@@ -703,7 +703,7 @@ class H5_Lobby(BasicWindow):
             pygame.display.update()
 
     def add_to_queue(self):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/add_to_queue/"
+        url = f"http://{env_dict["SERVER_URL"]}:8000/{env_dict["PATH_ADD"]}/"
         if not self.crsf_token:
             self._window_overlay = True
             self._authentication_error = True
@@ -722,7 +722,7 @@ class H5_Lobby(BasicWindow):
             self.check_queue.start()
 
     def remove_from_queue(self, is_accepted: bool):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/remove_from_queue/"
+        url = f"http://{env_dict["SERVER_URL"]}:8000/{env_dict["PATH_REMOVE"]}/"
         if not self.crsf_token:
             self._window_overlay = True
             self._authentication_error = True
@@ -741,7 +741,7 @@ class H5_Lobby(BasicWindow):
         self.session.post(url, json=user_data, headers=headers)
 
     def scan_for_players(self):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/get_players_matched/"
+        url = f"http://{env_dict["SERVER_URL"]}:8000/{env_dict["PATH_GET_PLAYERS"]}/"
         if not self.crsf_token:
             self._window_overlay = True
             self._authentication_error = True
@@ -773,7 +773,7 @@ class H5_Lobby(BasicWindow):
 
     @run_in_thread
     def check_if_oponnent_accepted(self):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/check_if_opponent_accepted/"
+        url = f"http://{env_dict["SERVER_URL"]}:8000/{env_dict['PATH_CHECK_OPONNENT']}/"
         if not self.crsf_token:
             self._window_overlay = True
             self._authentication_error = True

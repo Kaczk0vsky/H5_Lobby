@@ -13,8 +13,8 @@ urlpatterns = [
     path("remove_from_queue/", views.remove_from_queue, name="remove_from_queue"),
     path("get_players_matched/", views.get_players_matched, name="get_players_matched"),
     path(
-        "check_if_opponent_accepted/",
-        views.check_if_opponent_accepted,
-        name="check_if_opponent_accepted",
+        "check_if_oponnent_accepted/",
+        views.check_if_oponnent_accepted,
+        name="check_if_oponnent_accepted",
     ),
 ]

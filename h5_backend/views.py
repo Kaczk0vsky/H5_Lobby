@@ -415,7 +415,7 @@ def get_players_matched(request):
 @csrf_protect
 @require_POST
 @ratelimit(key="user_or_ip", rate="60/m", method="POST", block=True)
-def check_if_opponent_accepted(request):
+def check_if_oponnent_accepted(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
         nickname = data.get("nickname")
