@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [os.getenv("SERVER_URL"), "h5lobby.internal.cloudapp.net"]
 
@@ -53,9 +53,12 @@ MIDDLEWARE = [
 
 # CSRF Settings
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SECURE = False  # set to True for HTTPS
+CSRF_COOKIE_SECURE = True  # set to True for HTTPS
 CSRF_COOKIE_SAMESITE = "Lax"  # allows for CRSF in different domains
 CSRF_TRUSTED_ORIGINS = [f"http://{os.getenv("SERVER_URL")}"]
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = True
 
 ROOT_URLCONF = "admin_settings.urls"
 
