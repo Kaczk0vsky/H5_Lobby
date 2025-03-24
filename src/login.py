@@ -525,7 +525,7 @@ class LoginWindow(BasicWindow):
 
     @run_in_thread
     def login_player(self, inputs: list):
-        url = f"https://{env_dict['SERVER_URL']}:8443/{env_dict['PATH_LOGIN']}/"
+        url = f"https://{env_dict['SERVER_URL']}/db/{env_dict['PATH_LOGIN']}/"
         if not self.csrf_token:
             self.csrf_token = self.get_csrf_token()
 
@@ -576,7 +576,7 @@ class LoginWindow(BasicWindow):
 
     @run_in_thread
     def register_new_player(self, inputs: list):
-        url = f"https://{env_dict["SERVER_URL"]}:8443/{env_dict["PATH_REGISTER"]}/"
+        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_REGISTER"]}/"
         if not self.csrf_token:
             self.csrf_token = self.get_csrf_token()
 
@@ -656,9 +656,7 @@ class LoginWindow(BasicWindow):
 
     @run_in_thread
     def set_new_password(self, inputs: list):
-        url = (
-            f"https://{env_dict["SERVER_URL"]}:8443/{env_dict['PATH_CHANGE_PASSWORD']}/"
-        )
+        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_CHANGE_PASSWORD']}/"
         if not self.csrf_token:
             self.csrf_token = self.get_csrf_token()
         if not self.csrf_token:
@@ -709,7 +707,7 @@ class LoginWindow(BasicWindow):
                 self._error_status = True
 
     def get_csrf_token(self):
-        url = f"https://{env_dict['SERVER_URL']}:8443/{env_dict['PATH_TOKEN']}/"
+        url = f"https://{env_dict['SERVER_URL']}/db/{env_dict['PATH_TOKEN']}/"
         response = self.session.get(url)
         if "csrftoken" in response.cookies:
             return response.cookies["csrftoken"]
