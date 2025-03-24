@@ -9,7 +9,6 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.contrib.auth import authenticate
-from django.http import HttpResponse
 from django.db.models import Q
 from django.views.decorators.http import require_POST, require_GET
 from django.db import transaction
@@ -503,10 +502,3 @@ def check_if_oponnent_accepted(request):
         return JsonResponse(
             {"success": False, "error": "Something went wrong"}, status=500
         )
-
-
-# Basic request to check the response
-def ashanarena(request):
-    return HttpResponse(
-        "Greetings, Noble Warrior! Behold, the AshanArena3 is currently under construction. Take heed and return in the future, for great wonders shall await thee... Thou shalt not be disappointed!"
-    )

@@ -27,12 +27,13 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["h5-tavern.pl", "www.h5-tavern.pl"]
 
-CELERY_BROKER_URL = f"amqp://{os.getenv('CELERY_BROKER_LOGIN')}:{os.getenv('CELERY_BROKER_PASSWORD')}@localhost:5672/"
+CELERY_BROKER_URL = f"amqp://h5admin:Sukub0912@localhost:5672/"
 
 # Application definition
 
 INSTALLED_APPS = [
     "h5_backend.apps.H5BackendConfig",
+    "website.apps.WebsiteConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
