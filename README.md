@@ -237,3 +237,46 @@ sudo ufw allow 22/tcp
 
 ##### 9. (OPTIONAL - for cloud solutions) Set inbound rules for Ports
 Only needed if you use some clound hostef Virtual Machine. Open all ports that were described before.
+
+##### 10. Transfering to HTTPS
+1) `sudo apt install nginx`
+2) `pip install gunicorn`
+3) `sudo nano /etc/systemd/system/django.service`
+4) In django.service change ExecStart to: `ExecStart=/home/h5lobby/H5_Lobby/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 admin_settings.wsgi`
+5) Create a new file with `sudo nano /etc/nginx/sites-available/django` and put into it: 
+```
+server {
+    listen 80;
+    server_name yourdomain.com;
+    
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name yourdomain.com;
+
+    ssl_certificate /etc/nginx/selfsigned.crt; 
+    ssl_certificate_key /etc/nginx/selfsigned.key;
+
+    location /static/ {
+        alias /home/h5lobby/H5_Lobby/static/;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Connection "Upgrade";
+        proxy_redirect off;
+    }
+}
+```
+6) `sudo ln -s /etc/nginx/sites-available/django /etc/nginx/sites-enabled/`
+7) `sudo systemctl daemon-reload`
+8) `sudo systemctl enable nginx `
+9) `sudo systemctl restart nginx `
