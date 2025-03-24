@@ -525,7 +525,7 @@ class LoginWindow(BasicWindow):
 
     @run_in_thread
     def login_player(self, inputs: list):
-        url = f"http://{env_dict['SERVER_URL']}:8000/{env_dict['PATH_LOGIN']}/"
+        url = f"https://{env_dict['SERVER_URL']}:8443/{env_dict['PATH_LOGIN']}/"
         if not self.csrf_token:
             self.csrf_token = self.get_csrf_token()
 
@@ -542,6 +542,7 @@ class LoginWindow(BasicWindow):
         }
 
         headers = {
+            "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.csrf_token,
             "Content-Type": "application/json",
         }
@@ -575,7 +576,7 @@ class LoginWindow(BasicWindow):
 
     @run_in_thread
     def register_new_player(self, inputs: list):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/{env_dict["PATH_REGISTER"]}/"
+        url = f"https://{env_dict["SERVER_URL"]}:8443/{env_dict["PATH_REGISTER"]}/"
         if not self.csrf_token:
             self.csrf_token = self.get_csrf_token()
 
@@ -626,6 +627,7 @@ class LoginWindow(BasicWindow):
 
         if not self._error_status:
             headers = {
+                "Referer": "https://h5-tavern.pl/",
                 "X-CSRFToken": self.csrf_token,
                 "Content-Type": "application/json",
             }
@@ -655,7 +657,7 @@ class LoginWindow(BasicWindow):
     @run_in_thread
     def set_new_password(self, inputs: list):
         url = (
-            f"http://{env_dict["SERVER_URL"]}:8000/{env_dict['PATH_CHANGE_PASSWORD']}/"
+            f"https://{env_dict["SERVER_URL"]}:8443/{env_dict['PATH_CHANGE_PASSWORD']}/"
         )
         if not self.csrf_token:
             self.csrf_token = self.get_csrf_token()
@@ -677,6 +679,7 @@ class LoginWindow(BasicWindow):
 
         if not self._error_status:
             headers = {
+                "Referer": "https://h5-tavern.pl/",
                 "X-CSRFToken": self.csrf_token,
                 "Content-Type": "application/json",
             }

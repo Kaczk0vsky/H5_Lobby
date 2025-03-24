@@ -423,7 +423,7 @@ class H5_Lobby(BasicWindow):
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.quit_game_handling()
+                    self.quit_game_handling(self.crsf_token, self.session)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self._update_queue_status = True
@@ -442,7 +442,7 @@ class H5_Lobby(BasicWindow):
                     if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.options_window()
                     if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
-                        self.quit_game_handling()
+                        self.quit_game_handling(self.crsf_token, self.session)
                     if self._queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
                             set_all_buttons_active(is_active=True)
@@ -656,7 +656,7 @@ class H5_Lobby(BasicWindow):
             event_list = pygame.event.get()
             for event in event_list:
                 if event.type == pygame.QUIT:
-                    self.quit_game_handling()
+                    self.quit_game_handling(self.crsf_token, self.session)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if BACK_BUTTON.check_for_input(OPTIONS_MOUSE_POS):
                         self.main_menu()
@@ -703,7 +703,7 @@ class H5_Lobby(BasicWindow):
             pygame.display.update()
 
     def add_to_queue(self):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/{env_dict["PATH_ADD"]}/"
+        url = f"https://{env_dict["SERVER_URL"]}:8443/{env_dict["PATH_ADD"]}/"
         if not self.crsf_token:
             self._window_overlay = True
             self._authentication_error = True
@@ -712,6 +712,7 @@ class H5_Lobby(BasicWindow):
 
         user_data = {"nickname": self.client_config["nickname"]}
         headers = {
+            "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -722,7 +723,7 @@ class H5_Lobby(BasicWindow):
             self.check_queue.start()
 
     def remove_from_queue(self, is_accepted: bool):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/{env_dict["PATH_REMOVE"]}/"
+        url = f"https://{env_dict["SERVER_URL"]}:8443/{env_dict["PATH_REMOVE"]}/"
         if not self.crsf_token:
             self._window_overlay = True
             self._authentication_error = True
@@ -734,6 +735,7 @@ class H5_Lobby(BasicWindow):
             "is_accepted": is_accepted,
         }
         headers = {
+            "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -741,7 +743,7 @@ class H5_Lobby(BasicWindow):
         self.session.post(url, json=user_data, headers=headers)
 
     def scan_for_players(self):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/{env_dict["PATH_GET_PLAYERS"]}/"
+        url = f"https://{env_dict["SERVER_URL"]}:8443/{env_dict["PATH_GET_PLAYERS"]}/"
         if not self.crsf_token:
             self._window_overlay = True
             self._authentication_error = True
@@ -750,6 +752,7 @@ class H5_Lobby(BasicWindow):
 
         user_data = {"nickname": self.client_config["nickname"]}
         headers = {
+            "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -773,7 +776,9 @@ class H5_Lobby(BasicWindow):
 
     @run_in_thread
     def check_if_oponnent_accepted(self):
-        url = f"http://{env_dict["SERVER_URL"]}:8000/{env_dict['PATH_CHECK_OPONNENT']}/"
+        url = (
+            f"https://{env_dict["SERVER_URL"]}:8443/{env_dict['PATH_CHECK_OPONNENT']}/"
+        )
         if not self.crsf_token:
             self._window_overlay = True
             self._authentication_error = True
@@ -782,6 +787,7 @@ class H5_Lobby(BasicWindow):
 
         user_data = {"nickname": self.client_config["nickname"]}
         headers = {
+            "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }

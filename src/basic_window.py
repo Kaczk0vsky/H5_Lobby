@@ -65,12 +65,21 @@ class BasicWindow:
         pygame.mixer.fadeout(5000)
         pygame.quit()
 
-    def quit_game_handling(self):
+    def quit_game_handling(
+        self, crsf_token: str = None, session: requests.Session = None
+    ):
         if self.vpn_client is not None:
             self.vpn_client.set_vpn_state(False)
-            url = f"http://{env_dict["SERVER_URL"]}:8000/set_player_offline/"
-            user_data = {"nickname": self.vpn_client.user_name}
-            requests.post(url, json=user_data)
+            if crsf_token and session:
+                url = f"https://{env_dict["SERVER_URL"]}:8443/set_player_offline/"
+                headers = {
+                    "Referer": "https://h5-tavern.pl/",
+                    "X-CSRFToken": crsf_token,
+                    "Content-Type": "application/json",
+                }
+                user_data = {"nickname": self.vpn_client.user_name}
+                session.cookies.set("csrftoken", crsf_token)
+                session.post(url, json=user_data, headers=headers)
         pygame.quit()
         sys.exit()
 
