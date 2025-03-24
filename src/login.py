@@ -706,7 +706,7 @@ class LoginWindow(BasicWindow):
                 self._error_status = True
 
     def get_csrf_token(self):
-        url = f"http://{env_dict['SERVER_URL']}:8000/{env_dict['PATH_TOKEN']}/"
+        url = f"https://{env_dict['SERVER_URL']}:8443/{env_dict['PATH_TOKEN']}/"
         response = self.session.get(url)
         if "csrftoken" in response.cookies:
             return response.cookies["csrftoken"]

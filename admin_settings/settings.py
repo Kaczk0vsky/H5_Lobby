@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # TODO: set False for HTTPS
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = [os.getenv("SERVER_URL"), "h5lobby.internal.cloudapp.net"]
+ALLOWED_HOSTS = ["h5-tavern.pl", "www.h5-tavern.pl"]
 
 CELERY_BROKER_URL = f"amqp://{os.getenv('CELERY_BROKER_LOGIN')}:{os.getenv('CELERY_BROKER_PASSWORD')}@localhost:5672/"
 
@@ -55,8 +55,8 @@ MIDDLEWARE = [
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = True  # set to True for HTTPS
 CSRF_COOKIE_SAMESITE = "Lax"  # allows for CRSF in different domains
-CSRF_TRUSTED_ORIGINS = [f"https://{os.getenv('SERVER_URL')}"]
-# TODO: Uncomment for HTTPS
+# CSRF_TRUSTED_ORIGINS = [f"https://{os.getenv('SERVER_URL')}"]
+CSRF_TRUSTED_ORIGINS = ["h5-tavern.pl", "www.h5-tavern.pl"]
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = True
