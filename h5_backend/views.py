@@ -48,36 +48,14 @@ def register_new_player(request):
             UserPasswordSet {nickname} /PASSWORD:{password}
         """
 
-        if not (nickname and password and email):
+        if User.objects.filter(username=nickname).exists():
             return JsonResponse(
-                {"success": False, "error": "Missing required fields"}, status=400
+                {"success": False, "error": "Nickname already exists!"}, status=400
             )
 
-        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
+        if User.objects.filter(email=email).exists():
             return JsonResponse(
-                {"success": False, "error": "Invalid nickname format"}, status=400
-            )
-
-        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", email):
-            return JsonResponse(
-                {"success": False, "error": "Invalid email format"}, status=400
-            )
-
-        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^&+=!]{8,}$", password):
-            return JsonResponse(
-                {"success": False, "error": "Invalid password"}, status=400
-            )
-
-        try:
-            validate_email(email)
-        except ValidationError:
-            return JsonResponse(
-                {"success": False, "error": "Invalid email format"}, status=400
-            )
-
-        if not nickname.isalnum():
-            return JsonResponse(
-                {"success": False, "error": "Invalid nickname format"}, status=400
+                {"success": False, "error": "Email already in use!"}, status=400
             )
 
         with transaction.atomic():

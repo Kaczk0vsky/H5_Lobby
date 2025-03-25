@@ -117,6 +117,8 @@ class TextInput:
                     self.enter_pressed = True
                 elif event.key == pygame.K_ESCAPE:
                     self.active = False
+                elif event.key in [pygame.K_LSHIFT, pygame.K_RSHIFT, pygame.K_CAPSLOCK]:
+                    pass
                 else:
                     if self.hide_text:
                         self.text += "*"

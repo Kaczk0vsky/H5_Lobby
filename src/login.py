@@ -1,6 +1,7 @@
 import pygame
 import requests
 import time
+import re
 
 from src.global_vars import fonts_sizes, env_dict
 from src.basic_window import BasicWindow
@@ -38,10 +39,14 @@ class LoginWindow(BasicWindow):
     _error_status = False
     _connection_error = False
     _fields_empty = False
+    _wrong_nickname = False
+    _wrong_email = False
+    _wrong_password = False
     _remove_all_widgets = False
     _email_not_sent = False
     _allow_login = False
     _connection_timer = None
+    _error_message = None
 
     def __init__(self):
         BasicWindow.__init__(self)
@@ -340,6 +345,12 @@ class LoginWindow(BasicWindow):
                                     self._connection_error = False
                                 elif self._fields_empty:
                                     self._fields_empty = False
+                                elif self._wrong_nickname:
+                                    self._wrong_nickname = False
+                                elif self._wrong_password:
+                                    self._wrong_password = False
+                                elif self._wrong_email:
+                                    self._wrong_email = False
                                 self._window_overlay = False
                                 self._error_status = False
                                 NICKNAME_INPUT.set_active(self.SCREEN)
@@ -353,7 +364,23 @@ class LoginWindow(BasicWindow):
 
             if self._wrong_credentials_status:
                 self._window_overlay = True
-                error_text = "Given password is not correct!"
+                if self._error_message:
+                    error_text = self._error_message
+                    self._error_message = None
+                else:
+                    error_text = "Some of the requirements were not met!"
+
+            if self._wrong_nickname:
+                self._window_overlay = True
+                error_text = "Nickname is not correct!"
+
+            if self._wrong_password:
+                self._window_overlay = True
+                error_text = "Password is not correct!"
+
+            if self._wrong_email:
+                self._window_overlay = True
+                error_text = "Email is not correct!"
 
             if self._connection_timer:
                 time_passed = calculate_time_passed(start_time=self._connection_timer)[
@@ -601,23 +628,26 @@ class LoginWindow(BasicWindow):
                 self._error_status = True
                 return
 
-        # TODO: check if the useres already exists and email is free
-        pass
-
-        if user_data["password"] != user_data["repeat_password"]:
-            # TODO: passwords do not match handling
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", user_data["nickname"]):
             self._window_overlay = True
-            self._wrong_credentials_status = True
             self._error_status = True
+            self._wrong_nickname = True
+            return
 
-        if len(user_data["password"]) < 8:
-            # TODO: special conditions for password
+        if not re.match(
+            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^&+=!]{8,}$",
+            user_data["password"],
+        ):
             self._window_overlay = True
-            self._wrong_credentials_status = True
             self._error_status = True
+            self._wrong_password = True
+            return
 
-        # TODO: check for nickname special conditions
-        pass
+        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", user_data["email"]):
+            self._window_overlay = True
+            self._error_status = True
+            self._wrong_email = True
+            return
 
         self.client_config = {
             "nickname": user_data["nickname"],
@@ -646,8 +676,8 @@ class LoginWindow(BasicWindow):
                     self._remove_all_widgets = True
 
                 elif response.status_code == 400:
+                    self._error_message = response.text["error"]
                     self._window_overlay = True
-                    self._wrong_credentials_status = True
                     self._error_status = True
                     self._connection_timer = None
 
