@@ -494,6 +494,10 @@ class LoginWindow(BasicWindow):
                                     self._fields_empty = False
                                 elif self._email_not_sent:
                                     self._email_not_sent = False
+                                elif self._wrong_nickname:
+                                    self._wrong_nickname = False
+                                elif self._wrong_email:
+                                    self._wrong_email = False
                                 self._window_overlay = False
                                 self._error_status = False
                                 NICKNAME_INPUT.set_active(self.SCREEN)
@@ -508,6 +512,14 @@ class LoginWindow(BasicWindow):
             if self._wrong_credentials_status:
                 self._window_overlay = True
                 error_text = "User with this email doesn`t exist!"
+
+            if self._wrong_nickname:
+                self._window_overlay = True
+                error_text = "Nickname is not correct!"
+
+            if self._wrong_email:
+                self._window_overlay = True
+                error_text = "Email is not correct!"
 
             if self._connection_timer:
                 time_passed = calculate_time_passed(start_time=self._connection_timer)[
@@ -709,6 +721,19 @@ class LoginWindow(BasicWindow):
             self._window_overlay = True
             self._fields_empty = True
             self._error_status = True
+            return
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", user_data["nickname"]):
+            self._window_overlay = True
+            self._error_status = True
+            self._wrong_nickname = True
+            return
+
+        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", user_data["email"]):
+            self._window_overlay = True
+            self._error_status = True
+            self._wrong_email = True
+            return
 
         if not self._error_status:
             headers = {
@@ -722,8 +747,11 @@ class LoginWindow(BasicWindow):
                 response = self.session.get(url, params=user_data, headers=headers)
                 if response.status_code == 200:
                     if send_email(user_data):
-                        # self._remove_all_widgets = self.vpn_client.create_new_client()
                         self._remove_all_widgets = True
+                        self._window_overlay = False
+                        self._error_status = False
+                        self._connection_timer = None
+
                     else:
                         self._window_overlay = True
                         self._email_not_sent = True
