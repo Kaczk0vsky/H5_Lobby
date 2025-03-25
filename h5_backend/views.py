@@ -18,7 +18,7 @@ from django.middleware.csrf import get_token
 from django_ratelimit.decorators import ratelimit
 
 from h5_backend.tasks import add_new_user_to_vpn_server
-from h5_backend.models import Player, PlayersMatched
+from h5_backend.models import Player, PlayersMatched, Ban
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +114,12 @@ def login_player(request):
 
         try:
             player = Player.objects.get(nickname=nickname)
+            if Ban.objects.filter(player=player).exists():
+                ban_duration = Ban.objects.filter(player=player).get().get_time_left()
+                return JsonResponse(
+                    {"success": False, "error": f"You are banned for {ban_duration}"},
+                    status=400,
+                )
             player.player_state = "online"
             player.save()
         except Player.DoesNotExist:
