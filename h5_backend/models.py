@@ -151,4 +151,4 @@ class Ban(models.Model):
         return max(time_remaining, timedelta(0))
 
     def __str__(self):
-        return f"Player {self.player} - {self.duration}"
+        return f"Player {self.player} - {self.get_time_left()}"

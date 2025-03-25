@@ -190,8 +190,8 @@ class LoginWindow(BasicWindow):
                     else:
                         if self._error_status:
                             if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
-                                if self._wrong_credentials_status:
-                                    self._wrong_credentials_status = False
+                                if self._error_message:
+                                    self._error_message = False
                                 elif self._connection_error:
                                     self._connection_error = False
                                 self._window_overlay = False
@@ -208,9 +208,9 @@ class LoginWindow(BasicWindow):
                     input.update()
                     input.draw(self.SCREEN)
 
-            if self._wrong_credentials_status:
+            if self._error_message:
+                error_text = self._error_message
                 self._window_overlay = True
-                error_text = "Login doesn`t match password!"
 
             if self._connection_timer:
                 time_passed = calculate_time_passed(start_time=self._connection_timer)[
@@ -602,6 +602,9 @@ class LoginWindow(BasicWindow):
                 self._allow_login = True
 
             elif response.status_code == 400:
+                self._error_message = response.json().get(
+                    "error", "Unknown error occurred"
+                )
                 self._window_overlay = True
                 self._wrong_credentials_status = True
                 self._error_status = True

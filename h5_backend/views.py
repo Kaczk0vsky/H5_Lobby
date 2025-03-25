@@ -4,6 +4,7 @@ import logging
 import re
 
 from dotenv import load_dotenv
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.http import JsonResponse
@@ -115,11 +116,18 @@ def login_player(request):
         try:
             player = Player.objects.get(nickname=nickname)
             if Ban.objects.filter(player=player).exists():
-                ban_duration = Ban.objects.filter(player=player).get().get_time_left()
-                return JsonResponse(
-                    {"success": False, "error": f"You are banned for {ban_duration}"},
-                    status=400,
-                )
+                ban = Ban.objects.filter(player=player).get()
+                ban_duration = ban.get_time_left()
+                if ban_duration == timedelta(0):
+                    ban.delete()
+                else:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "error": f"You are banned for {ban_duration}",
+                        },
+                        status=400,
+                    )
             player.player_state = "online"
             player.save()
         except Player.DoesNotExist:
