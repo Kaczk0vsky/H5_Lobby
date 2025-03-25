@@ -560,6 +560,7 @@ class LoginWindow(BasicWindow):
                         self.client_config["nickname"],
                         self.client_config["password"],
                     )
+                    self.vpn_client.create_new_client()
                 self.vpn_client.set_vpn_state(state=True)
                 self._allow_login = True
 
@@ -641,7 +642,8 @@ class LoginWindow(BasicWindow):
                         self.client_config["nickname"],
                         self.client_config["password"],
                     )
-                    self._remove_all_widgets = self.vpn_client.create_new_client()
+                    self.vpn_client.create_new_client()
+                    self._remove_all_widgets = True
 
                 elif response.status_code == 400:
                     self._window_overlay = True

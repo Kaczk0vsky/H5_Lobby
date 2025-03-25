@@ -76,8 +76,5 @@ class SoftEtherClient:
                 time.sleep(1)
 
             except subprocess.CalledProcessError as e:
-                # TODO: error handling if crashes during one of those commands
-                print(f"Error executing command: {cmd}")
-                print(e.stderr)
                 return False
         return True
