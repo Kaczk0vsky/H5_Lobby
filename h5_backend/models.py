@@ -139,8 +139,8 @@ class Ban(models.Model):
         editable=True,
         null=True,
         blank=True,
-        db_column="player_1",
-        related_name="game_as_player_1",
+        db_column="player_banned",
+        related_name="ban_for_player",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     duration = models.DurationField(default=timedelta(days=7))
