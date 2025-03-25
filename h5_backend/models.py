@@ -143,7 +143,7 @@ class Ban(models.Model):
         related_name="ban_for_player",
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    duration = models.DurationField(default=timedelta(days=7))
+    duration = models.DurationField()
 
     def get_time_left(self):
         expiration_time = self.created_at + self.duration
