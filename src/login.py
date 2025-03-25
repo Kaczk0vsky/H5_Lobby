@@ -351,6 +351,8 @@ class LoginWindow(BasicWindow):
                                     self._wrong_password = False
                                 elif self._wrong_email:
                                     self._wrong_email = False
+                                elif self._error_message:
+                                    self._error_message = None
                                 self._window_overlay = False
                                 self._error_status = False
                                 NICKNAME_INPUT.set_active(self.SCREEN)
@@ -362,13 +364,9 @@ class LoginWindow(BasicWindow):
                     input.update()
                     input.draw(self.SCREEN)
 
-            if self._wrong_credentials_status:
+            if self._error_message:
+                error_text = self._error_message
                 self._window_overlay = True
-                if self._error_message:
-                    error_text = self._error_message
-                    self._error_message = None
-                else:
-                    error_text = "Some of the requirements were not met!"
 
             if self._wrong_nickname:
                 self._window_overlay = True
@@ -634,9 +632,12 @@ class LoginWindow(BasicWindow):
             self._wrong_nickname = True
             return
 
-        if not re.match(
-            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^&+=!]{8,}$",
-            user_data["password"],
+        if (
+            not re.match(
+                r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^&+=!]{8,}$",
+                user_data["password"],
+            )
+            or user_data["password"] != user_data["repeat_password"]
         ):
             self._window_overlay = True
             self._error_status = True
@@ -676,7 +677,9 @@ class LoginWindow(BasicWindow):
                     self._remove_all_widgets = True
 
                 elif response.status_code == 400:
-                    self._error_message = response.text["error"]
+                    self._error_message = response.json().get(
+                        "error", "Unknown error occurred"
+                    )
                     self._window_overlay = True
                     self._error_status = True
                     self._connection_timer = None
