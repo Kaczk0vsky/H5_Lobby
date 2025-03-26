@@ -3,6 +3,7 @@ import os
 import ssl
 import smtplib
 import time
+import re
 
 from email.message import EmailMessage
 
@@ -68,8 +69,44 @@ def send_email(userdata: dict[str, str]) -> bool:
             return False
 
 
-def calculate_time_passed(start_time) -> tuple[int, int]:
+def calculate_time_passed(start_time: float) -> tuple[int, int]:
     elapsed_time = round(time.time() - start_time)
     minutes = elapsed_time // 60
     seconds = elapsed_time % 60
     return minutes, seconds
+
+
+def check_input_correctnes(
+    inputs: list, text_input: dict[any, list]
+) -> dict[any, list]:
+    if "Nickname" in text_input[0][1]:
+        nickname = inputs[0].get_string()
+        if len(nickname) <= 16 and len(nickname) >= 3:
+            text_input[1][0] = True
+        else:
+            text_input[1][0] = False
+        if re.match(r"^[a-zA-Z0-9]+$", nickname):
+            text_input[2][0] = True
+        else:
+            text_input[2][0] = False
+    else:
+        password = inputs[1].get_string()
+        repeat_password = inputs[2].get_string()
+        if len(password) >= 8:
+            text_input[1][0] = True
+        else:
+            text_input[1][0] = False
+        if re.search(r"[a-z]", password) and re.search(r"[A-Z]", password):
+            text_input[2][0] = True
+        else:
+            text_input[2][0] = False
+        if re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+            text_input[3][0] = True
+        else:
+            text_input[3][0] = False
+        if password == repeat_password and text_input[1][0]:
+            text_input[4][0] = True
+        else:
+            text_input[4][0] = False
+
+    return text_input

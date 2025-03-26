@@ -104,6 +104,18 @@ class BasicWindow:
                 "resources/game_search/cancel_search_button_highlighted.png",
             )
         )
+        self.QUESTION_MARK = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/hover_boxes/qm1.png")
+        )
+        self.QUESTION_MARK_HIGHLIGHTED = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/hover_boxes/qm2.png")
+        )
+        self.CHECK_MARK = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/symbols/check.png")
+        )
+        self.UNCHECK_MARK = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/symbols/uncheck.png")
+        )
 
         if is_extended:
             self.PLAYER_LIST = pygame.image.load(
