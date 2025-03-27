@@ -1,7 +1,6 @@
 import os
 import psutil
 import time
-import pygame
 
 from src.decorators import run_in_thread
 from src.settings_reader import load_game_settings
