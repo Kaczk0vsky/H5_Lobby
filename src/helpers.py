@@ -4,6 +4,7 @@ import ssl
 import smtplib
 import time
 import re
+import pygetwindow as gw
 
 from email.message import EmailMessage
 
@@ -110,3 +111,8 @@ def check_input_correctnes(
             text_input[4][0] = False
 
     return text_input
+
+
+def get_window():
+    time.sleep(0.1)
+    return gw.getWindowsWithTitle("Heroes V of Might and Magic Ashan Arena 3 - Menu")[0]

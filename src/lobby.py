@@ -4,6 +4,7 @@ import toml
 import time
 import requests
 import random
+import ctypes
 
 from pygame.locals import *
 
@@ -15,8 +16,8 @@ from src.global_vars import (
     env_dict,
 )
 from src.basic_window import BasicWindow
-from src.run_ashan_arena import AschanArena3_Game
-from src.helpers import play_on_empty, calculate_time_passed
+from src.run_ashan_arena import AschanArena3Game
+from src.helpers import play_on_empty, calculate_time_passed, get_window
 from src.custom_thread import CustomThread
 from src.decorators import run_in_thread
 from widgets.button import Button
@@ -472,8 +473,8 @@ class H5_Lobby(BasicWindow):
             if self._opponent_accepted and self._player_accepted:
                 pygame.mixer.Channel(self._queue_channel).stop()
                 set_queue_vars(state=False)
-                game = AschanArena3_Game()
-                game.run_processes()
+                set_all_buttons_active(is_active=True)
+                self.run_arena()
 
             if self._opponent_declined:
                 self._update_queue_status = True
@@ -807,5 +808,38 @@ class H5_Lobby(BasicWindow):
 
             time.sleep(1)
 
+    def minimize_to_tray(self):
+        time.sleep(0.1)
+        self.window = get_window()
+        self.window.minimize()
+        self.window.hide()
+        pygame.display.iconify()
+
+    def maximize_from_tray(self):
+        # TODO: window blinks on white, upper part is white instead of blue
+        self.window.restore()
+        hwnd = self.window._hWnd
+        ctypes.windll.user32.ShowWindow(hwnd, 9)
+        foreground_hwnd = ctypes.windll.user32.GetForegroundWindow()
+        current_thread_id = ctypes.windll.kernel32.GetCurrentThreadId()
+        foreground_thread_id = ctypes.windll.user32.GetWindowThreadProcessId(
+            foreground_hwnd, 0
+        )
+        if foreground_thread_id != current_thread_id:
+            ctypes.windll.user32.AttachThreadInput(
+                current_thread_id, foreground_thread_id, True
+            )
+        ctypes.windll.user32.SetForegroundWindow(hwnd)
+        ctypes.windll.user32.BringWindowToTop(hwnd)
+        if foreground_thread_id != current_thread_id:
+            ctypes.windll.user32.AttachThreadInput(
+                current_thread_id, foreground_thread_id, False
+            )
+        self.play_background_music(music_path="resources/H5_main_theme.mp3")
+
     def run_game(self):
         self.main_menu()
+
+    def run_arena(self):
+        game = AschanArena3Game(self)
+        game.run_processes()
