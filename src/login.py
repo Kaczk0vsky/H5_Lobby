@@ -74,7 +74,7 @@ class LoginWindow(BasicWindow):
         self.client_config = load_client_settings()
         self.set_window_caption(title="Login")
         self.play_background_music(music_path="resources/H5_login_menu_theme.mp3")
-        self.create_window_elements()
+        self.create_login_elements()
 
         self.SCREEN = pygame.display.set_mode((800, 600))
         self.BG = pygame.transform.scale(
@@ -100,6 +100,8 @@ class LoginWindow(BasicWindow):
         self.QUESTION_MARK_HIGHLIGHTED = pygame.transform.scale(
             self.QUESTION_MARK_HIGHLIGHTED, self.hover_box_dims
         )
+        self.TEXT_INPUT = pygame.transform.scale(self.TEXT_INPUT, self.input_dims)
+
         LOGIN_TEXT = self.get_font(self.font_size[0]).render(
             "Username:", True, self.text_color
         )

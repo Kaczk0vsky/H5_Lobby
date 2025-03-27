@@ -31,8 +31,14 @@ class BasicWindow:
         get_font(font_size: int = 75) -> pygame.font.Font:
             Returns a font object with the specified size.
 
-        create_window_elements(is_extended: bool = False) -> None:
-            Loads and initializes background images and UI elements based on the extended mode.
+        create_universal_elements() -> None:
+            Loads and initializes background images and UI elements for both windows.
+
+        create_login_elements() -> None:
+            Loads and initializes background images and UI elements for login window.
+
+        create_lobby_elements() -> None:
+            Loads and initializes background images and UI elements for lobby window.
 
         error_window(text: str) -> tuple:
             Creates and returns error message UI elements, including text and a back button.
@@ -86,7 +92,7 @@ class BasicWindow:
     def get_font(self, font_size: int = 75) -> pygame.font.Font:
         return pygame.font.Font("resources/ASansrounded.ttf", font_size)
 
-    def create_window_elements(self, is_extended: bool = False) -> None:
+    def create_universal_elements(self) -> None:
         self.BG = pygame.image.load(
             os.path.join(os.getcwd(), "resources/background/background.png")
         )
@@ -104,6 +110,9 @@ class BasicWindow:
                 "resources/game_search/cancel_search_button_highlighted.png",
             )
         )
+
+    def create_login_elements(self) -> None:
+        self.create_universal_elements()
         self.QUESTION_MARK = pygame.image.load(
             os.path.join(os.getcwd(), "resources/hover_boxes/qm1.png")
         )
@@ -116,81 +125,79 @@ class BasicWindow:
         self.UNCHECK_MARK = pygame.image.load(
             os.path.join(os.getcwd(), "resources/symbols/uncheck.png")
         )
+        self.TEXT_INPUT = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/main_menu/text_input.png")
+        )
 
-        if is_extended:
-            self.PLAYER_LIST = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/background/players_online.png")
+    def create_lobby_elements(self) -> None:
+        self.create_universal_elements()
+        self.PLAYER_LIST = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/background/players_online.png")
+        )
+        self.TOP_BAR = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/main_menu/top_bar.png")
+        )
+        self.NEWS = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/news/news_window.png")
+        )
+        self.QUIT = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/close_dark.png")
+        )
+        self.QUIT_HIGHLIGHTED = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/close_highlighted.png")
+        )
+        self.ICON_SQUARE = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/iconsquare_dark.png")
+        )
+        self.ICON_SQUARE_HIGHLIGHTED = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/iconsquare_highlighted.png")
+        )
+        self.OPTIONS = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/options_dark.png")
+        )
+        self.OPTIONS_HIGHLIGHTED = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/options_highlighted.png")
+        )
+        self.SCROLL = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/scroll.png")
+        )
+        self.CANCEL_BUTTON = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/game_search/red_button_dark.png")
+        )
+        self.CANCEL_BUTTON_HIGHLIGHTED = pygame.image.load(
+            os.path.join(
+                os.getcwd(), "resources/game_search/red_button_highlighted.png"
             )
-            self.TOP_BAR = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/main_menu/top_bar.png")
+        )
+        self.CANCEL_BUTTON_INACTIVE = pygame.image.load(
+            os.path.join(
+                os.getcwd(),
+                "resources/game_search/red_button_inactive.png",
             )
-            self.NEWS = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/news/news_window.png")
+        )
+        self.ACCEPT_BUTTON = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/game_search/green_button_dark.png")
+        )
+        self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.image.load(
+            os.path.join(
+                os.getcwd(), "resources/game_search/green_button_highlighted.png"
             )
-            self.QUIT = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/buttons/close_dark.png")
+        )
+        self.ACCEPT_BUTTON_INACTIVE = pygame.image.load(
+            os.path.join(
+                os.getcwd(),
+                "resources/game_search/green_button_inactive.png",
             )
-            self.QUIT_HIGHLIGHTED = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/buttons/close_highlighted.png")
-            )
-            self.ICON_SQUARE = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/buttons/iconsquare_dark.png")
-            )
-            self.ICON_SQUARE_HIGHLIGHTED = pygame.image.load(
-                os.path.join(
-                    os.getcwd(), "resources/buttons/iconsquare_highlighted.png"
-                )
-            )
-            self.OPTIONS = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/buttons/options_dark.png")
-            )
-            self.OPTIONS_HIGHLIGHTED = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/buttons/options_highlighted.png")
-            )
-            self.SCROLL = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/buttons/scroll.png")
-            )
-            self.CANCEL_BUTTON = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/game_search/red_button_dark.png")
-            )
-            self.CANCEL_BUTTON_HIGHLIGHTED = pygame.image.load(
-                os.path.join(
-                    os.getcwd(), "resources/game_search/red_button_highlighted.png"
-                )
-            )
-            self.CANCEL_BUTTON_INACTIVE = pygame.image.load(
-                os.path.join(
-                    os.getcwd(),
-                    "resources/game_search/red_button_inactive.png",
-                )
-            )
-            self.ACCEPT_BUTTON = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/game_search/green_button_dark.png")
-            )
-            self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.image.load(
-                os.path.join(
-                    os.getcwd(), "resources/game_search/green_button_highlighted.png"
-                )
-            )
-            self.ACCEPT_BUTTON_INACTIVE = pygame.image.load(
-                os.path.join(
-                    os.getcwd(),
-                    "resources/game_search/green_button_inactive.png",
-                )
-            )
-            self.PROGRESS_BAR_FRAME = pygame.image.load(
-                os.path.join(
-                    os.getcwd(), "resources/progress_bar/progress_bar_frame.png"
-                )
-            )
-            self.PROGRESS_BAR_BG = pygame.image.load(
-                os.path.join(os.getcwd(), "resources/progress_bar/progress_bar_bg.png")
-            )
-            self.PROGRESS_BAR_EDGE = pygame.image.load(
-                os.path.join(
-                    os.getcwd(), "resources/progress_bar/progress_bar_edge.png"
-                )
-            )
+        )
+        self.PROGRESS_BAR_FRAME = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/progress_bar/progress_bar_frame.png")
+        )
+        self.PROGRESS_BAR_BG = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/progress_bar/progress_bar_bg.png")
+        )
+        self.PROGRESS_BAR_EDGE = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/progress_bar/progress_bar_edge.png")
+        )
 
     def error_window(self, text: str) -> tuple:
         overlay_width, overlay_height = 600, 400

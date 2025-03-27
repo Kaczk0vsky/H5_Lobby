@@ -87,7 +87,7 @@ class H5_Lobby(BasicWindow):
 
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
-        self.create_window_elements(is_extended=True)
+        self.create_lobby_elements()
 
         self.SCREEN = pygame.display.set_mode(
             (self.config["screen_width"], self.config["screen_hight"]), pygame.RESIZABLE

@@ -2,7 +2,6 @@ import os
 import psutil
 import time
 
-from src.decorators import run_in_thread
 from src.settings_reader import load_game_settings
 
 
@@ -20,11 +19,6 @@ class AschanArena3Game:
             if process.name() == self.arena_process:
                 return True
         return False
-
-    @run_in_thread
-    def scan_for_info(self):
-        if os.path.exists(os.path.join(self.game_path, "console.txt")):
-            pass
 
     def run_processes(self):
         self.lobby.minimize_to_tray()
