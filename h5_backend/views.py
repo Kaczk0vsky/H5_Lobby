@@ -40,14 +40,33 @@ def register_new_player(request):
         nickname = data.get("nickname")
         password = data.get("password")
         email = data.get("email")
-        vpn_server_ip = os.getenv("SERVER_URL")
-        vpn_server_password = os.getenv("VPN_SERVER_PASSWORD")
-        vpn_hub = os.getenv("VPN_HUB_NAME")
-        vpncmd_commands = f"""
-            Hub {vpn_hub}
-            UserCreate {nickname} /GROUP:none /REALNAME:none /NOTE:none
-            UserPasswordSet {nickname} /PASSWORD:{password}
-        """
+
+        if not (nickname and password and email):
+            return JsonResponse(
+                {"success": False, "error": "Missing required fields"}, status=400
+            )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", email):
+            return JsonResponse(
+                {"success": False, "error": "Invalid email format"}, status=400
+            )
+
+        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^&+=!]{8,}$", password):
+            return JsonResponse(
+                {"success": False, "error": "Invalid password"}, status=400
+            )
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse(
+                {"success": False, "error": "Invalid email format"}, status=400
+            )
 
         if User.objects.filter(username=nickname).exists():
             return JsonResponse(
@@ -58,6 +77,15 @@ def register_new_player(request):
             return JsonResponse(
                 {"success": False, "error": "Email already in use!"}, status=400
             )
+
+        vpn_server_ip = os.getenv("SERVER_URL")
+        vpn_server_password = os.getenv("VPN_SERVER_PASSWORD")
+        vpn_hub = os.getenv("VPN_HUB_NAME")
+        vpncmd_commands = f"""
+            Hub {vpn_hub}
+            UserCreate {nickname} /GROUP:none /REALNAME:none /NOTE:none
+            UserPasswordSet {nickname} /PASSWORD:{password}
+        """
 
         with transaction.atomic():
             User.objects.create_user(username=nickname, password=password, email=email)
