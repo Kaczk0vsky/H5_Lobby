@@ -63,28 +63,41 @@ class TextInput:
         self,
         position: tuple[float, float],
         dimensions: tuple[int, int],
-        text_color: pygame.Color = pygame.Color("black"),
-        fill_inactive: pygame.Color = pygame.Color("gray"),
-        fill_active: pygame.Color = pygame.Color("white"),
+        image: pygame.Surface,
+        title: str,
+        text_color: pygame.Color,
+        text_bg_color: pygame.Color = pygame.Color("#1e2120"),
         font_size: int = 20,
+        font_size_title: int = 16,
         text: str = "",
         is_active: bool = False,
         hide_text: bool = False,
     ):
         self.id = TextInput.__id
         self.rect = pygame.Rect(position[0], position[1], dimensions[0], dimensions[1])
+        self.rect_bg = pygame.Rect(
+            position[0] + 12.5,
+            position[1] + 12.5,
+            dimensions[0] - dimensions[0] * 0.085,
+            dimensions[1] - dimensions[1] * 0.45,
+        )
+        self.image = image
+        self.title = title
         self.text_color = text_color
-        self.fill_inactive = fill_inactive
-        self.fill_active = fill_active
+        self.text_bg_color = text_bg_color
         self.hide_text = hide_text
         self.hidden_text = text
         self.text = text
         self.font = pygame.font.Font("resources/ASansrounded.ttf", font_size)
+        self.font_title = pygame.font.Font(
+            "resources/ASansrounded.ttf", font_size_title
+        )
         self.txt_surface = self.font.render(
             len(self.text) * "*" if self.hide_text else self.text,
             True,
             self.text_color,
         )
+        self.title_surface = self.font_title.render(self.title, True, self.text_color)
         self.active = is_active
         self.last_backspace_time = 0
         self.scroll_offset = 0
@@ -167,15 +180,18 @@ class TextInput:
         self.update_text_surface()
 
     def draw(self, screen: pygame.Surface) -> None:
-        fill_color = self.fill_active if self.active else self.fill_inactive
-        pygame.draw.rect(screen, fill_color, self.rect)
+        screen.blit(self.image, self.rect)
+        if self.active:
+            pygame.draw.rect(screen, self.text_bg_color, self.rect_bg)
         text_surface_clipped = pygame.Surface(
             (self.rect.width - 10, self.rect.height), pygame.SRCALPHA
         )
         text_surface_clipped.blit(self.txt_surface, (-self.scroll_offset, 0))
-        screen.blit(text_surface_clipped, (self.rect.x + 5, self.rect.y + 5))
-
-        pygame.draw.rect(screen, self.text_color, self.rect, 2)
+        title_rect = self.title_surface.get_rect(
+            center=(self.rect.x + self.rect.w / 2, self.rect.y - self.rect.h / 10)
+        )
+        screen.blit(self.title_surface, title_rect.topleft)
+        screen.blit(text_surface_clipped, (self.rect.x + 20, self.rect.y + 12.5))
 
     def jump_to_next_input(self) -> None:
         self.active = False

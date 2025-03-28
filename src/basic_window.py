@@ -46,8 +46,8 @@ class BasicWindow:
 
     def __init__(self):
         self.vpn_client = None
-        self.text_color = "#d7fcd4"
-        self.hovering_color = "#FFFFFF"
+        self.text_color = "#c6c4c3"
+        self.hovering_color = "#fefac9"
         self.inactive_color = "#A9A9A9"
         self.config = load_resolution_settings()
         self.cursor = Cursor()
@@ -90,7 +90,7 @@ class BasicWindow:
         sys.exit()
 
     def get_font(self, font_size: int = 75) -> pygame.font.Font:
-        return pygame.font.Font("resources/ASansrounded.ttf", font_size)
+        return pygame.font.Font("resources/Quivira.otf", font_size)
 
     def create_universal_elements(self) -> None:
         self.BG = pygame.image.load(
@@ -127,6 +127,9 @@ class BasicWindow:
         )
         self.TEXT_INPUT = pygame.image.load(
             os.path.join(os.getcwd(), "resources/main_menu/text_input.png")
+        )
+        self.TEXT_BG = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/background/text_inputs_bg.png")
         )
 
     def create_lobby_elements(self) -> None:

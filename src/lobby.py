@@ -142,7 +142,7 @@ class H5_Lobby(BasicWindow):
         )
         self.PLAYER_LIST_BG.fill((0, 0, 0, 200))
         self.PLAYERS_TEXT = self.get_font(self.font_size[0]).render(
-            "Players active", True, "#d7fcd4"
+            "Players active", True, self.text_color
         )
         self.PLAYERS_TEXT_RECT = self.PLAYERS_TEXT.get_rect(
             center=(
@@ -549,7 +549,7 @@ class H5_Lobby(BasicWindow):
                 self._elapsed_time = time.time()
             if not self._game_found_music:
                 self._queue_channel = play_on_empty(
-                    "resources/match_found.wav", volume=bg_sound_volume
+                    "resources/match_found.mp3", volume=bg_sound_volume
                 )
                 pygame.mixer.Channel(0).set_volume(0.0)
                 self._game_found_music = True

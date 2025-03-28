@@ -30,7 +30,7 @@ class HoverBox:
         if position[0] in range(self.rect.left, self.rect.right) and position[
             1
         ] in range(self.rect.top, self.rect.bottom):
-            self.channel_index = play_on_empty("resources/button_click.wav")
+            self.channel_index = play_on_empty("resources/button_click.mp3")
             self.active = True
             return True
         return False
