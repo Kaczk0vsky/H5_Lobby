@@ -226,7 +226,7 @@ class H5_Lobby(BasicWindow):
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
             image_inactive=self.CANCEL_BUTTON_INACTIVE,
-            pos=(
+            position=(
                 830 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
@@ -240,7 +240,7 @@ class H5_Lobby(BasicWindow):
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
             image_inactive=self.CANCEL_BUTTON_INACTIVE,
-            pos=(
+            position=(
                 1080 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
@@ -254,7 +254,7 @@ class H5_Lobby(BasicWindow):
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
             image_inactive=self.CANCEL_BUTTON_INACTIVE,
-            pos=(
+            position=(
                 1330 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
@@ -268,7 +268,7 @@ class H5_Lobby(BasicWindow):
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
             image_inactive=self.CANCEL_BUTTON_INACTIVE,
-            pos=(
+            position=(
                 1580 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
@@ -281,7 +281,7 @@ class H5_Lobby(BasicWindow):
         PLAYER_PROFILE = Button(
             image=self.ICON_SQUARE,
             image_highlited=self.ICON_SQUARE_HIGHLIGHTED,
-            pos=(
+            position=(
                 1730 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
@@ -292,7 +292,7 @@ class H5_Lobby(BasicWindow):
         OPTIONS_BUTTON = Button(
             image=self.OPTIONS,
             image_highlited=self.OPTIONS_HIGHLIGHTED,
-            pos=(
+            position=(
                 1800 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
@@ -303,7 +303,7 @@ class H5_Lobby(BasicWindow):
         QUIT_BUTTON = Button(
             image=self.QUIT,
             image_highlited=self.QUIT_HIGHLIGHTED,
-            pos=(
+            position=(
                 1870 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
@@ -532,7 +532,7 @@ class H5_Lobby(BasicWindow):
         CANCEL_BUTTON = Button(
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
-            pos=(overlay_width * 1.5, overlay_height * 1.8),
+            position=(overlay_width * 1.5, overlay_height * 1.8),
             text_input="Cancel",
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,

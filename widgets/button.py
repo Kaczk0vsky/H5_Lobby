@@ -39,7 +39,7 @@ class Button:
         self,
         image: pygame.Surface,
         image_highlited: pygame.Surface,
-        pos: tuple[float, float],
+        position: tuple[float, float],
         font: pygame.font.Font,
         base_color: str,
         hovering_color: str,
@@ -51,8 +51,8 @@ class Button:
         self.image_highlighted = image_highlited
         if image_inactive:
             self.image_inactive = image_inactive
-        self.x_pos = pos[0]
-        self.y_pos = pos[1]
+        self.x_pos = position[0]
+        self.y_pos = position[1]
         self.font = font
         self.base_color = base_color
         self.hovering_color = hovering_color

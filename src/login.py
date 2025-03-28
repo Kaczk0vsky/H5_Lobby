@@ -112,7 +112,7 @@ class LoginWindow(BasicWindow):
         LOGIN_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(self.buttons_pos[0], self.buttons_pos[1]),
+            position=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Login",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
@@ -121,7 +121,7 @@ class LoginWindow(BasicWindow):
         REGISTER_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
+            position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Register",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
@@ -130,7 +130,7 @@ class LoginWindow(BasicWindow):
         FORGOT_PASSWORD_BUTTON = Button(
             image=self.LONG_BUTTON,
             image_highlited=self.LONG_BUTTON_HIGHLIGHTED,
-            pos=(self.buttons_pos[0], self.buttons_pos[1] + 130),
+            position=(self.buttons_pos[0], self.buttons_pos[1] + 130),
             text_input="Forgot Password",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
@@ -276,7 +276,7 @@ class LoginWindow(BasicWindow):
         REGISTER_ACCOUNT_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
+            position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Submit",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
@@ -285,7 +285,7 @@ class LoginWindow(BasicWindow):
         BACK_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(self.buttons_pos[0], self.buttons_pos[1] + 130),
+            position=(self.buttons_pos[0], self.buttons_pos[1] + 130),
             text_input="Back",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
@@ -294,13 +294,13 @@ class LoginWindow(BasicWindow):
         HOVER_BOX_NICKNAME = HoverBox(
             image=self.QUESTION_MARK,
             image_highlited=self.QUESTION_MARK_HIGHLIGHTED,
-            pos=(self.hover_box_pos[0], self.hover_box_pos[1]),
+            position=(self.hover_box_pos[0], self.hover_box_pos[1]),
             dimensions=self.hover_box_dims,
         )
         HOVER_BOX_PASSWORD = HoverBox(
             image=self.QUESTION_MARK,
             image_highlited=self.QUESTION_MARK_HIGHLIGHTED,
-            pos=(self.hover_box_pos[0], self.hover_box_pos[1] + 65),
+            position=(self.hover_box_pos[0], self.hover_box_pos[1] + 65),
             dimensions=self.hover_box_dims,
         )
         NICKNAME_INPUT = TextInput(
@@ -477,7 +477,7 @@ class LoginWindow(BasicWindow):
         SUBMIT_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(self.buttons_pos[0], self.buttons_pos[1]),
+            position=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Submit",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
@@ -486,7 +486,7 @@ class LoginWindow(BasicWindow):
         BACK_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(self.buttons_pos[0], self.buttons_pos[1] + 65),
+            position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Back",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,

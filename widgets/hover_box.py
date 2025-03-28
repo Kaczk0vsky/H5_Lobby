@@ -8,12 +8,12 @@ class HoverBox:
         self,
         image: pygame.Surface,
         image_highlited: pygame.Surface,
-        pos: tuple[float, float],
+        position: tuple[float, float],
         dimensions: tuple[int, int],
     ):
         self.image = image
         self.image_highlighted = image_highlited
-        self.pos = pos
+        self.pos = position
         self.dims = dimensions
         self.active = False
         self.rect = self.image.get_rect(center=(self.pos[0], self.pos[1]))

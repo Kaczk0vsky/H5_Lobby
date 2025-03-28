@@ -184,7 +184,7 @@ class TextInput:
         if self.active:
             pygame.draw.rect(screen, self.text_bg_color, self.rect_bg)
         text_surface_clipped = pygame.Surface(
-            (self.rect.width - 10, self.rect.height), pygame.SRCALPHA
+            (self.rect_bg.width - 10, self.rect_bg.height), pygame.SRCALPHA
         )
         text_surface_clipped.blit(self.txt_surface, (-self.scroll_offset, 0))
         title_rect = self.title_surface.get_rect(
