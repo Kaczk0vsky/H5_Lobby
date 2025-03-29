@@ -29,9 +29,12 @@ def create_exe_file():
     # Run pyinstaller to create an .exe file
     run_command(
         f'pyinstaller --onefile --noconsole \
+            --icon=resources/icon.ico \
+            --version-file=resources/version.txt \
             --add-data="{OBFUSCATED_DIR}/src:{DEST_PATH_SRC}" \
             --add-data="{OBFUSCATED_DIR}/widgets:{DEST_PATH_WIDGETS}" \
             --add-data="{OBFUSCATED_DIR}:{DEST_PATH_SETTINGS}" \
+            --add-data=".env;." \
             --hidden-import=pygame \
             --collect-submodules=pygame \
             --hidden-import=toml \
@@ -44,6 +47,10 @@ def create_exe_file():
             --collect-submodules=easygui \
             --hidden-import=dotenv \
             --collect-submodules=dotenv \
+            --hidden-import=pygetwindow \
+            --collect-submodules=pygetwindow \
+            --hidden-import=psutil \
+            --collect-submodules=psutil \
             --name={EXE_NAME} {OBFUSCATED_DIR}/main.py'
     )
 

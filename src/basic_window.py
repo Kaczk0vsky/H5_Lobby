@@ -77,7 +77,7 @@ class BasicWindow:
         if self.vpn_client is not None:
             self.vpn_client.set_vpn_state(False)
             if crsf_token and session:
-                url = f"https://{env_dict["SERVER_URL"]}/db/set_player_offline/"
+                url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_PLAYER_OFFLINE"]}/"
                 headers = {
                     "Referer": "https://h5-tavern.pl/",
                     "X-CSRFToken": crsf_token,

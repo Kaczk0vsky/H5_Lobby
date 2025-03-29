@@ -88,10 +88,8 @@ class TextInput:
         self.hide_text = hide_text
         self.hidden_text = text
         self.text = text
-        self.font = pygame.font.Font("resources/ASansrounded.ttf", font_size)
-        self.font_title = pygame.font.Font(
-            "resources/ASansrounded.ttf", font_size_title
-        )
+        self.font = pygame.font.Font("resources/Quivira.otf", font_size)
+        self.font_title = pygame.font.Font("resources/Quivira.otf", font_size_title)
         self.txt_surface = self.font.render(
             len(self.text) * "*" if self.hide_text else self.text,
             True,
