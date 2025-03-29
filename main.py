@@ -17,7 +17,7 @@ ENV_DEST = USER_DIR / ".env"
 
 if not ENV_DEST.exists():
     shutil.copy(ENV_SRC, ENV_DEST)
-    ENV_DEST.chmod(0o444)  # Ustawienie tylko do odczytu
+    ENV_DEST.chmod(0o444)
 
 
 def run_lobby():

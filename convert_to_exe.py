@@ -30,7 +30,7 @@ def create_exe_file():
     run_command(
         f'pyinstaller --onefile --noconsole \
             --icon=resources/icon.ico \
-            --version-file=resources/version.txt \
+            --version-file=version.txt \
             --add-data="{OBFUSCATED_DIR}/src:{DEST_PATH_SRC}" \
             --add-data="{OBFUSCATED_DIR}/widgets:{DEST_PATH_WIDGETS}" \
             --add-data="{OBFUSCATED_DIR}:{DEST_PATH_SETTINGS}" \
