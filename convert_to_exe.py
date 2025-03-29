@@ -4,7 +4,7 @@ import os
 SOURCE_FILE = "main.py"
 OBFUSCATED_DIR = "obfuscated"
 BUILD_DIR = "build"
-EXE_NAME = "AshanArena3.exe"
+EXE_NAME = "H5_Lobby"
 SOURCE_PATH_SRC = os.path.join(os.getcwd(), "src/")
 DEST_PATH_SRC = "src"
 SOURCE_PATH_WIDGETS = os.path.join(os.getcwd(), "widgets/")
