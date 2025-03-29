@@ -110,6 +110,12 @@ class BasicWindow:
                 "resources/game_search/cancel_search_button_highlighted.png",
             )
         )
+        self.QUIT = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/close_dark.png")
+        )
+        self.QUIT_HIGHLIGHTED = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/buttons/close_highlighted.png")
+        )
 
     def create_login_elements(self) -> None:
         self.create_universal_elements()
@@ -131,6 +137,12 @@ class BasicWindow:
         self.TEXT_BG = pygame.image.load(
             os.path.join(os.getcwd(), "resources/background/text_inputs_bg.png")
         )
+        self.CHECKBOX = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/checkbox/check_box.png")
+        )
+        self.CHECKBOX_CHECKED = pygame.image.load(
+            os.path.join(os.getcwd(), "resources/checkbox/check_box_checked.png")
+        )
 
     def create_lobby_elements(self) -> None:
         self.create_universal_elements()
@@ -142,12 +154,6 @@ class BasicWindow:
         )
         self.NEWS = pygame.image.load(
             os.path.join(os.getcwd(), "resources/news/news_window.png")
-        )
-        self.QUIT = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/buttons/close_dark.png")
-        )
-        self.QUIT_HIGHLIGHTED = pygame.image.load(
-            os.path.join(os.getcwd(), "resources/buttons/close_highlighted.png")
         )
         self.ICON_SQUARE = pygame.image.load(
             os.path.join(os.getcwd(), "resources/buttons/iconsquare_dark.png")
@@ -221,7 +227,7 @@ class BasicWindow:
         BACK_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(screen_width // 2, overlay_y + overlay_height * 2 // 3),
+            position=(screen_width // 2, overlay_y + overlay_height * 2 // 3),
             text_input="Back",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,

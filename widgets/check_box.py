@@ -1,5 +1,7 @@
 import pygame
 
+from src.helpers import play_on_empty
+
 
 class CheckBox:
     """
@@ -27,63 +29,30 @@ class CheckBox:
         self,
         surface: pygame.Surface,
         position: tuple[float, float],
-        dimensions: tuple[int, int],
+        image: pygame.Surface,
+        image_checked: pygame.Surface,
         checked: bool = False,
     ):
         self.surface = surface
         self.x_pos = position[0]
         self.y_pos = position[1]
-        self.base_color = pygame.Color("white")
-        self.hovering_color = pygame.Color("gray")
-        self.checked_color = pygame.Color("black")
-        self.outer_rect = pygame.Rect(
-            position[0], position[1], dimensions[0], dimensions[1]
-        )
-        self.inner_rect = pygame.Rect(
-            position[0] + 2, position[1] + 2, dimensions[0] - 4, dimensions[1] - 4
-        )
+        self.image = image
+        self.image_checked = image_checked
         self.checked = checked
+        self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         self.is_active = False
 
-    def draw(self) -> None:
-        pygame.draw.rect(self.surface, self.checked_color, self.outer_rect)
-        pygame.draw.rect(
-            self.surface,
-            self.base_color if self.is_active else self.hovering_color,
-            self.inner_rect,
-        )
-
     def update(self) -> None:
-        self.draw()
         if self.checked:
-            pygame.draw.line(
-                self.surface,
-                self.checked_color,
-                (self.inner_rect.x, self.inner_rect.y),
-                (
-                    self.inner_rect.x + self.inner_rect.w,
-                    self.inner_rect.y + self.inner_rect.h,
-                ),
-                3,
-            )
-            pygame.draw.line(
-                self.surface,
-                self.checked_color,
-                (self.inner_rect.x + self.inner_rect.w, self.inner_rect.y),
-                (self.inner_rect.x, self.inner_rect.y + self.inner_rect.h),
-                3,
-            )
+            self.surface.blit(self.image_checked, self.rect)
         else:
-            pygame.draw.rect(
-                self.surface,
-                self.base_color if self.is_active else self.hovering_color,
-                self.inner_rect,
-            )
+            self.surface.blit(self.image, self.rect)
 
     def check_for_input(self, position: tuple[int, int]) -> bool:
-        if position[0] in range(
-            self.inner_rect.left, self.inner_rect.right
-        ) and position[1] in range(self.inner_rect.top, self.inner_rect.bottom):
+        if position[0] in range(self.rect.left, self.rect.right) and position[
+            1
+        ] in range(self.rect.top, self.rect.bottom):
+            self.channel_index = play_on_empty("resources/button_click.mp3")
             self.checked = not self.checked
             self.is_active = True
             return True

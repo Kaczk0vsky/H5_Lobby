@@ -132,7 +132,7 @@ class TextInput:
                     self.active = False
                 elif event.key in [pygame.K_LSHIFT, pygame.K_RSHIFT, pygame.K_CAPSLOCK]:
                     pass
-                else:
+                elif len(self.text) < 24:
                     if self.hide_text:
                         self.text += "*"
                         self.hidden_text += event.unicode
@@ -183,15 +183,21 @@ class TextInput:
         screen.blit(self.image, self.rect)
         if self.active:
             pygame.draw.rect(screen, self.text_bg_color, self.rect_bg)
+
+        text_width = self.txt_surface.get_width()
+        text_x = self.rect_bg.x + (self.rect_bg.width - text_width) / 2
+
         text_surface_clipped = pygame.Surface(
-            (self.rect_bg.width - 10, self.rect_bg.height), pygame.SRCALPHA
+            (self.rect_bg.width, self.rect_bg.height), pygame.SRCALPHA
         )
-        text_surface_clipped.blit(self.txt_surface, (-self.scroll_offset, 0))
+
+        text_surface_clipped.blit(self.txt_surface, (0, 0))
+
         title_rect = self.title_surface.get_rect(
             center=(self.rect.x + self.rect.w / 2, self.rect.y - self.rect.h / 10)
         )
         screen.blit(self.title_surface, title_rect.topleft)
-        screen.blit(text_surface_clipped, (self.rect.x + 20, self.rect.y + 12.5))
+        screen.blit(text_surface_clipped, (text_x, self.rect.y + 12.5))
 
     def jump_to_next_input(self) -> None:
         self.active = False

@@ -60,14 +60,15 @@ class LoginWindow(BasicWindow):
     def __init__(self):
         BasicWindow.__init__(self)
 
-        self.text_pos = [265, 260]
+        self.text_pos = [370, 275]
         self.buttons_pos = [400, 340]
         self.buttons_dims = (210, 60)
-        self.long_buttons_dims = (310, 60)
         self.input_pos = [250, 110]
         self.input_dims = (300, 50)
-        self.hover_box_pos = [565, 115]
-        self.hover_box_dims = (40, 40)
+        self.hoverbox_pos = [565, 115]
+        self.hoverbox_dims = (30, 40)
+        self.checkbox_pos = [470, 275]
+        self.checkbox_dims = (30, 30)
         self.transformation_option = "800x600"
         self.font_size = fonts_sizes[self.transformation_option]
 
@@ -76,7 +77,7 @@ class LoginWindow(BasicWindow):
         self.play_background_music(music_path="resources/H5_login_menu_theme.mp3")
         self.create_login_elements()
 
-        self.SCREEN = pygame.display.set_mode((800, 600))
+        self.SCREEN = pygame.display.set_mode((800, 600), pygame.NOFRAME)
         self.BG = pygame.transform.scale(
             self.BG,
             (800, 600),
@@ -90,30 +91,38 @@ class LoginWindow(BasicWindow):
         self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.BUTTON_HIGHLIGHTED, self.buttons_dims
         )
-        self.LONG_BUTTON = pygame.transform.scale(self.BUTTON, self.long_buttons_dims)
+        self.LONG_BUTTON = pygame.transform.scale(self.BUTTON, self.buttons_dims)
         self.LONG_BUTTON_HIGHLIGHTED = pygame.transform.scale(
-            self.BUTTON_HIGHLIGHTED, self.long_buttons_dims
+            self.BUTTON_HIGHLIGHTED, self.buttons_dims
         )
         self.QUESTION_MARK = pygame.transform.scale(
-            self.QUESTION_MARK, self.hover_box_dims
+            self.QUESTION_MARK, self.hoverbox_dims
         )
         self.QUESTION_MARK_HIGHLIGHTED = pygame.transform.scale(
-            self.QUESTION_MARK_HIGHLIGHTED, self.hover_box_dims
+            self.QUESTION_MARK_HIGHLIGHTED, self.hoverbox_dims
         )
         self.TEXT_INPUT = pygame.transform.scale(self.TEXT_INPUT, self.input_dims)
         self.TEXT_BG = pygame.transform.scale(self.TEXT_BG, (400, 500))
+        self.CHECKBOX = pygame.transform.scale(self.CHECKBOX, self.checkbox_dims)
+        self.CHECKBOX_CHECKED = pygame.transform.scale(
+            self.CHECKBOX_CHECKED, self.checkbox_dims
+        )
+        self.QUIT = pygame.transform.scale(self.QUIT, self.checkbox_dims)
+        self.QUIT_HIGHLIGHTED = pygame.transform.scale(
+            self.QUIT_HIGHLIGHTED, self.checkbox_dims
+        )
 
         REMEMBER_LOGIN_TEXT = self.get_font(self.font_size[0]).render(
             "Remeber me:", True, self.text_color
         )
         REMEMBER_LOGIN_RECT = REMEMBER_LOGIN_TEXT.get_rect(
-            center=(self.text_pos[0] + 100, self.SCREEN.get_height() / 2.2)
+            center=(self.text_pos[0], self.text_pos[1])
         )
         LOGIN_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1]),
-            text_input="Login",
+            text_input="Sign In",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
@@ -122,7 +131,7 @@ class LoginWindow(BasicWindow):
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
-            text_input="Register",
+            text_input="Sing Up",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
@@ -131,15 +140,24 @@ class LoginWindow(BasicWindow):
             image=self.LONG_BUTTON,
             image_highlited=self.LONG_BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 130),
-            text_input="Forgot Password",
+            text_input="Forgot Password?",
+            font=self.get_font(self.font_size[0]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        QUIT_BUTTON = Button(
+            image=self.QUIT,
+            image_highlited=self.QUIT_HIGHLIGHTED,
+            position=(550, 95),
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
         CHECK_BOX_PASSWORD = CheckBox(
             surface=self.SCREEN,
-            position=(self.SCREEN.get_width() / 1.7, self.SCREEN.get_height() / 2.25),
-            dimensions=(20, 20),
+            position=(self.checkbox_pos[0], self.checkbox_pos[1]),
+            image=self.CHECKBOX,
+            image_checked=self.CHECKBOX_CHECKED,
             checked=self.client_config["remember_password"],
         )
         LOGIN_INPUT = TextInput(
@@ -197,6 +215,8 @@ class LoginWindow(BasicWindow):
                             delete_objects(INPUT_BOXES)
                             self.forgot_password_window()
                             self._window_overlay = True
+                        if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
+                            self.quit_game_handling()
                         if CHECK_BOX_PASSWORD.check_for_input(MENU_MOUSE_POS):
                             self.client_config["remember_password"] = (
                                 not self.client_config["remember_password"]
@@ -213,11 +233,12 @@ class LoginWindow(BasicWindow):
                                 LOGIN_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
-                buttons = [LOGIN_BUTTON, REGISTER_BUTTON, FORGOT_PASSWORD_BUTTON]
-
                 CHECK_BOX_PASSWORD.update()
-                for button in buttons:
-                    button.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                LOGIN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                REGISTER_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                FORGOT_PASSWORD_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                QUIT_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+
                 for input in INPUT_BOXES:
                     input.update()
                     input.draw(self.SCREEN)
@@ -294,14 +315,14 @@ class LoginWindow(BasicWindow):
         HOVER_BOX_NICKNAME = HoverBox(
             image=self.QUESTION_MARK,
             image_highlited=self.QUESTION_MARK_HIGHLIGHTED,
-            position=(self.hover_box_pos[0], self.hover_box_pos[1]),
-            dimensions=self.hover_box_dims,
+            position=(self.hoverbox_pos[0], self.hoverbox_pos[1]),
+            dimensions=self.hoverbox_dims,
         )
         HOVER_BOX_PASSWORD = HoverBox(
             image=self.QUESTION_MARK,
             image_highlited=self.QUESTION_MARK_HIGHLIGHTED,
-            position=(self.hover_box_pos[0], self.hover_box_pos[1] + 65),
-            dimensions=self.hover_box_dims,
+            position=(self.hoverbox_pos[0], self.hoverbox_pos[1] + 65),
+            dimensions=self.hoverbox_dims,
         )
         NICKNAME_INPUT = TextInput(
             position=(self.input_pos[0], self.input_pos[1] - 20),
@@ -646,7 +667,7 @@ class LoginWindow(BasicWindow):
         self.BACK_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(400, 420),
+            position=(400, 420),
             text_input="Back",
             font=self.get_font(self.font_size[0]),
             base_color=self.text_color,

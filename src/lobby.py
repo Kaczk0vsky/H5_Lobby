@@ -90,7 +90,8 @@ class H5_Lobby(BasicWindow):
         self.create_lobby_elements()
 
         self.SCREEN = pygame.display.set_mode(
-            (self.config["screen_width"], self.config["screen_hight"]), pygame.RESIZABLE
+            (self.config["screen_width"], self.config["screen_hight"]),
+            pygame.NOFRAME,
         )
 
     def main_menu(self):
@@ -549,7 +550,7 @@ class H5_Lobby(BasicWindow):
                 self._elapsed_time = time.time()
             if not self._game_found_music:
                 self._queue_channel = play_on_empty(
-                    "resources/match_found.mp3", volume=bg_sound_volume
+                    "resources/match_found.wav", volume=bg_sound_volume
                 )
                 pygame.mixer.Channel(0).set_volume(0.0)
                 self._game_found_music = True
@@ -575,7 +576,7 @@ class H5_Lobby(BasicWindow):
                 image=self.ACCEPT_BUTTON,
                 image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
                 image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-                pos=(overlay_width * 1.3, overlay_height * 1.8),
+                position=(overlay_width * 1.3, overlay_height * 1.8),
                 text_input="Accept",
                 font=self.get_font(self.font_size[1]),
                 base_color=self.text_color,
@@ -586,7 +587,7 @@ class H5_Lobby(BasicWindow):
                 image=self.CANCEL_BUTTON,
                 image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
                 image_inactive=self.CANCEL_BUTTON_INACTIVE,
-                pos=(overlay_width * 1.7, overlay_height * 1.8),
+                position=(overlay_width * 1.7, overlay_height * 1.8),
                 text_input="Cancel",
                 font=self.get_font(self.font_size[1]),
                 base_color=self.text_color,
@@ -623,7 +624,7 @@ class H5_Lobby(BasicWindow):
         BACK_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            pos=(
+            position=(
                 290 * (transformation_factors[self.transformation_option][0]),
                 800 * (transformation_factors[self.transformation_option][1]),
             ),
@@ -677,7 +678,8 @@ class H5_Lobby(BasicWindow):
                     self.config["screen_width"] = int(resolutions[0])
                     self.config["screen_hight"] = int(resolutions[1])
                     self.SCREEN = pygame.display.set_mode(
-                        (self.config["screen_width"], self.config["screen_hight"])
+                        (self.config["screen_width"], self.config["screen_hight"]),
+                        pygame.NOFRAME,
                     )
                     self.BG = pygame.image.load(
                         os.path.join(os.getcwd(), "resources/h5_background.jpg")
