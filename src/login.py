@@ -907,7 +907,9 @@ class LoginWindow(BasicWindow):
             try:
                 response = self.session.get(url, params=user_data, headers=headers)
                 if response.status_code == 200:
-                    if send_email(user_data):
+                    data = response.json()
+                    reset_url = data.get("reset_url")
+                    if send_email(user_data, reset_url):
                         self._remove_all_widgets = True
                         self._window_overlay = False
                         self._error_status = False

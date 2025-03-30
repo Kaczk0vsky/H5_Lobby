@@ -17,6 +17,10 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.middleware.csrf import get_token
 from django_ratelimit.decorators import ratelimit
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
 
 from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player, PlayersMatched, Ban
@@ -197,9 +201,14 @@ def change_password(request):
             )
 
         try:
-            user = User.objects.get(username=nickname)
-            if user.email == email:
-                return JsonResponse({"success": True})
+            user = User.objects.get(username=nickname, email=email)
+            if user:
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                token = default_token_generator.make_token(user)
+                reset_url = reverse(
+                    "password_reset_confirm", kwargs={"uidb64": uid, "token": token}
+                )
+                return JsonResponse({"success": True, "reset_url": reset_url})
             else:
                 return JsonResponse(
                     {"success": False, "error": "Invalid credentials"}, status=400

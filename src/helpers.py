@@ -7,6 +7,9 @@ import re
 import pygetwindow as gw
 
 from email.message import EmailMessage
+from dotenv import load_dotenv
+
+from src.global_vars import env_dict
 
 
 def delete_objects(object_list: list):
@@ -26,13 +29,14 @@ def play_on_empty(path: str, volume: float = 1) -> int:
             return index
 
 
-def send_email(userdata: dict[str, str]) -> bool:
+def send_email(userdata: dict[str, str], url: str) -> bool:
     SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 465
     EMAIL_SENDER = "ashanarena3@gmail.com"
     EMAIL_PASSWORD = "gllx ckzw degx wjie"
 
     EMAIL_RECEIVER = userdata["email"]
+    SERVER_URL = f"https://{env_dict["SERVER_URL"]}/{url}/"
 
     subject = "A Hero’s Quest: Reset Your Password"
     body = f"""\
@@ -43,7 +47,7 @@ def send_email(userdata: dict[str, str]) -> bool:
 
     To restore your rightful place among the legends, follow this sacred link and forge a new password worthy of your name:
 
-    🔗 [Reset Your Password](#)
+    🔗 {SERVER_URL}
 
     But beware! The link shall only remain active for a short while before vanishing into the ether. Should you delay, you must summon the request once more.
 

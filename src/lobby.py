@@ -812,7 +812,6 @@ class H5_Lobby(BasicWindow):
         pygame.display.iconify()
 
     def maximize_from_tray(self):
-        # TODO: window blinks on white, upper part is white instead of blue
         self.window.restore()
         hwnd = self.window._hWnd
         ctypes.windll.user32.ShowWindow(hwnd, 9)
