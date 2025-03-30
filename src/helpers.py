@@ -36,7 +36,7 @@ def send_email(userdata: dict[str, str], url: str) -> bool:
     EMAIL_PASSWORD = "gllx ckzw degx wjie"
 
     EMAIL_RECEIVER = userdata["email"]
-    SERVER_URL = f"https://{env_dict["SERVER_URL"]}/{url}/"
+    SERVER_URL = f"https://{env_dict["SERVER_URL"]}{url}"
 
     subject = "A Hero’s Quest: Reset Your Password"
     body = f"""\
