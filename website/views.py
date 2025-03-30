@@ -23,8 +23,10 @@ def password_reset_confirm(request, uidb64, token):
         if request.method == "POST":
             form = SetPasswordForm(user, request.POST)
             if form.is_valid():
-                form.save()
-                return redirect("password_reset_complete")
+                new_password = form.cleaned_data["new_password1"]
+                user.set_password(new_password)
+                user.save()
+                return render(request, "password_reset_complete.html")
         else:
             form = SetPasswordForm(user)
 
