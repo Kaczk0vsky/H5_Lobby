@@ -19,20 +19,20 @@ def password_reset_confirm(request, uidb64, token):
     except (User.DoesNotExist, ValueError, TypeError):
         user = None
 
-    if user and default_token_generator.check_token(user, token):
-        if request.method == "POST":
-            form = SetPasswordForm(user, request.POST)
-            if form.is_valid():
-                new_password = form.cleaned_data["new_password1"]
-                user.set_password(new_password)
-                user.save()
-                return render(request, "password_reset_complete.html")
-        else:
-            form = SetPasswordForm(user)
+    if user is None or not default_token_generator.check_token(user, token):
+        return render(request, "password_reset_invalid.html")
 
-        return render(request, "password_reset_confirm.html", {"form": form})
+    if request.method == "POST":
+        form = SetPasswordForm(user, request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data["new_password1"]
+            user.set_password(new_password)
+            user.save()
+            return render(request, "password_reset_complete.html")
+    else:
+        form = SetPasswordForm(user)
 
-    return render(request, "password_reset_invalid.html")
+    return render(request, "password_reset_confirm.html", {"form": form})
 
 
 def ashanarena(request):
