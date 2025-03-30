@@ -5,12 +5,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import SetPasswordForm
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_http_methods
 from django_ratelimit.decorators import ratelimit
 
 
 @csrf_protect
-@require_GET
+@require_http_methods(["GET", "POST"])
 @ratelimit(key="user_or_ip", rate="3/m", method="GET", block=True)
 def password_reset_confirm(request, uidb64, token):
     try:
