@@ -154,7 +154,6 @@ class LoginWindow(BasicWindow):
             hovering_color=self.hovering_color,
         )
         CHECK_BOX_PASSWORD = CheckBox(
-            surface=self.SCREEN,
             position=(self.checkbox_pos[0], self.checkbox_pos[1]),
             image=self.CHECKBOX,
             image_checked=self.CHECKBOX_CHECKED,
@@ -166,6 +165,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Username",
             text_color=self.text_color,
+            font=self.get_font(self.font_size[0]),
+            font_title=self.get_font(self.font_size[1]),
             text=(
                 self.client_config["nickname"]
                 if self.client_config["remember_password"]
@@ -179,6 +180,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Password",
             text_color=self.text_color,
+            font=self.get_font(self.font_size[0]),
+            font_title=self.get_font(self.font_size[1]),
             text=(
                 self.client_config["password"]
                 if self.client_config["remember_password"]
@@ -201,7 +204,7 @@ class LoginWindow(BasicWindow):
                     self.quit_game_handling()
                 for input in INPUT_BOXES:
                     input.event(event)
-                    if input.enter_pressed == True and input.active:
+                    if input._enter_pressed == True and input.active:
                         self.login_player(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -233,7 +236,7 @@ class LoginWindow(BasicWindow):
                                 LOGIN_INPUT.set_active(self.SCREEN)
 
             if not self._window_overlay:
-                CHECK_BOX_PASSWORD.update()
+                CHECK_BOX_PASSWORD.update(self.SCREEN)
                 LOGIN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 REGISTER_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 FORGOT_PASSWORD_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
@@ -316,13 +319,11 @@ class LoginWindow(BasicWindow):
             image=self.QUESTION_MARK,
             image_highlited=self.QUESTION_MARK_HIGHLIGHTED,
             position=(self.hoverbox_pos[0], self.hoverbox_pos[1]),
-            dimensions=self.hoverbox_dims,
         )
         HOVER_BOX_PASSWORD = HoverBox(
             image=self.QUESTION_MARK,
             image_highlited=self.QUESTION_MARK_HIGHLIGHTED,
             position=(self.hoverbox_pos[0], self.hoverbox_pos[1] + 65),
-            dimensions=self.hoverbox_dims,
         )
         NICKNAME_INPUT = TextInput(
             position=(self.input_pos[0], self.input_pos[1] - 20),
@@ -330,6 +331,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Username",
             text_color=self.text_color,
+            font=self.get_font(self.font_size[0]),
+            font_title=self.get_font(self.font_size[1]),
             is_active=True,
         )
         PASSWORD_INPUT = TextInput(
@@ -338,6 +341,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Password",
             text_color=self.text_color,
+            font=self.get_font(self.font_size[0]),
+            font_title=self.get_font(self.font_size[1]),
             hide_text=True,
         )
         REPEAT_PASSWORD_INPUT = TextInput(
@@ -346,6 +351,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Repeat Password",
             text_color=self.text_color,
+            font=self.get_font(self.font_size[0]),
+            font_title=self.get_font(self.font_size[1]),
             hide_text=True,
         )
         EMAIL_INPUT = TextInput(
@@ -354,6 +361,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Email",
             text_color=self.text_color,
+            font=self.get_font(self.font_size[0]),
+            font_title=self.get_font(self.font_size[1]),
         )
         INPUT_BOXES = [
             NICKNAME_INPUT,
@@ -374,7 +383,7 @@ class LoginWindow(BasicWindow):
                     self.quit_game_handling()
                 for input in INPUT_BOXES:
                     input.event(event)
-                    if input.enter_pressed == True and input.active:
+                    if input._enter_pressed == True and input.active:
                         self.register_new_player(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -519,6 +528,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Username",
             text_color=self.text_color,
+            font=self.get_font(self.font_size[0]),
+            font_title=self.get_font(self.font_size[1]),
             is_active=True,
         )
         EMAIL_INPUT = TextInput(
@@ -527,6 +538,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Email",
             text_color=self.text_color,
+            font=self.get_font(self.font_size[0]),
+            font_title=self.get_font(self.font_size[1]),
         )
         INPUT_BOXES = [
             NICKNAME_INPUT,
@@ -545,7 +558,7 @@ class LoginWindow(BasicWindow):
                     self.quit_game_handling()
                 for input in INPUT_BOXES:
                     input.event(event)
-                    if input.enter_pressed == True and input.active:
+                    if input._enter_pressed == True and input.active:
                         self.set_new_password(INPUT_BOXES)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:

@@ -10,10 +10,10 @@ class ProgressBar:
     the frame, background, and edge, updating the display based on elapsed time.
 
     Attributes:
-        x (float): The x-coordinate of the progress bar's center.
-        y (float): The y-coordinate of the progress bar's center.
-        length (int): The total length of the progress bar.
-        width (int): The width of the progress bar.
+        x_pos (float): The x-coordinate of the progress bar's center.
+        y_pos (float): The y-coordinate of the progress bar's center.
+        w (int): The total length of the progress bar.
+        h (int): The height of the progress bar.
         image_frame (pygame.Surface): The image representing the progress bar's frame.
         image_bg (pygame.Surface): The image representing the progress bar's background.
         image_edge (pygame.Surface): The image representing the moving edge of the progress bar.
@@ -36,24 +36,24 @@ class ProgressBar:
         image_edge: pygame.Surface,
         max_wait_time: int = 10,
     ):
-        self.x = position[0]
-        self.y = position[1]
-        self.length = dimensions[0]
-        self.width = dimensions[1]
+        self.x_pos = position[0]
+        self.y_pos = position[1]
+        self.w = dimensions[0]
+        self.h = dimensions[1]
         self.image_frame = image_frame
         self.image_bg = image_bg
         self.image_edge = image_edge
         self.max_wait_time = max_wait_time
-        self.rect = self.image_frame.get_rect(center=(self.x, self.y))
-        self.rect_bg = self.image_bg.get_rect(center=(self.x, self.y))
+        self.rect = self.image_frame.get_rect(center=(self.x_pos, self.y_pos))
+        self.rect_bg = self.image_bg.get_rect(center=(self.x_pos, self.y_pos))
 
-    def draw(self, screen: pygame.Surface, elapsed_time: float) -> None:
+    def draw(self, screen: pygame.Surface, elapsed_time: float) -> bool:
         elapsed_time = time.time() - elapsed_time
         fill_progress = min(elapsed_time / self.max_wait_time, 1)
-        fill_width = int(self.length * fill_progress)
+        fill_width = int(self.w * fill_progress)
 
-        filled_bg = pygame.Surface((fill_width, self.width))
-        filled_bg.blit(self.image_bg, (0, 0), (0, 0, fill_width, self.width))
+        filled_bg = pygame.Surface((fill_width, self.h))
+        filled_bg.blit(self.image_bg, (0, 0), (0, 0, fill_width, self.h))
 
         screen.blit(filled_bg, self.rect_bg)
         screen.blit(self.image_frame, self.rect)

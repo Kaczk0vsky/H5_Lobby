@@ -664,7 +664,7 @@ class H5_Lobby(BasicWindow):
                         self.main_menu()
 
             selected_option = RESOLUTION_CHOICES.update(event_list)
-            if selected_option != None:
+            if selected_option != -1:
                 resolution = resolution_choices[selected_option]
                 if "fullscreen" in resolution.lower():
                     monitor_resolution = pygame.display.Info()
@@ -682,7 +682,7 @@ class H5_Lobby(BasicWindow):
                         pygame.NOFRAME,
                     )
                     self.BG = pygame.image.load(
-                        os.path.join(os.getcwd(), "resources/h5_background.jpg")
+                        os.path.join(os.getcwd(), "resources/background/background.png")
                     )
                     self.BG = pygame.transform.scale(
                         self.BG,
@@ -696,13 +696,7 @@ class H5_Lobby(BasicWindow):
                 with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
                     toml.dump(data, f)
 
-            RESOLUTION_CHOICES.draw(
-                self.SCREEN,
-                300 * (transformation_factors[self.transformation_option][0]),
-                280 * (transformation_factors[self.transformation_option][1]),
-                160,
-                40,
-            )
+            RESOLUTION_CHOICES.draw(self.SCREEN)
             pygame.display.update()
 
     def add_to_queue(self):
