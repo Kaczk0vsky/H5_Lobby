@@ -265,6 +265,12 @@ server {
         alias /home/h5lobby/H5_Lobby/static/;
     }
 
+    location /assets/ {
+        root /home/h5lobby/H5_Lobby/frontend/dist;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
     location / {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
