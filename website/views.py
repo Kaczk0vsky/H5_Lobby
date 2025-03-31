@@ -42,4 +42,4 @@ def password_reset_confirm(request, uidb64, token):
 
 
 def ashanarena(request):
-    return render(request, "main.html")
+    return render(request, "frontend/index.html")
