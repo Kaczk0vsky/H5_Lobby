@@ -284,5 +284,14 @@ server {
 ```
 6) `sudo ln -s /etc/nginx/sites-available/django /etc/nginx/sites-enabled/`
 7) `sudo systemctl daemon-reload`
-8) `sudo systemctl enable nginx `
-9) `sudo systemctl restart nginx `
+8) `sudo systemctl enable nginx`
+9) `sudo systemctl restart nginx`
+
+##### 11. Frontend installation
+1) `sudo apt install npm`
+2) `npm install`
+3) `npm install bootstrap`
+4) `cd frontend`
+5) `npm run build`
+6) `sudo systemctl restart nginx`
+7) `sudo systemctl restart django.service`
