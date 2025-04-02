@@ -28,7 +28,7 @@ def create_exe_file():
 
     # Run pyinstaller to create an .exe file
     run_command(
-        f'pyinstaller --onefile --noconsole \
+        f'pyinstaller --onefile --noconsole --clean \
             --icon=resources/icon.ico \
             --version-file=version.txt \
             --add-data="{OBFUSCATED_DIR}/src:{DEST_PATH_SRC}" \
@@ -43,14 +43,20 @@ def create_exe_file():
             --collect-submodules=django \
             --hidden-import=requests \
             --collect-submodules=requests \
-            --hidden-import=easygui \
-            --collect-submodules=easygui \
             --hidden-import=dotenv \
             --collect-submodules=dotenv \
             --hidden-import=pygetwindow \
             --collect-submodules=pygetwindow \
             --hidden-import=psutil \
             --collect-submodules=psutil \
+            --hidden-import=dotenv \
+            --collect-submodules=dotenv \
+            --hidden-import=tkinter \
+            --collect-submodules=tkinter \
+            --hidden-import=_tkinter \
+            --collect-submodules=_tkinter \
+            --hidden-import=easygui \
+            --collect-submodules=easygui \
             --name={EXE_NAME} {OBFUSCATED_DIR}/main.py'
     )
 

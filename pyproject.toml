@@ -19,6 +19,7 @@ pyinstaller = "^6.12.0"
 pyarmor = "^9.1.1"
 django-oauth-toolkit = "^3.0.1"
 psutil = "^7.0.0"
+pygetwindow = "^0.0.9"
 
 [build-system]
 requires = ["poetry-core"]
