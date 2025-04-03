@@ -588,7 +588,7 @@ class H5_Lobby(BasicWindow):
             if not self.__player_accepted:
                 PROGRESS_BAR = ProgressBar(
                     position=(overlay_width * 1.5, overlay_height * 1.6),
-                    dimensions=(overlay_width * 0.8, 30),
+                    dimensions=(overlay_width * 0.9, overlay_height * 0.175),
                     image_frame=self.PROGRESS_BAR_FRAME,
                     image_bg=self.PROGRESS_BAR_BG,
                     image_edge=self.PROGRESS_BAR_EDGE,
