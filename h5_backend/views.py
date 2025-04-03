@@ -364,7 +364,7 @@ def remove_from_queue(request):
 
                 except PlayersMatched.DoesNotExist:
                     return JsonResponse(
-                        {"success": False, "error": "Match not found"}, status=400
+                        {"success": False, "error": "Match not found"}, status=404
                     )
         return JsonResponse({"success": True})
 
