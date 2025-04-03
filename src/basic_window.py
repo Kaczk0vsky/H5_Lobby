@@ -208,8 +208,8 @@ class BasicWindow:
             os.path.join(os.getcwd(), "resources/progress_bar/progress_bar_edge.png")
         )
 
-    def error_window(self, text: str) -> tuple:
-        overlay_width, overlay_height = 600, 400
+    def error_window(self, text: str, dimensions: tuple[int, int]) -> tuple:
+        overlay_width, overlay_height = dimensions
         screen_width, screen_height = pygame.display.get_surface().get_size()
         overlay_y = (screen_height - overlay_height) // 2
 
@@ -229,7 +229,7 @@ class BasicWindow:
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(screen_width // 2, overlay_y + overlay_height * 2 // 3),
             text_input="Back",
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )

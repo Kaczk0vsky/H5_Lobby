@@ -61,6 +61,8 @@ class LoginWindow(BasicWindow):
         self.hoverbox_dims = (30, 40)
         self.checkbox_pos = [470, 275]
         self.checkbox_dims = (30, 30)
+        self.error_window_dims = (600, 400)
+        self.bg_dims = (800, 600)
         self.transformation_option = "800x600"
         self.font_size = fonts_sizes[self.transformation_option]
 
@@ -69,11 +71,8 @@ class LoginWindow(BasicWindow):
         self.play_background_music(music_path="resources/H5_login_menu_theme.mp3")
         self.create_login_elements()
 
-        self.SCREEN = pygame.display.set_mode((800, 600), pygame.NOFRAME)
-        self.BG = pygame.transform.scale(
-            self.BG,
-            (800, 600),
-        )
+        self.SCREEN = pygame.display.set_mode(self.bg_dims, pygame.NOFRAME)
+        self.BG = pygame.transform.scale(self.BG, self.bg_dims)
 
         self.session = requests.Session()
         self.csrf_token = None
@@ -115,7 +114,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Sign In",
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -124,7 +123,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Sing Up",
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -133,7 +132,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.LONG_BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 130),
             text_input="Forgot Password?",
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -141,7 +140,7 @@ class LoginWindow(BasicWindow):
             image=self.QUIT,
             image_highlited=self.QUIT_HIGHLIGHTED,
             position=(550, 95),
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -244,7 +243,9 @@ class LoginWindow(BasicWindow):
 
             if self.__error_msg:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = (
-                    self.error_window(text=self.__error_msg)
+                    self.error_window(
+                        text=self.__error_msg, dimensions=self.error_window_dims
+                    )
                 )
 
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
@@ -282,7 +283,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Submit",
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -291,7 +292,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 130),
             text_input="Back",
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -412,7 +413,9 @@ class LoginWindow(BasicWindow):
 
             if self.__error_msg:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(text=self.__error_msg)
+                    self.error_window(
+                        text=self.__error_msg, dimensions=self.error_window_dims
+                    )
                 )
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
@@ -451,7 +454,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Submit",
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -460,7 +463,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Back",
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -531,7 +534,9 @@ class LoginWindow(BasicWindow):
 
             if self.__error_msg:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(text=self.__error_msg)
+                    self.error_window(
+                        text=self.__error_msg, dimensions=self.error_window_dims
+                    )
                 )
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
@@ -593,7 +598,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(400, 420),
             text_input="Back",
-            font=self.get_font(self.font_size[0]),
+            font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )

@@ -438,6 +438,7 @@ class H5_Lobby(BasicWindow):
                                 pygame.mixer.Channel(self.__queue_channel).stop()
                             set_queue_vars(state=False)
                             self.__error_msg = self.remove_from_queue(is_accepted=False)
+                            continue
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
                                 self.__update_queue_status = True
@@ -480,7 +481,13 @@ class H5_Lobby(BasicWindow):
 
             if self.__error_msg:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(text=self.__error_msg)
+                    self.error_window(
+                        text=self.__error_msg,
+                        dimensions=(
+                            self.config["screen_width"] // 3,
+                            self.config["screen_hight"] // 3,
+                        ),
+                    )
                 )
                 screen_width, screen_height = (
                     self.SCREEN.get_width(),
