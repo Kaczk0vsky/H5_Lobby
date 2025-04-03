@@ -118,8 +118,8 @@ class H5_Lobby(BasicWindow):
             self.config["screen_hight"] / 17,
         )
         self.player_list_dims = (
-            self.config["screen_width"] / 4,
-            self.config["screen_hight"] / 1.35,
+            self.config["screen_width"] / 4.7,
+            self.config["screen_hight"] / 1.1,
         )
 
         self.BG = pygame.transform.scale(
@@ -215,6 +215,22 @@ class H5_Lobby(BasicWindow):
             self.PROGRESS_BAR_EDGE,
             (60, 80),
         )
+        self.SCROLL = pygame.transform.scale(
+            self.SCROLL,
+            (30, 100),
+        )
+        self.SCROLL_BAR = pygame.transform.scale(
+            self.SCROLL_BAR,
+            (50, self.config["screen_hight"] / 1.2),
+        )
+        self.LINE = pygame.transform.scale(
+            self.LINE,
+            (self.config["screen_width"] / 5.8, 5),
+        )
+        self.CHECKBOX = pygame.transform.scale(
+            self.CHECKBOX,
+            (40, 40),
+        )
         FIND_GAME_BUTTON = Button(
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
@@ -306,15 +322,19 @@ class H5_Lobby(BasicWindow):
         )
         USERS_LIST = UsersList(
             position=(
-                1670 * (transformation_factors[self.transformation_option][0]),
-                510 * (transformation_factors[self.transformation_option][1]),
+                1710 * (transformation_factors[self.transformation_option][0]),
+                590 * (transformation_factors[self.transformation_option][1]),
             ),
             color=self.text_color,
             font=self.get_font(self.font_size[0]),
-            title="Players active",
+            title="Players Online",
             image=self.PLAYER_LIST,
             image_bg=self.PLAYER_LIST_BG,
             image_box=self.PLAYER_LIST_FRAME,
+            scroll=self.SCROLL,
+            scroll_bar=self.SCROLL_BAR,
+            line=self.LINE,
+            box=self.CHECKBOX,
         )
 
         self.refresh_friends_list()
@@ -405,6 +425,7 @@ class H5_Lobby(BasicWindow):
                         continue
 
             for event in pygame.event.get():
+                USERS_LIST.event(event)
                 if event.type == pygame.QUIT:
                     if self.__queue_status:
                         self.remove_from_queue(is_accepted=False)
