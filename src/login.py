@@ -40,22 +40,14 @@ class LoginWindow(BasicWindow):
         run_game(): Starts the main UI called in login_window().
     """
 
-    _window_overlay = False
-    _wrong_credentials_status = False
-    _error_status = False
-    _connection_error = False
-    _fields_empty = False
-    _wrong_nickname = False
-    _wrong_email = False
-    _wrong_password = False
-    _remove_all_widgets = False
-    _email_not_sent = False
-    _allow_login = False
-    _show_hint = False
-    _show_nickname_hint = False
-    _show_password_hint = False
-    _connection_timer = None
-    _error_message = None
+    __window_overlay = False
+    __remove_all_widgets = False
+    __allow_login = False
+    __show_hint = False
+    __show_nickname_hint = False
+    __show_password_hint = False
+    __connection_timer = None
+    __error_msg = None
 
     def __init__(self):
         BasicWindow.__init__(self)
@@ -205,19 +197,19 @@ class LoginWindow(BasicWindow):
                 for input in INPUT_BOXES:
                     input.event(event)
                     if input._enter_pressed == True and input.active:
-                        self.login_player(INPUT_BOXES)
+                        self.__error_msg = self.login_player(INPUT_BOXES).join()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if not self._window_overlay:
+                    if not self.__window_overlay:
                         if LOGIN_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            self.login_player(INPUT_BOXES)
+                            self.__error_msg = self.login_player(INPUT_BOXES).join()
                         if REGISTER_BUTTON.check_for_input(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.register_player_window()
                         if FORGOT_PASSWORD_BUTTON.check_for_input(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
                             self.forgot_password_window()
-                            self._window_overlay = True
+                            self.__window_overlay = True
                         if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.quit_game_handling()
                         if CHECK_BOX_PASSWORD.check_for_input(MENU_MOUSE_POS):
@@ -225,17 +217,13 @@ class LoginWindow(BasicWindow):
                                 not self.client_config["remember_password"]
                             )
                     else:
-                        if self._error_status:
+                        if self.__error_msg:
                             if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
-                                if self._error_message:
-                                    self._error_message = False
-                                elif self._connection_error:
-                                    self._connection_error = False
-                                self._window_overlay = False
-                                self._error_status = False
+                                self.__window_overlay = False
+                                self.__error_msg = None
                                 LOGIN_INPUT.set_active(self.SCREEN)
 
-            if not self._window_overlay:
+            if not self.__window_overlay:
                 CHECK_BOX_PASSWORD.update(self.SCREEN)
                 LOGIN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 REGISTER_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
@@ -246,43 +234,35 @@ class LoginWindow(BasicWindow):
                     input.update()
                     input.draw(self.SCREEN)
 
-            if self._error_message:
-                error_text = self._error_message
-                self._window_overlay = True
-
-            if self._connection_timer:
-                time_passed = calculate_time_passed(start_time=self._connection_timer)[
+            if self.__connection_timer:
+                time_passed = calculate_time_passed(start_time=self.__connection_timer)[
                     1
                 ]
                 if time_passed >= 3:
-                    self._window_overlay = True
-                    self._error_status = True
-                    error_text = f"Connecting for {time_passed} seconds..."
+                    self.__window_overlay = True
+                    self.__error_msg = f"Connecting for {time_passed} seconds..."
 
-            if self._connection_error:
-                self._connection_timer = None
-                self._window_overlay = True
-                error_text = "Error occured while trying to connect to server!"
-
-            if self._error_status:
+            if self.__error_msg:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = (
-                    self.error_window(text=error_text)
+                    self.error_window(text=self.__error_msg)
                 )
 
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                if not self._connection_timer:
+                if not self.__connection_timer:
                     BACK_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
-            if self._allow_login:
-                self._allow_login = False
+            if self.__allow_login:
+                self.__allow_login = False
                 self.run_lobby()
 
             pygame.display.update()
 
     def register_player_window(self):
-        self.CHECK_MARK = pygame.transform.scale(self.CHECK_MARK, (30, 30))
-        self.UNCHECK_MARK = pygame.transform.scale(self.UNCHECK_MARK, (30, 30))
+        self.CHECK_MARK = pygame.transform.scale(self.CHECK_MARK, self.checkbox_dims)
+        self.UNCHECK_MARK = pygame.transform.scale(
+            self.UNCHECK_MARK, self.checkbox_dims
+        )
 
         nickname_dict = {
             0: [False, "Nickname requirements:"],
@@ -384,120 +364,82 @@ class LoginWindow(BasicWindow):
                 for input in INPUT_BOXES:
                     input.event(event)
                     if input._enter_pressed == True and input.active:
-                        self.register_new_player(INPUT_BOXES)
+                        self.__error_msg = self.register_new_player(INPUT_BOXES).join()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if not self._window_overlay:
+                    if not self.__window_overlay:
                         if REGISTER_ACCOUNT_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            self.register_new_player(INPUT_BOXES)
+                            self.__error_msg = self.register_new_player(
+                                INPUT_BOXES
+                            ).join()
                         elif BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            self._remove_all_widgets = True
+                            self.__remove_all_widgets = True
                         elif HOVER_BOX_NICKNAME.check_for_input(MENU_MOUSE_POS):
-                            self._show_hint = True
-                            self._show_nickname_hint = True
-                            self._window_overlay = True
+                            self.__show_hint = True
+                            self.__show_nickname_hint = True
                         elif HOVER_BOX_PASSWORD.check_for_input(MENU_MOUSE_POS):
-                            self._show_hint = True
-                            self._show_password_hint = True
-                            self._window_overlay = True
+                            self.__show_hint = True
+                            self.__show_password_hint = True
                     else:
-                        if self._error_status:
+                        if self.__error_msg:
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
-                                if self._wrong_credentials_status:
-                                    self._wrong_credentials_status = False
-                                elif self._connection_error:
-                                    self._connection_error = False
-                                elif self._fields_empty:
-                                    self._fields_empty = False
-                                elif self._wrong_nickname:
-                                    self._wrong_nickname = False
-                                elif self._wrong_password:
-                                    self._wrong_password = False
-                                elif self._wrong_email:
-                                    self._wrong_email = False
-                                elif self._error_message:
-                                    self._error_message = None
-                                self._window_overlay = False
-                                self._error_status = False
+                                self.__window_overlay = False
+                                self.__error_msg = None
 
-                        if self._show_hint:
-                            if self.BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
-                                self._show_hint = False
-                                self._window_overlay = False
+                        if self.__show_hint:
+                            if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
+                                self.__window_overlay = False
+                                self.__show_hint = False
 
                         NICKNAME_INPUT.set_active(self.SCREEN)
 
-            if not self._window_overlay:
+            if not self.__window_overlay or not self.__show_hint:
                 REGISTER_ACCOUNT_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 BACK_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                HOVER_BOX_NICKNAME.update(self.SCREEN, MENU_MOUSE_POS)
+                HOVER_BOX_PASSWORD.update(self.SCREEN, MENU_MOUSE_POS)
                 for input in INPUT_BOXES:
                     input.update()
                     input.draw(self.SCREEN)
-                HOVER_BOX_NICKNAME.update(self.SCREEN, MENU_MOUSE_POS)
-                HOVER_BOX_PASSWORD.update(self.SCREEN, MENU_MOUSE_POS)
 
-            if self._error_message:
-                error_text = self._error_message
-                self._window_overlay = True
-
-            if self._wrong_nickname:
-                self._window_overlay = True
-                error_text = "Nickname is not correct!"
-
-            if self._wrong_password:
-                self._window_overlay = True
-                error_text = "Password is not correct!"
-
-            if self._wrong_email:
-                self._window_overlay = True
-                error_text = "Email is not correct!"
-
-            if self._connection_timer:
-                time_passed = calculate_time_passed(start_time=self._connection_timer)[
+            if self.__connection_timer:
+                time_passed = calculate_time_passed(start_time=self.__connection_timer)[
                     1
                 ]
                 if time_passed >= 3:
-                    self._window_overlay = True
-                    self._error_status = True
-                    error_text = f"Connecting for {time_passed} seconds..."
+                    self.__window_overlay = True
+                    self.__error_msg = f"Connecting for {time_passed} seconds..."
 
-            if self._connection_error:
-                self._connection_timer = None
-                self._window_overlay = True
-                error_text = "Error occured while trying to connect to server!"
-
-            if self._fields_empty:
-                self._window_overlay = True
-                error_text = "Fields cannot be empty!"
-
-            if self._error_status:
+            if self.__error_msg:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(text=error_text)
+                    self.error_window(text=self.__error_msg)
                 )
-
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                if not self._connection_timer:
+
+                if not self.__connection_timer:
                     RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
-            if self._show_hint:
-                if self._show_nickname_hint:
-                    text_input_dict = nickname_dict
-                    text_input_dict = check_input_correctnes(
-                        INPUT_BOXES, text_input_dict
-                    )
-                if self._show_password_hint:
-                    text_input_dict = password_dict
-                    text_input_dict = check_input_correctnes(
-                        INPUT_BOXES, text_input_dict
-                    )
-                self.hints_window(text_input_dict)
-                self.BACK_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
-                self._show_password_hint = False
-                self._show_nickname_hint = False
+            if self.__show_hint:
+                self.__window_overlay = True
+                text_input_dict = None
 
-            if self._remove_all_widgets:
-                self._remove_all_widgets = False
+                if self.__show_nickname_hint:
+                    text_input_dict = check_input_correctnes(INPUT_BOXES, nickname_dict)
+                    self.__show_nickname_hint = False
+
+                if self.__show_password_hint:
+                    text_input_dict = check_input_correctnes(INPUT_BOXES, password_dict)
+
+                if text_input_dict:
+                    RETURN_BUTTON = self.hints_window(text_input_dict)
+                    self.__show_password_hint = False
+
+                self.render_hints()
+                RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+
+            if self.__remove_all_widgets:
+                self.__remove_all_widgets = False
                 delete_objects(INPUT_BOXES)
                 self.login_window()
 
@@ -559,135 +501,84 @@ class LoginWindow(BasicWindow):
                 for input in INPUT_BOXES:
                     input.event(event)
                     if input._enter_pressed == True and input.active:
-                        self.set_new_password(INPUT_BOXES)
+                        self.__error_msg = self.set_new_password(INPUT_BOXES).join()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if not self._window_overlay:
+                    if not self.__window_overlay:
                         if SUBMIT_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            self.set_new_password(INPUT_BOXES)
+                            self.__error_msg = self.set_new_password(INPUT_BOXES).join()
                         if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            self._remove_all_widgets = True
+                            self.__remove_all_widgets = True
                     else:
-                        if self._error_status:
+                        if self.__error_msg:
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
-                                if self._wrong_credentials_status:
-                                    self._wrong_credentials_status = False
-                                elif self._connection_error:
-                                    self._connection_error = False
-                                elif self._fields_empty:
-                                    self._fields_empty = False
-                                elif self._email_not_sent:
-                                    self._email_not_sent = False
-                                elif self._wrong_nickname:
-                                    self._wrong_nickname = False
-                                elif self._wrong_email:
-                                    self._wrong_email = False
-                                self._window_overlay = False
-                                self._error_status = False
+                                self.__window_overlay = False
+                                self.__error_msg = None
                                 NICKNAME_INPUT.set_active(self.SCREEN)
 
-            if not self._window_overlay:
+            if not self.__window_overlay:
                 SUBMIT_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 BACK_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 for input in INPUT_BOXES:
                     input.update()
                     input.draw(self.SCREEN)
 
-            if self._wrong_credentials_status:
-                self._window_overlay = True
-                error_text = "User with this email doesn`t exist!"
+            if self.__connection_timer:
+                time_passed = calculate_time_passed(start_time=self.__connection_timer)
+                if time_passed[1] >= 3:
+                    self.__window_overlay = True
+                    self.__error_msg = f"Connecting for {time_passed[1]} seconds..."
 
-            if self._wrong_nickname:
-                self._window_overlay = True
-                error_text = "Nickname is not correct!"
-
-            if self._wrong_email:
-                self._window_overlay = True
-                error_text = "Email is not correct!"
-
-            if self._connection_timer:
-                time_passed = calculate_time_passed(start_time=self._connection_timer)[
-                    1
-                ]
-                if time_passed >= 3:
-                    self._window_overlay = True
-                    self._error_status = True
-                    error_text = f"Connecting for {time_passed} seconds..."
-
-            if self._connection_error:
-                self._connection_timer = None
-                self._window_overlay = True
-                error_text = "Error occured while trying to connect to server!"
-
-            if self._fields_empty:
-                self._window_overlay = True
-                error_text = "Fields cannot be empty!"
-
-            if self._email_not_sent:
-                self._window_overlay = True
-                error_text = "Error occured during sending email!"
-
-            if self._error_status:
+            if self.__error_msg:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(text=error_text)
+                    self.error_window(text=self.__error_msg)
                 )
-
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                if not self._connection_timer:
+
+                if not self.__connection_timer:
                     RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
-            if self._remove_all_widgets:
-                self._remove_all_widgets = False
+            if self.__remove_all_widgets:
+                self.__remove_all_widgets = False
                 delete_objects(INPUT_BOXES)
                 self.login_window()
 
             pygame.display.update()
 
     def hints_window(self, text_input: dict[any, list]):
-        if self._show_nickname_hint or self._show_password_hint:
-            self.check_list = []
-            for key in text_input.keys():
-                if text_input[key][0]:
-                    self.check_list.append(self.CHECK_MARK)
-                else:
-                    self.check_list.append(self.UNCHECK_MARK)
-            overlay_width, overlay_height = 600, 400
-            x_pos = 200
-            y_pos = 150
+        self.check_list = []
+        overlay_width, overlay_height = 600, 400
+        x_pos, y_pos = 200, 150
 
-            self.SMALLER_WINDOWS_BG = pygame.transform.scale(
-                self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height)
-            )
+        for key in text_input.keys():
+            if text_input[key][0]:
+                self.check_list.append(self.CHECK_MARK)
+            else:
+                self.check_list.append(self.UNCHECK_MARK)
 
-            self.TITLE_TEXT = self.get_font(self.font_size[0]).render(
-                text_input[0][1], True, self.text_color
-            )
-            self.TITLE_RECT = self.TITLE_TEXT.get_rect(center=(x_pos * 2, y_pos))
-            self.FIRST_TEXT = self.get_font(self.font_size[0]).render(
-                text_input[1][1], True, self.text_color
-            )
-            self.FIRST_RECT = self.FIRST_TEXT.get_rect(topleft=(x_pos, y_pos + 50))
-            self.SECOND_TEXT = self.get_font(self.font_size[0]).render(
-                text_input[2][1], True, self.text_color
-            )
-            self.SECOND_RECT = self.SECOND_TEXT.get_rect(topleft=(x_pos, y_pos + 100))
-            self.THIRD_TEXT = None
-            self.THIRD_RECT = None
-            self.FOURTH_TEXT = None
-            self.FOURTH_RECT = None
-
-        self.BACK_BUTTON = Button(
-            image=self.BUTTON,
-            image_highlited=self.BUTTON_HIGHLIGHTED,
-            position=(400, 420),
-            text_input="Back",
-            font=self.get_font(self.font_size[0]),
-            base_color=self.text_color,
-            hovering_color=self.hovering_color,
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(
+            self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height)
         )
 
-        if self._show_password_hint:
+        self.TITLE_TEXT = self.get_font(self.font_size[0]).render(
+            text_input[0][1], True, self.text_color
+        )
+        self.TITLE_RECT = self.TITLE_TEXT.get_rect(center=(x_pos * 2, y_pos))
+        self.FIRST_TEXT = self.get_font(self.font_size[0]).render(
+            text_input[1][1], True, self.text_color
+        )
+        self.FIRST_RECT = self.FIRST_TEXT.get_rect(topleft=(x_pos, y_pos + 50))
+        self.SECOND_TEXT = self.get_font(self.font_size[0]).render(
+            text_input[2][1], True, self.text_color
+        )
+        self.SECOND_RECT = self.SECOND_TEXT.get_rect(topleft=(x_pos, y_pos + 100))
+        self.THIRD_TEXT = None
+        self.THIRD_RECT = None
+        self.FOURTH_TEXT = None
+        self.FOURTH_RECT = None
+
+        if self.__show_password_hint:
             self.THIRD_TEXT = self.get_font(self.font_size[0]).render(
                 text_input[3][1], True, self.text_color
             )
@@ -697,6 +588,18 @@ class LoginWindow(BasicWindow):
             )
             self.FOURTH_RECT = self.FOURTH_TEXT.get_rect(topleft=(x_pos, y_pos + 200))
 
+        BACK_BUTTON = Button(
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
+            position=(400, 420),
+            text_input="Back",
+            font=self.get_font(self.font_size[0]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        return BACK_BUTTON
+
+    def render_hints(self):
         self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
         self.SCREEN.blit(self.TITLE_TEXT, self.TITLE_RECT)
         self.SCREEN.blit(
@@ -708,7 +611,7 @@ class LoginWindow(BasicWindow):
         )
         self.SCREEN.blit(self.SECOND_TEXT, self.SECOND_RECT)
 
-        if self.FOURTH_TEXT:
+        if self.THIRD_TEXT and self.FOURTH_TEXT:
             self.SCREEN.blit(
                 self.check_list[3], (self.FIRST_RECT.x - 50, self.THIRD_RECT.y)
             )
@@ -725,10 +628,8 @@ class LoginWindow(BasicWindow):
             self.csrf_token = self.get_csrf_token()
 
         if not self.csrf_token:
-            self._window_overlay = True
-            self._wrong_credentials_status = True
-            self._error_status = True
-            return
+            self.__window_overlay = True
+            return "Server error!"
 
         self.client_config = {
             "nickname": inputs[0].get_string(),
@@ -736,19 +637,32 @@ class LoginWindow(BasicWindow):
             "remember_password": self.client_config["remember_password"],
         }
 
+        if not self.client_config["nickname"] or not self.client_config["password"]:
+            self.__window_overlay = True
+            return "Fields cannot be empty!"
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", self.client_config["nickname"]):
+            self.__window_overlay = True
+            return "Nickname has incorrect format!"
+
+        if not re.match(
+            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^&+=!]{8,}$",
+            self.client_config["password"],
+        ):
+            self.__window_overlay = True
+            return "Passowrd has incorrect format!"
+
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.csrf_token,
             "Content-Type": "application/json",
         }
         self.session.cookies.set("csrftoken", self.csrf_token)
-
-        self._connection_timer = time.time()
+        self.__connection_timer = time.time()
         try:
             response = self.session.post(url, json=self.client_config, headers=headers)
-
             if response.status_code == 200:
-                self._connection_timer = None
+                self.__connection_timer = None
                 save_login_information(self.client_config)
                 if self.vpn_client is None:
                     self.vpn_client = SoftEtherClient(
@@ -757,21 +671,25 @@ class LoginWindow(BasicWindow):
                     )
                     self.vpn_client.create_new_client()
                 self.vpn_client.set_vpn_state(state=True)
-                self._allow_login = True
+                self.__allow_login = True
+                return None
 
             elif response.status_code == 400:
-                self._error_message = response.json().get(
-                    "error", "Unknown error occurred"
-                )
-                self._window_overlay = True
-                self._wrong_credentials_status = True
-                self._error_status = True
-                self._connection_timer = None
+                self.__window_overlay = True
+                self.__connection_timer = None
+                return response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
-            self._window_overlay = True
-            self._connection_error = True
-            self._error_status = True
+            self.__window_overlay = True
+            return "Error occured while trying to connect to server!"
+
+        except requests.exceptions.ConnectionError:
+            self.__window_overlay = True
+            return "To many tries, try again later!"
+
+        except:
+            self.__window_overlay = True
+            return "Unknown error occured..."
 
     @run_in_thread
     def register_new_player(self, inputs: list):
@@ -780,10 +698,8 @@ class LoginWindow(BasicWindow):
             self.csrf_token = self.get_csrf_token()
 
         if not self.csrf_token:
-            self._window_overlay = True
-            self._wrong_credentials_status = True
-            self._error_status = True
-            return
+            self.__window_overlay = True
+            return "Server error!"
 
         user_data = {
             "nickname": inputs[0].get_string(),
@@ -792,36 +708,28 @@ class LoginWindow(BasicWindow):
             "email": inputs[3].get_string(),
         }
 
-        for value in user_data.values():
-            if not value:
-                self._window_overlay = True
-                self._fields_empty = True
-                self._error_status = True
-                return
+        if not all(user_data.values()):
+            self.__window_overlay = True
+            return "Fields cannot be empty!"
 
         if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", user_data["nickname"]):
-            self._window_overlay = True
-            self._error_status = True
-            self._wrong_nickname = True
-            return
+            self.__window_overlay = True
+            return "Nickname has incorrect format!"
 
-        if (
-            not re.match(
-                r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^&+=!]{8,}$",
-                user_data["password"],
-            )
-            or user_data["password"] != user_data["repeat_password"]
+        if not re.match(
+            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^&+=!]{8,}$",
+            user_data["password"],
         ):
-            self._window_overlay = True
-            self._error_status = True
-            self._wrong_password = True
-            return
+            self.__window_overlay = True
+            return "Password has incorrect format!"
+
+        if user_data["password"] != user_data["repeat_password"]:
+            self.__window_overlay = True
+            return "Passwords do not match!"
 
         if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", user_data["email"]):
-            self._window_overlay = True
-            self._error_status = True
-            self._wrong_email = True
-            return
+            self.__window_overlay = True
+            return "Email has incorrect format!"
 
         self.client_config = {
             "nickname": user_data["nickname"],
@@ -829,108 +737,107 @@ class LoginWindow(BasicWindow):
             "remember_password": False,
             "crsf_token": self.csrf_token,
         }
+        headers = {
+            "Referer": "https://h5-tavern.pl/",
+            "X-CSRFToken": self.csrf_token,
+            "Content-Type": "application/json",
+        }
+        self.session.cookies.set("csrftoken", self.csrf_token)
+        self.__connection_timer = time.time()
+        try:
+            response = self.session.post(url, json=user_data, headers=headers)
+            if response.status_code == 200:
+                self.__connection_timer = None
+                self.vpn_client = SoftEtherClient(
+                    self.client_config["nickname"],
+                    self.client_config["password"],
+                )
+                self.vpn_client.create_new_client()
+                self.__remove_all_widgets = True
+                return None
 
-        if not self._error_status:
-            headers = {
-                "Referer": "https://h5-tavern.pl/",
-                "X-CSRFToken": self.csrf_token,
-                "Content-Type": "application/json",
-            }
-            self.session.cookies.set("csrftoken", self.csrf_token)
-            self._connection_timer = time.time()
-            try:
-                response = self.session.post(url, json=user_data, headers=headers)
-                if response.status_code == 200:
-                    self._connection_timer = None
-                    self.vpn_client = SoftEtherClient(
-                        self.client_config["nickname"],
-                        self.client_config["password"],
-                    )
-                    self.vpn_client.create_new_client()
-                    self._remove_all_widgets = True
+            elif response.status_code == 400:
+                self.__window_overlay = True
+                self.__connection_timer = None
+                return response.json().get("error", "Unknown error occurred")
 
-                elif response.status_code == 400:
-                    self._error_message = response.json().get(
-                        "error", "Unknown error occurred"
-                    )
-                    self._window_overlay = True
-                    self._error_status = True
-                    self._connection_timer = None
+        except requests.exceptions.ConnectTimeout:
+            self.__window_overlay = True
+            return "Error occured while trying to connect to server!"
 
-            except requests.exceptions.ConnectTimeout:
-                self._window_overlay = True
-                self._connection_error = True
-                self._error_status = True
+        except requests.exceptions.ConnectionError:
+            self.__window_overlay = True
+            return "To many tries, try again later!"
+
+        except:
+            self.__window_overlay = True
+            return "Unknown error occured..."
 
     @run_in_thread
     def set_new_password(self, inputs: list):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_CHANGE_PASSWORD']}/"
         if not self.csrf_token:
             self.csrf_token = self.get_csrf_token()
+
         if not self.csrf_token:
-            self._window_overlay = True
-            self._wrong_credentials_status = True
-            self._error_status = True
-            return
+            self.__window_overlay = True
+            return "Server error!"
 
         user_data = {
             "nickname": inputs[0].get_string(),
             "email": inputs[1].get_string(),
         }
 
-        if not user_data["nickname"] or not user_data["email"]:
-            self._window_overlay = True
-            self._fields_empty = True
-            self._error_status = True
-            return
+        if not all(user_data.values()):
+            self.__window_overlay = True
+            return "Fields cannot be empty!"
 
         if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", user_data["nickname"]):
-            self._window_overlay = True
-            self._error_status = True
-            self._wrong_nickname = True
-            return
+            self.__window_overlay = True
+            return "Nickname has incorrect format!"
 
         if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", user_data["email"]):
-            self._window_overlay = True
-            self._error_status = True
-            self._wrong_email = True
-            return
+            self.__window_overlay = True
+            return "Email has incorrect format!"
 
-        if not self._error_status:
-            headers = {
-                "Referer": "https://h5-tavern.pl/",
-                "X-CSRFToken": self.csrf_token,
-                "Content-Type": "application/json",
-            }
-            self.session.cookies.set("csrftoken", self.csrf_token)
-            self._connection_timer = time.time()
-            try:
-                response = self.session.get(url, params=user_data, headers=headers)
-                if response.status_code == 200:
-                    data = response.json()
-                    reset_url = data.get("reset_url")
-                    if send_email(user_data, reset_url):
-                        self._remove_all_widgets = True
-                        self._window_overlay = False
-                        self._error_status = False
-                        self._connection_timer = None
+        headers = {
+            "Referer": "https://h5-tavern.pl/",
+            "X-CSRFToken": self.csrf_token,
+            "Content-Type": "application/json",
+        }
+        self.session.cookies.set("csrftoken", self.csrf_token)
+        self.__connection_timer = time.time()
+        try:
+            response = self.session.get(url, params=user_data, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                reset_url = data.get("reset_url")
+                if send_email(user_data, reset_url):
+                    self.__remove_all_widgets = True
+                    self.__window_overlay = False
+                    self.__connection_timer = None
+                    return None
+                else:
+                    self.__window_overlay = True
+                    self.__connection_timer = None
+                    return "Error occured during sending email!"
 
-                    else:
-                        self._window_overlay = True
-                        self._email_not_sent = True
-                        self._error_status = True
-                        self._connection_timer = None
+            elif response.status_code == 400 or response.status_code == 404:
+                self.__window_overlay = True
+                self.__connection_timer = None
+                return "User with this email doesn`t exist!"
 
-                elif response.status_code == 400 or response.status_code == 404:
-                    self._window_overlay = True
-                    self._wrong_credentials_status = True
-                    self._error_status = True
-                    self._connection_timer = None
+        except requests.exceptions.ConnectTimeout:
+            self.__window_overlay = True
+            return "Error occured while trying to connect to server!"
 
-            except requests.exceptions.ConnectTimeout:
-                self._window_overlay = True
-                self._connection_error = True
-                self._error_status = True
+        except requests.exceptions.ConnectionError:
+            self.__window_overlay = True
+            return "To many tries, try again later!"
+
+        except:
+            self.__window_overlay = True
+            return "Unknown error occured..."
 
     def get_csrf_token(self):
         url = f"https://{env_dict['SERVER_URL']}/db/{env_dict['PATH_TOKEN']}/"
@@ -939,7 +846,7 @@ class LoginWindow(BasicWindow):
             return response.cookies["csrftoken"]
         return None
 
-    def run_game(self):
+    def run_login(self):
         self.login_window()
 
     def run_lobby(self):

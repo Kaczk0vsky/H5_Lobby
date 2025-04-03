@@ -23,6 +23,7 @@ from src.decorators import run_in_thread
 from widgets.button import Button
 from widgets.option_box import OptionBox
 from widgets.progress_bar import ProgressBar
+from widgets.users_list import UsersList
 
 
 class H5_Lobby(BasicWindow):
@@ -49,23 +50,19 @@ class H5_Lobby(BasicWindow):
             Starts the lobby system by initializing and displaying the main menu.
     """
 
-    _error_status = False
-    _queue_canceled = False
-    _window_overlay = False
-    _game_found_music = False
-    _get_time = False
-    _found_game = False
-    _opponent_accepted = False
-    _authentication_error = False
-    _opponent_declined = False
-    _player_accepted = False
-    _queue_status = False
-    _error_status = False
-    _window_overlay = False
-    _update_queue_status = False
-    _elapsed_time = None
-    _queue_channel = None
-    _opponent_nickname = ""
+    __window_overlay = False
+    __game_found_music = False
+    __get_time = False
+    __found_game = False
+    __opponent_accepted = False
+    __opponent_declined = False
+    __player_accepted = False
+    __queue_status = False
+    __update_queue_status = False
+    __elapsed_time = None
+    __queue_channel = None
+    __error_msg = None
+    __connection_timer = None
 
     def __init__(
         self,
@@ -96,15 +93,14 @@ class H5_Lobby(BasicWindow):
 
     def main_menu(self):
         def set_queue_vars(state: bool = False) -> None:
-            self._game_found_music = state
-            self._get_time = state
-            self._found_game = state
-            self._opponent_accepted = state
-            self._player_accepted = state
-            self._queue_status = state
-            self._elapsed_time = None
-            self._queue_channel = None
-            self._opponent_nickname = ""
+            self.__game_found_music = state
+            self.__get_time = state
+            self.__found_game = state
+            self.__opponent_accepted = state
+            self.__player_accepted = state
+            self.__queue_status = state
+            self.__elapsed_time = None
+            self.__queue_channel = None
 
         def set_all_buttons_active(is_active: bool = False) -> None:
             FIND_GAME_BUTTON.set_active(is_active)
@@ -121,6 +117,10 @@ class H5_Lobby(BasicWindow):
             self.config["screen_width"] / 28,
             self.config["screen_hight"] / 17,
         )
+        self.player_list_dims = (
+            self.config["screen_width"] / 4,
+            self.config["screen_hight"] / 1.35,
+        )
 
         self.BG = pygame.transform.scale(
             self.BG,
@@ -130,30 +130,22 @@ class H5_Lobby(BasicWindow):
             self.TOP_BAR,
             (self.config["screen_width"] / 1.5, self.config["screen_hight"] / 10),
         )
-        self.PLAYER_LIST = pygame.transform.scale(
-            self.PLAYER_LIST,
-            (self.config["screen_width"] / 5, self.config["screen_hight"] / 1.5),
-        )
-        self.PLAYER_LIST_BG = pygame.Surface(
-            (
-                350 * (transformation_factors[self.transformation_option][0]),
-                680 * (transformation_factors[self.transformation_option][1]),
-            ),
-            pygame.SRCALPHA,
-        )
-        self.PLAYER_LIST_BG.fill((0, 0, 0, 200))
-        self.PLAYERS_TEXT = self.get_font(self.font_size[0]).render(
-            "Players active", True, self.text_color
-        )
-        self.PLAYERS_TEXT_RECT = self.PLAYERS_TEXT.get_rect(
-            center=(
-                1730 * (transformation_factors[self.transformation_option][0]),
-                180 * transformation_factors[self.transformation_option][1],
-            ),
-        )
         self.NEWS = pygame.transform.scale(
             self.NEWS,
             (self.config["screen_width"] / 2, self.config["screen_hight"] / 1.5),
+        )
+        self.PLAYER_LIST = pygame.transform.scale(
+            self.PLAYER_LIST,
+            self.player_list_dims,
+        )
+        self.PLAYER_LIST_BG = pygame.Surface(
+            self.player_list_dims,
+            pygame.SRCALPHA,
+        )
+        # TODO: add individual picture
+        self.PLAYER_LIST_FRAME = pygame.transform.scale(
+            self.PROGRESS_BAR_FRAME,
+            (300, 80),
         )
         self.OPTIONS = pygame.transform.scale(
             self.OPTIONS,
@@ -312,7 +304,20 @@ class H5_Lobby(BasicWindow):
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
+        USERS_LIST = UsersList(
+            position=(
+                1670 * (transformation_factors[self.transformation_option][0]),
+                510 * (transformation_factors[self.transformation_option][1]),
+            ),
+            color=self.text_color,
+            font=self.get_font(self.font_size[0]),
+            title="Players active",
+            image=self.PLAYER_LIST,
+            image_bg=self.PLAYER_LIST_BG,
+            image_box=self.PLAYER_LIST_FRAME,
+        )
 
+        self.refresh_friends_list()
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
             self.cursor.update()
@@ -325,30 +330,6 @@ class H5_Lobby(BasicWindow):
                     5 * (transformation_factors[self.transformation_option][1]),
                 ),
             )
-            self.SCREEN.blit(
-                self.PLAYER_LIST_BG,
-                (
-                    1550 * (transformation_factors[self.transformation_option][0]),
-                    120 * (transformation_factors[self.transformation_option][1]),
-                ),
-            )
-            self.SCREEN.blit(
-                self.PLAYER_LIST,
-                (
-                    1530 * (transformation_factors[self.transformation_option][0]),
-                    100 * (transformation_factors[self.transformation_option][1]),
-                ),
-            )
-            self.SCREEN.blit(self.PLAYERS_TEXT, self.PLAYERS_TEXT_RECT)
-
-            # TODO: add news block
-            # self.SCREEN.blit(
-            #     self.NEWS,
-            #     (
-            #         550 * (transformation_factors[self.transformation_option][0]),
-            #         100 * (transformation_factors[self.transformation_option][1]),
-            #     ),
-            # )
 
             for button in [
                 FIND_GAME_BUTTON,
@@ -360,9 +341,10 @@ class H5_Lobby(BasicWindow):
                 QUIT_BUTTON,
             ]:
                 button.handle_button(self.SCREEN, MENU_MOUSE_POS)
+            USERS_LIST.update(self.SCREEN)
 
-            if self._queue_status:
-                if self._update_queue_status:
+            if self.__queue_status:
+                if self.__update_queue_status:
                     (
                         CANCEL_QUEUE,
                         ACCEPT_QUEUE,
@@ -370,8 +352,8 @@ class H5_Lobby(BasicWindow):
                         OPONNENT_RECT,
                         PROGRESS_BAR,
                     ) = self.queue_window()
-                    ACCEPT_QUEUE.set_active(False) if self._player_accepted else None
-                    self._update_queue_status = False
+                    ACCEPT_QUEUE.set_active(False) if self.__player_accepted else None
+                    self.__update_queue_status = False
 
                 self.SCREEN.blit(
                     self.SMALLER_WINDOWS_BG,
@@ -384,7 +366,7 @@ class H5_Lobby(BasicWindow):
                 CANCEL_QUEUE.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 if ACCEPT_QUEUE is not None:
                     ACCEPT_QUEUE.handle_button(self.SCREEN, MENU_MOUSE_POS)
-                if not self._found_game:
+                if not self.__found_game:
                     minutes, seconds = calculate_time_passed(self.start_time)
                     HEADER_TEXT = self.get_font(self.font_size[0]).render(
                         f"Waiting for opponent: {minutes}:{seconds:02d}",
@@ -410,14 +392,13 @@ class H5_Lobby(BasicWindow):
                 self.SCREEN.blit(HEADER_TEXT, HEADER_RECT)
                 if OPONNENT_TEXT is not None and OPONNENT_RECT is not None:
                     self.SCREEN.blit(OPONNENT_TEXT, OPONNENT_RECT)
-                if PROGRESS_BAR is not None and not self._player_accepted:
-                    cancel_bar = PROGRESS_BAR.draw(self.SCREEN, self._elapsed_time)
+                if PROGRESS_BAR is not None and not self.__player_accepted:
+                    cancel_bar = PROGRESS_BAR.draw(self.SCREEN, self.__elapsed_time)
                     if cancel_bar:
-                        self._queue_canceled = True
-                        self._error_status = True
-                        self._window_overlay = True
+                        self.__window_overlay = True
+                        self.__error_msg = "Queue has been declined"
                         pygame.mixer.Channel(0).set_volume(bg_sound_volume)
-                        pygame.mixer.Channel(self._queue_channel).stop()
+                        pygame.mixer.Channel(self.__queue_channel).stop()
                         set_queue_vars(state=False)
                         set_all_buttons_active(True)
                         self.remove_from_queue(is_accepted=False)
@@ -425,13 +406,15 @@ class H5_Lobby(BasicWindow):
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    if self.__queue_status:
+                        self.remove_from_queue(is_accepted=False)
                     self.quit_game_handling(self.crsf_token, self.session)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
-                        self._update_queue_status = True
-                        self._queue_status = True
+                        self.__update_queue_status = True
+                        self.__queue_status = True
                         set_all_buttons_active(is_active=False)
-                        self.add_to_queue()
+                        self.__error_msg = self.add_to_queue()
                         continue
                     if VIEW_STATISTICS.check_for_input(MENU_MOUSE_POS):
                         pass
@@ -444,60 +427,60 @@ class H5_Lobby(BasicWindow):
                     if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.options_window()
                     if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
+                        if self.__queue_status:
+                            self.remove_from_queue(is_accepted=False)
                         self.quit_game_handling(self.crsf_token, self.session)
-                    if self._queue_status:
+                    if self.__queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
                             set_all_buttons_active(is_active=True)
                             pygame.mixer.Channel(0).set_volume(bg_sound_volume)
-                            if self._queue_channel:
-                                pygame.mixer.Channel(self._queue_channel).stop()
+                            if self.__queue_channel:
+                                pygame.mixer.Channel(self.__queue_channel).stop()
                             set_queue_vars(state=False)
-                            self.remove_from_queue(is_accepted=False)
+                            self.__error_msg = self.remove_from_queue(is_accepted=False)
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
-                                self._update_queue_status = True
-                                self._player_accepted = True
+                                self.__update_queue_status = True
+                                self.__player_accepted = True
                                 set_all_buttons_active(is_active=False)
-                                self.remove_from_queue(is_accepted=True)
+                                self.__error_msg = self.remove_from_queue(
+                                    is_accepted=True
+                                )
                                 self.check_if_oponnent_accepted()
 
-                    if self._window_overlay:
-                        if self._error_status:
+                    if self.__window_overlay:
+                        if self.__error_msg:
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
-                                if self._queue_canceled:
-                                    self._queue_canceled = False
-                                elif self._authentication_error:
-                                    self._authentication_error = False
-                                self._window_overlay = False
-                                self._error_status = False
+                                self.__window_overlay = False
+                                self.__error_msg = None
 
-            if self._opponent_accepted and self._player_accepted:
-                pygame.mixer.Channel(self._queue_channel).stop()
+            if self.__opponent_accepted and self.__player_accepted:
+                pygame.mixer.Channel(self.__queue_channel).stop()
                 set_queue_vars(state=False)
                 set_all_buttons_active(is_active=True)
                 self.run_arena()
 
-            if self._opponent_declined:
-                self._update_queue_status = True
-                self._opponent_declined = False
-                self._found_game = False
-                self._player_accepted = False
-                self._game_found_music = False
-                self._elapsed_time = None
+            if self.__opponent_declined:
+                self.__update_queue_status = True
+                self.__opponent_declined = False
+                self.__found_game = False
+                self.__player_accepted = False
+                self.__game_found_music = False
+                self.__elapsed_time = None
                 pygame.mixer.Channel(0).set_volume(bg_sound_volume)
-                if self._queue_channel:
-                    pygame.mixer.Channel(self._queue_channel).stop()
-                self.add_to_queue()
+                if self.__queue_channel:
+                    pygame.mixer.Channel(self.__queue_channel).stop()
+                self.__error_msg = self.add_to_queue()
 
-            if self._queue_canceled:
-                error_text = "Queue has been declined"
+            if self.__connection_timer:
+                time_passed = calculate_time_passed(start_time=self.__connection_timer)
+                if time_passed[1] >= 3:
+                    self.__window_overlay = True
+                    self.__error_msg = f"Connecting for {time_passed[1]} seconds..."
 
-            if self._authentication_error:
-                error_text = "CRSF Token is not valid"
-
-            if self._error_status:
+            if self.__error_msg:
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(text=error_text)
+                    self.error_window(text=self.__error_msg)
                 )
                 screen_width, screen_height = (
                     self.SCREEN.get_width(),
@@ -513,7 +496,8 @@ class H5_Lobby(BasicWindow):
 
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (x_position, y_position))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                if not self.__connection_timer:
+                    RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             pygame.display.update()
 
@@ -526,9 +510,9 @@ class H5_Lobby(BasicWindow):
             self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height)
         )
 
-        if not self._get_time:
+        if not self.__get_time:
             self.start_time = time.time()
-            self._get_time = True
+            self.__get_time = True
 
         CANCEL_BUTTON = Button(
             image=self.CANCEL_BUTTON,
@@ -545,21 +529,21 @@ class H5_Lobby(BasicWindow):
         OPONNENT_RECT = None
         PROGRESS_BAR = None
 
-        if self._found_game:
-            if not self._elapsed_time:
-                self._elapsed_time = time.time()
-            if not self._game_found_music:
-                self._queue_channel = play_on_empty(
+        if self.__found_game:
+            if not self.__elapsed_time:
+                self.__elapsed_time = time.time()
+            if not self.__game_found_music:
+                self.__queue_channel = play_on_empty(
                     "resources/match_found.wav", volume=bg_sound_volume
                 )
                 pygame.mixer.Channel(0).set_volume(0.0)
-                self._game_found_music = True
+                self.__game_found_music = True
 
-            if self._player_accepted:
-                information_str = f"Waiting for {self._opponent_nickname} to accept..."
+            if self.__player_accepted:
+                information_str = f"Waiting for {self.__opponent_nickname} to accept..."
             else:
                 information_str = (
-                    f"{self._opponent_nickname} - {self.oponnent_ranking_points} RP"
+                    f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} RP"
                 )
             OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
                 information_str,
@@ -594,7 +578,7 @@ class H5_Lobby(BasicWindow):
                 hovering_color=self.hovering_color,
                 inactive_color=self.inactive_color,
             )
-            if not self._player_accepted:
+            if not self.__player_accepted:
                 PROGRESS_BAR = ProgressBar(
                     position=(overlay_width * 1.5, overlay_height * 1.6),
                     dimensions=(overlay_width * 0.8, 30),
@@ -702,10 +686,8 @@ class H5_Lobby(BasicWindow):
     def add_to_queue(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_ADD"]}/"
         if not self.crsf_token:
-            self._window_overlay = True
-            self._authentication_error = True
-            self._error_status = True
-            return
+            self.__window_overlay = True
+            return "CRSF Token is not valid"
 
         user_data = {"nickname": self.client_config["nickname"]}
         headers = {
@@ -713,19 +695,39 @@ class H5_Lobby(BasicWindow):
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
-        response = self.session.post(url, json=user_data, headers=headers)
+        self.__connection_timer = time.time()
+        try:
+            response = self.session.post(url, json=user_data, headers=headers)
+            if response.status_code == 200:
+                self.__connection_timer = None
+                self.check_queue = CustomThread(
+                    target=self.scan_for_players, daemon=True
+                )
+                self.check_queue.start()
+                return None
 
-        if response.status_code == 200:
-            self.check_queue = CustomThread(target=self.scan_for_players, daemon=True)
-            self.check_queue.start()
+            elif response.status_code == 400:
+                self.__window_overlay = True
+                self.__connection_timer = None
+                return response.json().get("error", "Unknown error occurred")
+
+        except requests.exceptions.ConnectTimeout:
+            self.__window_overlay = True
+            return "Error occured while trying to connect to server!"
+
+        except requests.exceptions.ConnectionError:
+            self.__window_overlay = True
+            return "To many tries, try again later!"
+
+        except:
+            self.__window_overlay = True
+            return "Unknown error occured..."
 
     def remove_from_queue(self, is_accepted: bool):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_REMOVE"]}/"
         if not self.crsf_token:
-            self._window_overlay = True
-            self._authentication_error = True
-            self._error_status = True
-            return
+            self.__window_overlay = True
+            return "CRSF Token is not valid"
 
         user_data = {
             "nickname": self.client_config["nickname"],
@@ -736,16 +738,35 @@ class H5_Lobby(BasicWindow):
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
+        self.__connection_timer = time.time()
+        try:
+            response = self.session.post(url, json=user_data, headers=headers)
+            if response.status_code == 200:
+                self.__connection_timer = None
+                return None
 
-        self.session.post(url, json=user_data, headers=headers)
+            elif response.status_code == 400:
+                self.__window_overlay = True
+                self.__connection_timer = None
+                return response.json().get("error", "Unknown error occurred")
+
+        except requests.exceptions.ConnectTimeout:
+            self.__window_overlay = True
+            return "Error occured while trying to connect to server!"
+
+        except requests.exceptions.ConnectionError:
+            self.__window_overlay = True
+            return "To many tries, try again later!"
+
+        except:
+            self.__window_overlay = True
+            return "Unknown error occured..."
 
     def scan_for_players(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_GET_PLAYERS"]}/"
         if not self.crsf_token:
-            self._window_overlay = True
-            self._authentication_error = True
-            self._error_status = True
-            return
+            self.__window_overlay = True
+            "CRSF Token is not valid"
 
         user_data = {"nickname": self.client_config["nickname"]}
         headers = {
@@ -760,10 +781,12 @@ class H5_Lobby(BasicWindow):
                 if response.status_code == 200:
                     json_response = response.json()
                     if json_response.get("game_found"):
-                        self._update_queue_status = True
-                        self._found_game = True
-                        self._opponent_nickname = json_response.get("opponent")[0]
-                        self.oponnent_ranking_points = json_response.get("opponent")[1]
+                        self.__update_queue_status = True
+                        self.__found_game = True
+                        self.__opponent_nickname = json_response.get("opponent")[0]
+                        self.__oponnent_ranking_points = json_response.get("opponent")[
+                            1
+                        ]
                         break
 
             except Exception as e:
@@ -775,10 +798,8 @@ class H5_Lobby(BasicWindow):
     def check_if_oponnent_accepted(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_CHECK_OPONNENT']}/"
         if not self.crsf_token:
-            self._window_overlay = True
-            self._authentication_error = True
-            self._error_status = True
-            return
+            self.__window_overlay = True
+            return "CRSF Token is not valid"
 
         user_data = {"nickname": self.client_config["nickname"]}
         headers = {
@@ -793,16 +814,20 @@ class H5_Lobby(BasicWindow):
                 if response.status_code == 200:
                     json_response = response.json()
                     if json_response.get("oponnent_accepted"):
-                        self._opponent_accepted = True
+                        self.__opponent_accepted = True
                         break
                     elif json_response.get("oponnent_declined"):
-                        self._opponent_declined = True
+                        self.__opponent_declined = True
                         break
 
             except Exception as e:
                 pass
 
             time.sleep(1)
+
+    @run_in_thread
+    def refresh_friends_list(self):
+        pass
 
     def minimize_to_tray(self):
         time.sleep(0.1)

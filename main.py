@@ -23,7 +23,7 @@ if not ENV_DEST.exists():
 def run_lobby():
     check_for_missing_paths()
     lobby = LoginWindow()
-    lobby.run_game()
+    lobby.run_login()
 
 
 if __name__ == "__main__":
