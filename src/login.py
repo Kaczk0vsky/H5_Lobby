@@ -11,6 +11,7 @@ from src.helpers import (
     send_email,
     calculate_time_passed,
     check_input_correctnes,
+    is_server_reachable,
 )
 from src.vpn_handling import SoftEtherClient
 from src.settings_reader import load_client_settings
@@ -46,6 +47,7 @@ class LoginWindow(BasicWindow):
     __show_hint = False
     __show_nickname_hint = False
     __show_password_hint = False
+    __server_unreachable = False
     __connection_timer = None
     __error_msg = None
 
@@ -66,6 +68,13 @@ class LoginWindow(BasicWindow):
         self.transformation_option = "800x600"
         self.font_size = fonts_sizes[self.transformation_option]
 
+        if not is_server_reachable():
+            self.__server_unreachable = True
+            self.__window_overlay = True
+            self.__error_msg = (
+                "Server unreachable. Visit ToA Discord for more information."
+            )
+
         self.client_config = load_client_settings()
         self.set_window_caption(title="Login")
         self.play_background_music(music_path="resources/H5_login_menu_theme.mp3")
@@ -82,6 +91,7 @@ class LoginWindow(BasicWindow):
         self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.BUTTON_HIGHLIGHTED, self.buttons_dims
         )
+        self.BUTTON_INACTIVE = pygame.transform.scale(self.BUTTON, self.buttons_dims)
         self.LONG_BUTTON = pygame.transform.scale(self.BUTTON, self.buttons_dims)
         self.LONG_BUTTON_HIGHLIGHTED = pygame.transform.scale(
             self.BUTTON_HIGHLIGHTED, self.buttons_dims
@@ -112,30 +122,41 @@ class LoginWindow(BasicWindow):
         LOGIN_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
+            image_inactive=self.BUTTON_INACTIVE,
             position=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Sign In",
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
         )
         REGISTER_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
+            image_inactive=self.BUTTON_INACTIVE,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Sing Up",
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
         )
         FORGOT_PASSWORD_BUTTON = Button(
             image=self.LONG_BUTTON,
             image_highlited=self.LONG_BUTTON_HIGHLIGHTED,
+            image_inactive=self.BUTTON_INACTIVE,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 130),
             text_input="Forgot Password?",
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
         )
+        if self.__server_unreachable:
+            LOGIN_BUTTON.set_active(False)
+            REGISTER_BUTTON.set_active(False)
+            FORGOT_PASSWORD_BUTTON.set_active(False)
+
         QUIT_BUTTON = Button(
             image=self.QUIT,
             image_highlited=self.QUIT_HIGHLIGHTED,
@@ -629,13 +650,6 @@ class LoginWindow(BasicWindow):
     @run_in_thread
     def login_player(self, inputs: list):
         url = f"https://{env_dict['SERVER_URL']}/db/{env_dict['PATH_LOGIN']}/"
-        if not self.csrf_token:
-            self.csrf_token = self.get_csrf_token()
-
-        if not self.csrf_token:
-            self.__window_overlay = True
-            return "Server error!"
-
         self.client_config = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
@@ -657,17 +671,22 @@ class LoginWindow(BasicWindow):
             self.__window_overlay = True
             return "Passowrd has incorrect format!"
 
+        if not self.csrf_token:
+            self.csrf_token = self.get_csrf_token()
+
+        if not self.csrf_token:
+            self.__window_overlay = True
+            return "Server error!"
+
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.csrf_token,
             "Content-Type": "application/json",
         }
         self.session.cookies.set("csrftoken", self.csrf_token)
-        self.__connection_timer = time.time()
         try:
             response = self.session.post(url, json=self.client_config, headers=headers)
             if response.status_code == 200:
-                self.__connection_timer = None
                 save_login_information(self.client_config)
                 if self.vpn_client is None:
                     self.vpn_client = SoftEtherClient(
@@ -681,7 +700,6 @@ class LoginWindow(BasicWindow):
 
             elif response.status_code == 400:
                 self.__window_overlay = True
-                self.__connection_timer = None
                 return response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
@@ -694,18 +712,11 @@ class LoginWindow(BasicWindow):
 
         except:
             self.__window_overlay = True
-            return "Unknown error occured..."
+            return "Server/Player offline. Check discord..."
 
     @run_in_thread
     def register_new_player(self, inputs: list):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_REGISTER"]}/"
-        if not self.csrf_token:
-            self.csrf_token = self.get_csrf_token()
-
-        if not self.csrf_token:
-            self.__window_overlay = True
-            return "Server error!"
-
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
@@ -736,6 +747,13 @@ class LoginWindow(BasicWindow):
             self.__window_overlay = True
             return "Email has incorrect format!"
 
+        if not self.csrf_token:
+            self.csrf_token = self.get_csrf_token()
+
+        if not self.csrf_token:
+            self.__window_overlay = True
+            return "Server error!"
+
         self.client_config = {
             "nickname": user_data["nickname"],
             "password": user_data["password"],
@@ -748,11 +766,9 @@ class LoginWindow(BasicWindow):
             "Content-Type": "application/json",
         }
         self.session.cookies.set("csrftoken", self.csrf_token)
-        self.__connection_timer = time.time()
         try:
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
-                self.__connection_timer = None
                 self.vpn_client = SoftEtherClient(
                     self.client_config["nickname"],
                     self.client_config["password"],
@@ -763,7 +779,6 @@ class LoginWindow(BasicWindow):
 
             elif response.status_code == 400:
                 self.__window_overlay = True
-                self.__connection_timer = None
                 return response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
@@ -776,18 +791,11 @@ class LoginWindow(BasicWindow):
 
         except:
             self.__window_overlay = True
-            return "Unknown error occured..."
+            return "Server/Player offline. Check discord..."
 
     @run_in_thread
     def set_new_password(self, inputs: list):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_CHANGE_PASSWORD']}/"
-        if not self.csrf_token:
-            self.csrf_token = self.get_csrf_token()
-
-        if not self.csrf_token:
-            self.__window_overlay = True
-            return "Server error!"
-
         user_data = {
             "nickname": inputs[0].get_string(),
             "email": inputs[1].get_string(),
@@ -805,13 +813,19 @@ class LoginWindow(BasicWindow):
             self.__window_overlay = True
             return "Email has incorrect format!"
 
+        if not self.csrf_token:
+            self.csrf_token = self.get_csrf_token()
+
+        if not self.csrf_token:
+            self.__window_overlay = True
+            return "Server error!"
+
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.csrf_token,
             "Content-Type": "application/json",
         }
         self.session.cookies.set("csrftoken", self.csrf_token)
-        self.__connection_timer = time.time()
         try:
             response = self.session.get(url, params=user_data, headers=headers)
             if response.status_code == 200:
@@ -820,16 +834,13 @@ class LoginWindow(BasicWindow):
                 if send_email(user_data, reset_url):
                     self.__remove_all_widgets = True
                     self.__window_overlay = False
-                    self.__connection_timer = None
                     return None
                 else:
                     self.__window_overlay = True
-                    self.__connection_timer = None
                     return "Error occured during sending email!"
 
             elif response.status_code == 400 or response.status_code == 404:
                 self.__window_overlay = True
-                self.__connection_timer = None
                 return "User with this email doesn`t exist!"
 
         except requests.exceptions.ConnectTimeout:
@@ -842,7 +853,7 @@ class LoginWindow(BasicWindow):
 
         except:
             self.__window_overlay = True
-            return "Unknown error occured..."
+            return "Server/Player offline. Check discord..."
 
     def get_csrf_token(self):
         url = f"https://{env_dict['SERVER_URL']}/db/{env_dict['PATH_TOKEN']}/"

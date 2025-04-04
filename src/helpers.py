@@ -4,6 +4,7 @@ import ssl
 import smtplib
 import time
 import re
+import socket
 import pygetwindow as gw
 
 from email.message import EmailMessage
@@ -40,21 +41,21 @@ def send_email(userdata: dict[str, str], url: str) -> bool:
 
     subject = "A Hero’s Quest: Reset Your Password"
     body = f"""\
-    Greetings {userdata["nickname"]}!
+Greetings {userdata["nickname"]}!
 
-    The ancient scrolls whisper that you seek to reclaim access to your account. 
-    Fear not, for even the mightiest of heroes sometimes misplace their enchanted keys!
+The ancient scrolls whisper that you seek to reclaim access to your account. 
+Fear not, for even the mightiest of heroes sometimes misplace their enchanted keys!
 
-    To restore your rightful place among the legends, follow this sacred link and forge a new password worthy of your name:
+To restore your rightful place among the legends, follow this sacred link and forge a new password worthy of your name:
 
-    🔗 {SERVER_URL}
+🔗 {SERVER_URL}
 
-    But beware! The link shall only remain active for a short while before vanishing into the ether. Should you delay, you must summon the request once more.
+But beware! The link shall only remain active for a short while before vanishing into the ether. Should you delay, you must summon the request once more.
 
-    May fortune favor you on your journey, and may your armies march ever victorious!
+May fortune favor you on your journey, and may your armies march ever victorious!
 
-    For honor and glory,
-    AshanArena3 Support
+For honor and glory,
+AshanArena3 Support
     """
 
     msg = EmailMessage()
@@ -120,3 +121,15 @@ def check_input_correctnes(
 def get_window():
     time.sleep(0.1)
     return gw.getWindowsWithTitle("Heroes V of Might and Magic Ashan Arena 3 - Menu")[0]
+
+
+def is_server_reachable(
+    host: str = env_dict["SERVER_URL"].replace("https://", "").replace("http://", ""),
+    port: int = 443,
+    timeout: float = 5.0,
+) -> bool:
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except (socket.timeout, socket.error):
+        return False
