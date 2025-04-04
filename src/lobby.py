@@ -107,7 +107,8 @@ class H5_Lobby(BasicWindow):
             VIEW_STATISTICS.set_active(is_active)
             NEWS.set_active(is_active)
             MY_PROFILE.set_active(is_active)
-            # OPTIONS_BUTTON.set_active(is_active)
+            PLAYER_PROFILE.set_active(is_active)
+            OPTIONS_BUTTON.set_active(is_active)
 
         self.button_dims = (
             self.config["screen_width"] / 9,
@@ -290,6 +291,7 @@ class H5_Lobby(BasicWindow):
         PLAYER_PROFILE = Button(
             image=self.ICON_SQUARE,
             image_highlited=self.ICON_SQUARE_HIGHLIGHTED,
+            image_inactive=self.ICON_SQUARE,
             position=(
                 1730 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -297,10 +299,12 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
         )
         OPTIONS_BUTTON = Button(
             image=self.OPTIONS,
             image_highlited=self.OPTIONS_HIGHLIGHTED,
+            image_inactive=self.OPTIONS,
             position=(
                 1800 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -308,6 +312,7 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
         )
         QUIT_BUTTON = Button(
             image=self.QUIT,
