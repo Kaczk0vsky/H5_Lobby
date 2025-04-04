@@ -226,7 +226,7 @@ def change_password(request):
 
 @csrf_protect
 @require_POST
-@ratelimit(key="user_or_ip", rate="1/m", method="POST", block=True)
+@ratelimit(key="user_or_ip", rate="5/m", method="POST", block=True)
 def set_player_offline(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
