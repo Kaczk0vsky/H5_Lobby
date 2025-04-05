@@ -17,7 +17,7 @@ from src.global_vars import (
 )
 from src.basic_window import BasicWindow
 from src.run_ashan_arena import AschanArena3Game
-from src.helpers import play_on_empty, calculate_time_passed, get_window
+from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state
 from src.custom_thread import CustomThread
 from src.decorators import run_in_thread
 from widgets.button import Button
@@ -881,13 +881,14 @@ class H5_Lobby(BasicWindow):
                 if response.status_code == 200:
                     json_response = response.json()
                     players_data = json_response.get("players_data")
-                    sorted_players = dict(
-                        sorted(
+                    sorted_players = {
+                        player: (score, format_state(state))
+                        for player, (score, state) in sorted(
                             players_data.items(),
                             key=lambda item: item[1][0],
                             reverse=True,
                         )
-                    )
+                    }
                     users_list.get_players_list(sorted_players)
 
             except Exception as e:

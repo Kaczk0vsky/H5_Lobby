@@ -118,7 +118,7 @@ def check_input_correctnes(
     return text_input
 
 
-def get_window():
+def get_window() -> list:
     time.sleep(0.1)
     return gw.getWindowsWithTitle("Heroes V of Might and Magic Ashan Arena 3 - Menu")[0]
 
@@ -133,3 +133,7 @@ def is_server_reachable(
             return True
     except (socket.timeout, socket.error):
         return False
+
+
+def format_state(state: str) -> str:
+    return state.replace("_", " ").capitalize()

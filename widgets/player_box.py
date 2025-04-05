@@ -56,7 +56,7 @@ class PlayerBox:
         self.nickname = nickname
         self.ranking_points = ranking_points
         self.state = state
-        self.green_states = ["online", "in queue"]
+        self.green_states = ["Online", "In queue"]
         self.rect = pygame.Rect(position, dimensions)
         self.image_line = pygame.transform.scale(
             image_line, (self.w, image_line.get_height() * 0.4)
