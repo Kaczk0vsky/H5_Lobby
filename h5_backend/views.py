@@ -553,7 +553,7 @@ def update_users_list(request):
 
         try:
             players = Player.objects.exclude(player_state="offline").exclude(
-                username="Lazaren"
+                nickname=nickname
             )
             players_list = players.values_list(
                 "nickname", "ranking_points", "player_state"
