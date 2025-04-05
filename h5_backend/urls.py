@@ -16,4 +16,5 @@ urlpatterns = [
         views.check_if_oponnent_accepted,
         name="check_if_oponnent_accepted",
     ),
+    path("get_users_online/", views.update_users_list, name="update_users_list"),
 ]

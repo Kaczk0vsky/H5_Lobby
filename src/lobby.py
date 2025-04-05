@@ -893,6 +893,7 @@ class H5_Lobby(BasicWindow):
                     players_dict = {}
                     for player in players_list:
                         players_dict[player[0]] = [player[1], player[2]]
+                    print(players_dict)
                     users_list.get_players_list(players_dict)
 
             except Exception as e:
