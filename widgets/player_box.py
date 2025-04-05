@@ -2,6 +2,36 @@ import pygame
 
 
 class PlayerBox:
+    """
+    A class representing a single player entry in a user list, displaying nickname, ranking points, and status.
+
+    Attributes:
+        position (tuple[float, float]): The x and y coordinates of the top-left corner of the box.
+        dimensions (tuple[int, int]): The width and height of the player box.
+        color (pygame.Color): The color used for rendering the text.
+        red (str): Hex color code used for offline or inactive status.
+        green (str): Hex color code used for online or active status.
+        font (pygame.font.Font): The main font used for the nickname.
+        font_small (pygame.font.Font): A smaller font used for additional player info.
+        nickname (str): The player's nickname.
+        ranking_points (int): The player's ranking points.
+        state (str): The player's current status (e.g., "online", "offline").
+        green_states (list[str]): List of states that are considered "green" (active).
+        rect (pygame.Rect): The rectangle representing the box's position and size.
+        image_line (pygame.Surface): A line image rendered at the bottom of the box.
+        image_box (pygame.Surface): A graphic/icon displayed next to the player’s name.
+
+        text_surface_nickname (pygame.Surface): Rendered text surface for the nickname.
+        text_surface_points (pygame.Surface): Rendered text surface for ranking points.
+        text_surface_status_title (pygame.Surface): Rendered label for status.
+        text_surface_status (pygame.Surface): Rendered text surface showing the player’s current status.
+
+    Methods:
+        update(screen: pygame.Surface) -> None:
+            Draws the player box on the screen, including the nickname, ranking points, status,
+            player icon, and decorative line.
+    """
+
     def __init__(
         self,
         position: tuple[float, float],
@@ -48,7 +78,7 @@ class PlayerBox:
             self.green if str(self.state) in self.green_states else self.red,
         )
 
-    def update(self, screen: pygame.Surface):
+    def update(self, screen: pygame.Surface) -> None:
         text_x = self.rect.x + self.w * 0.075
         text_y = self.rect.y + self.h * 0.1
 

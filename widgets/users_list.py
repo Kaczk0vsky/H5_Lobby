@@ -4,6 +4,41 @@ from widgets.player_box import PlayerBox
 
 
 class UsersList:
+    """
+    A class for displaying a scrollable list of player profiles.
+
+    Attributes:
+        position (tuple[float, float]): The x and y coordinates of the center position of the list.
+        color (pygame.Color): The color used for rendering text and player boxes.
+        font (pygame.font.Font): The font used for rendering text.
+        title (str): The title displayed at the top of the list.
+        image (pygame.Surface): The background image of the entire list container.
+        image_bg (pygame.Surface): The background image of the inner box.
+        image_box (pygame.Surface): The image used for player box backgrounds.
+        scroll (pygame.Surface): The scroll handle image.
+        scroll_bar (pygame.Surface): The scroll bar background image.
+        line (pygame.Surface): A decorative line under the title.
+        box (pygame.Surface): A surface used to create the individual player boxes.
+        text (dict[str, list], optional): Dictionary containing player information in the format {nickname: [ranking_points, state]}.
+
+    Methods:
+        update(screen: pygame.Surface) -> None:
+            Renders the entire user list, including the background, title, line, scroll bar, and player boxes.
+            Handles scrolling animation.
+
+        event(event) -> None:
+            Handles mouse wheel and button events for scrolling and dragging the scroll handle.
+
+        limit_scroll() -> None:
+            Clamps the scroll position within the scroll bar's range.
+
+        limit_scroll_target() -> None:
+            Clamps the target scroll position to prevent overscrolling when using the mouse wheel.
+
+        get_players_list(text: dict[str, list] = {}) -> None:
+            Initializes and generates the list of player boxes based on the provided text dictionary.
+    """
+
     def __init__(
         self,
         position: tuple[float, float],
@@ -119,9 +154,7 @@ class UsersList:
         screen.blit(self.scroll_bar, self.scroll_bar_rect)
         screen.blit(self.scroll, (self.scroll_rect.x, self.scroll_rect.y))
 
-        # self.draw_player_boxes()
-
-    def event(self, event):
+    def event(self, event) -> None:
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         if event.type == pygame.MOUSEWHEEL and self.rect_bg.collidepoint(
@@ -149,18 +182,18 @@ class UsersList:
             self.scroll_pos += event.rel[1]
             self.limit_scroll()
 
-    def limit_scroll(self):
+    def limit_scroll(self) -> None:
         min_y = self.scroll_bar_rect.top
         max_y = self.scroll_bar_rect.bottom - self.scroll.get_height()
         self.scroll_pos = max(min_y, min(self.scroll_pos, max_y))
         self.scroll_rect.y = self.scroll_pos
 
-    def limit_scroll_target(self):
+    def limit_scroll_target(self) -> None:
         min_y = self.scroll_bar_rect.top
         max_y = self.scroll_bar_rect.bottom - self.scroll.get_height()
         self.target_scroll_pos = max(min_y, min(self.target_scroll_pos, max_y))
 
-    def get_players_list(self, text: dict[str, list] = {}):
+    def get_players_list(self, text: dict[str, list] = {}) -> None:
         self.text = text
         self.player_list = []
         for index, (key, value) in enumerate(self.text.items()):
