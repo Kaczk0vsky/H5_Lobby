@@ -366,7 +366,11 @@ class H5_Lobby(BasicWindow):
                 QUIT_BUTTON,
             ]:
                 button.handle_button(self.SCREEN, MENU_MOUSE_POS)
-            USERS_LIST.update(self.SCREEN)
+
+            try:
+                USERS_LIST.update(self.SCREEN)
+            except pygame.error:
+                continue
 
             if self.__queue_status:
                 if self.__update_queue_status:
@@ -871,27 +875,20 @@ class H5_Lobby(BasicWindow):
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
-        text = {
-            "Kaczk0vsky": [1052, "online"],
-            "Ćwiercz": [2040, "playing"],
-            "Edgy_3.0": [1821, "in queue"],
-            "Jacek": [741, "in queue"],
-            "Jacek2": [1494, "online"],
-            "Jacek3": [101, "in queue"],
-            "Ćwiercz2": [2040, "playing"],
-            "Ćwiercz3": [2040, "playing"],
-            "Ćwiercz4": [2040, "playing"],
-            "Ćwiercz5": [2040, "playing"],
-            "Ćwiercz6": [2040, "playing"],
-        }
         while True:
             try:
                 response = self.session.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
                     json_response = response.json()
                     players_data = json_response.get("players_data")
-                    print(players_data)
-                    users_list.get_players_list(players_data)
+                    sorted_players = dict(
+                        sorted(
+                            players_data.items(),
+                            key=lambda item: item[1][0],
+                            reverse=True,
+                        )
+                    )
+                    users_list.get_players_list(sorted_players)
 
             except Exception as e:
                 pass
