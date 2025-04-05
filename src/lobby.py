@@ -889,12 +889,9 @@ class H5_Lobby(BasicWindow):
                 response = self.session.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
                     json_response = response.json()
-                    players_list = json_response.get("players_list")
-                    players_dict = {}
-                    for player in players_list:
-                        players_dict[player[0]] = [player[1], player[2]]
-                    print(players_dict)
-                    users_list.get_players_list(players_dict)
+                    players_data = json_response.get("players_data")
+                    print(players_data)
+                    users_list.get_players_list(players_data)
 
             except Exception as e:
                 pass

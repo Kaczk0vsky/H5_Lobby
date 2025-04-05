@@ -555,15 +555,18 @@ def update_users_list(request):
             players = Player.objects.exclude(player_state="offline").exclude(
                 nickname=nickname
             )
-            players_list = players.values_list(
-                "nickname", "ranking_points", "player_state"
-            )
+            players_data = {
+                nickname: [ranking_points, player_state]
+                for nickname, ranking_points, player_state in players.values_list(
+                    "nickname", "ranking_points", "player_state"
+                )
+            }
         except Player.DoesNotExist:
             return JsonResponse(
                 {"success": False, "error": "Players not found"}, status=400
             )
 
-        return JsonResponse({"success": True, "players_list": players_list})
+        return JsonResponse({"success": True, "players_data": players_data})
 
     except json.JSONDecodeError:
         return JsonResponse(
