@@ -552,19 +552,18 @@ def update_users_list(request):
             )
 
         try:
-            player = Player.objects.get(nickname=nickname)
+            players = Player.objects.exclude(player_state="offline").exclude(
+                username="Lazaren"
+            )
+            players_list = players.values_list(
+                "nickname", "ranking_points", "player_state"
+            )
         except Player.DoesNotExist:
             return JsonResponse(
-                {"success": False, "error": "Player not found"}, status=400
-            )
-        try:
-            pass
-        except PlayersMatched.DoesNotExist:
-            return JsonResponse(
-                {"success": False, "error": "Player not found"}, status=400
+                {"success": False, "error": "Players not found"}, status=400
             )
 
-        return JsonResponse({"success": True, "oponnent_accepted": False})
+        return JsonResponse({"success": True, "players_list": players_list})
 
     except json.JSONDecodeError:
         return JsonResponse(

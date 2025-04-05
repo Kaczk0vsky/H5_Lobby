@@ -885,15 +885,19 @@ class H5_Lobby(BasicWindow):
             "Ćwiercz6": [2040, "playing"],
         }
         while True:
-            users_list.get_players_list(text)
-            # try:
-            #     response = self.session.post(url, json=user_data, headers=headers)
-            #     if response.status_code == 200:
-            #         json_response = response.json()
-            #         pass
+            try:
+                response = self.session.post(url, json=user_data, headers=headers)
+                if response.status_code == 200:
+                    json_response = response.json()
+                    players_list = json_response.get("players_list")
+                    players_dict = {}
+                    for player in players_list:
+                        players_dict[player[0]] = [player[1], player[2]]
+                    users_list.get_players_list(players_dict)
 
-            # except Exception as e:
-            #     pass
+            except Exception as e:
+                pass
+
             time.sleep(15)
 
     def minimize_to_tray(self):
