@@ -1,5 +1,7 @@
 import pygame
 
+from widgets.player_box import PlayerBox
+
 
 class UsersList:
     def __init__(
@@ -30,16 +32,16 @@ class UsersList:
         self.box = box
         self.text = text
 
-        self.title_surface = self.font.render(self.title, True, self.color)
-        self.scroll_pos = 0
         self.scroll_dragging = False
+        self.player_list = []
 
+        self.title_surface = self.font.render(self.title, True, self.color)
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         self.rect_bg = pygame.Rect(
             self.x_pos - (self.rect.width / 2.15),
             self.y_pos - (self.rect.height / 2.075),
             self.rect.width * 0.97,
-            self.rect.height * 0.97,
+            self.rect.height * 0.95,
         )
         self.image_bg = pygame.transform.scale(
             image_bg, (self.rect_bg.width, self.rect_bg.height)
@@ -59,43 +61,65 @@ class UsersList:
             self.scroll_bar.get_width(),
             self.scroll_bar.get_height(),
         )
+        self.scroll_pos = self.scroll_bar_rect.top
+        self.target_scroll_pos = self.scroll_pos
         self.scroll_rect = self.scroll.get_rect()
         self.scroll_rect.topleft = (
             self.x_pos + (self.rect.width * 0.3725),
-            self.y_pos - (self.rect.height / 2.3),
+            self.scroll_pos,
         )
-
-        if not self.text:
-            self.text = ["essa", "essa2", "essa3"]
+        self.scroll_area_rect = pygame.Rect(
+            self.rect_bg.left,
+            self.line_rect.bottom,
+            self.rect_bg.width,
+            self.rect_bg.bottom - self.line_rect.bottom,
+        )
 
     def update(self, screen: pygame.Surface) -> None:
         screen.blit(self.image_bg, self.rect_bg)
         self.image_bg.fill((0, 0, 0, 220))
-        screen.blit(self.image, self.rect)
         screen.blit(self.title_surface, self.title_rect)
         screen.blit(self.line, self.line_rect)
+
+        player_height = self.rect.height / 10
+        padding_bottom = player_height * 0.2825
+
+        max_scroll = max(
+            0,
+            len(self.player_list) * player_height
+            - self.rect_bg.height
+            + padding_bottom,
+        )
+        scroll_range = self.scroll_bar_rect.height - self.scroll.get_height()
+
+        if not self.scroll_dragging:
+            lerp_speed = 0.15  # speed of scroll bar
+            self.scroll_pos += (self.target_scroll_pos - self.scroll_pos) * lerp_speed
+        else:
+            self.target_scroll_pos = self.scroll_pos
+        self.scroll_rect.y = self.scroll_pos
+        scroll_percent = (
+            (self.scroll_pos - self.scroll_bar_rect.top) / scroll_range
+            if scroll_range > 0
+            else 0
+        )
+        scroll_offset = scroll_percent * max_scroll
+
+        old_clip = screen.get_clip()
+        screen.set_clip(self.scroll_area_rect)
+
+        for player, base_y in self.player_list:
+            player_y = base_y - scroll_offset
+            player.rect.y = player_y
+            player.update(screen)
+
+        screen.set_clip(old_clip)
+
+        screen.blit(self.image, self.rect)
         screen.blit(self.scroll_bar, self.scroll_bar_rect)
         screen.blit(self.scroll, (self.scroll_rect.x, self.scroll_rect.y))
 
-        # TODO: add dynamic users boxes
-        # visible_items = 5
-        # offset = int(
-        #     (self.scroll_pos - (self.y_pos - (self.rect.height / 2.3)))
-        #     / (self.scroll_bar.get_height() / len(self.text))
-        # )
-
-        # for index, value in enumerate(self.text[offset : offset + visible_items]):
-        #     pygame.draw.rect(
-        #         screen,
-        #         (255, 255, 255),
-        #         [
-        #             self.x_pos - self.rect.w / 2.2,
-        #             self.y_pos - self.rect.h / 3.3 + index * (self.rect.height / 6.2),
-        #             self.rect.width - self.rect.width / 15,
-        #             self.rect.height / 6,
-        #         ],
-        #         3,
-        #     )
+        # self.draw_player_boxes()
 
     def event(self, event):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -103,8 +127,8 @@ class UsersList:
         if event.type == pygame.MOUSEWHEEL and self.rect_bg.collidepoint(
             (mouse_x, mouse_y)
         ):
-            self.scroll_pos -= event.y * 10
-            self.limit_scroll()
+            self.target_scroll_pos -= event.y * len(self.text) * 3
+            self.limit_scroll_target()
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.scroll_rect.collidepoint(event.pos):
@@ -115,8 +139,8 @@ class UsersList:
                     self.y_pos - (self.rect.height / 2.2),
                 )
             ).collidepoint(event.pos):
-                self.scroll_pos = event.pos[1] - self.scroll.get_height() // 2
-                self.limit_scroll()
+                self.target_scroll_pos = event.pos[1] - self.scroll.get_height() // 2
+                self.limit_scroll_target()
 
         elif event.type == pygame.MOUSEBUTTONUP:
             self.scroll_dragging = False
@@ -126,14 +150,35 @@ class UsersList:
             self.limit_scroll()
 
     def limit_scroll(self):
-        min_y = self.y_pos - (self.rect.height / 2.3)
-        max_y = (
-            self.y_pos
-            - (self.rect.height / 2.3)
-            + (self.scroll_bar.get_height() * 0.96 - self.scroll.get_height())
-        )
+        min_y = self.scroll_bar_rect.top
+        max_y = self.scroll_bar_rect.bottom - self.scroll.get_height()
         self.scroll_pos = max(min_y, min(self.scroll_pos, max_y))
         self.scroll_rect.y = self.scroll_pos
 
-    def get_data(self, text: list[str]):
+    def limit_scroll_target(self):
+        min_y = self.scroll_bar_rect.top
+        max_y = self.scroll_bar_rect.bottom - self.scroll.get_height()
+        self.target_scroll_pos = max(min_y, min(self.target_scroll_pos, max_y))
+
+    def get_players_list(self, text: dict[str, list] = {}):
         self.text = text
+        self.player_list = []
+        for index, (key, value) in enumerate(self.text.items()):
+            y_offset = index * (self.rect.height / 10)
+            base_y = self.y_pos - self.rect.h / 2.8 + y_offset
+
+            player = PlayerBox(
+                position=(self.x_pos - self.rect.w / 2.2, base_y),
+                dimensions=(
+                    self.rect.width - self.rect.width / 15,
+                    self.rect.height / 10,
+                ),
+                color=self.color,
+                font=self.font,
+                nickname=key,
+                ranking_points=value[0],
+                state=value[1],
+                image_line=self.line,
+                image_box=self.box,
+            )
+            self.player_list.append((player, base_y))

@@ -341,8 +341,8 @@ class H5_Lobby(BasicWindow):
             line=self.LINE,
             box=self.CHECKBOX,
         )
+        self.refresh_friends_list(USERS_LIST)
 
-        self.refresh_friends_list()
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
             self.cursor.update()
@@ -859,8 +859,42 @@ class H5_Lobby(BasicWindow):
             time.sleep(1)
 
     @run_in_thread
-    def refresh_friends_list(self):
-        pass
+    def refresh_friends_list(self, users_list: UsersList):
+        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_USERS_LIST']}/"
+        if not self.crsf_token:
+            self.__window_overlay = True
+            return "CRSF Token is not valid"
+
+        user_data = {"nickname": self.client_config["nickname"]}
+        headers = {
+            "Referer": "https://h5-tavern.pl/",
+            "X-CSRFToken": self.crsf_token,
+            "Content-Type": "application/json",
+        }
+        text = {
+            "Kaczk0vsky": [1052, "online"],
+            "Ćwiercz": [2040, "playing"],
+            "Edgy_3.0": [1821, "in queue"],
+            "Jacek": [741, "in queue"],
+            "Jacek2": [1494, "online"],
+            "Jacek3": [101, "in queue"],
+            "Ćwiercz2": [2040, "playing"],
+            "Ćwiercz3": [2040, "playing"],
+            "Ćwiercz4": [2040, "playing"],
+            "Ćwiercz5": [2040, "playing"],
+            "Ćwiercz6": [2040, "playing"],
+        }
+        while True:
+            users_list.get_players_list(text)
+            # try:
+            #     response = self.session.post(url, json=user_data, headers=headers)
+            #     if response.status_code == 200:
+            #         json_response = response.json()
+            #         pass
+
+            # except Exception as e:
+            #     pass
+            time.sleep(15)
 
     def minimize_to_tray(self):
         time.sleep(0.1)

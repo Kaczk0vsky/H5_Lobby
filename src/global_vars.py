@@ -53,4 +53,5 @@ env_dict = {
     "PATH_REMOVE": os.getenv("PATH_REMOVE"),
     "PATH_GET_PLAYERS": os.getenv("PATH_GET_PLAYERS"),
     "PATH_CHECK_OPONNENT": os.getenv("PATH_CHECK_OPONNENT"),
+    "PATH_TO_USERS_LIST": os.getenv("PATH_TO_USERS_LIST"),
 }
