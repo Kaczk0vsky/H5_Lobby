@@ -101,6 +101,7 @@ class H5_Lobby(BasicWindow):
             self.__queue_status = state
             self.__elapsed_time = None
             self.__queue_channel = None
+            self.__connection_timer = None
 
         def set_all_buttons_active(is_active: bool = False) -> None:
             FIND_GAME_BUTTON.set_active(is_active)
@@ -787,6 +788,11 @@ class H5_Lobby(BasicWindow):
                 self.__connection_timer = None
                 return response.json().get("error", "Unknown error occurred")
 
+            elif response.status_code == 404:
+                self.__window_overlay = True
+                self.__connection_timer = None
+                return None
+
         except requests.exceptions.ConnectTimeout:
             self.__window_overlay = True
             return "Error occured while trying to connect to server!"
@@ -814,6 +820,9 @@ class H5_Lobby(BasicWindow):
 
         while True:
             try:
+                if not self.__queue_status:
+                    break
+
                 response = self.session.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
                     json_response = response.json()

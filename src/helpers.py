@@ -8,7 +8,6 @@ import socket
 import pygetwindow as gw
 
 from email.message import EmailMessage
-from dotenv import load_dotenv
 
 from src.global_vars import env_dict
 
