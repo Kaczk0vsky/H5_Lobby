@@ -195,23 +195,52 @@ class UsersList:
 
     def get_players_list(self, text: dict[str, list] = {}) -> None:
         self.text = text
-        self.player_list = []
-        for index, (key, value) in enumerate(self.text.items()):
-            y_offset = index * (self.rect.height / 10)
-            base_y = self.y_pos - self.rect.h / 2.8 + y_offset
+        temp_list = []
+        if self.player_list:
+            existing_nicknames = {player.nickname for player, _ in self.player_list}
+            for index, (key, value) in enumerate(text.items()):
+                y_offset = index * (self.rect.height / 10)
+                base_y = self.y_pos - self.rect.h / 2.8 + y_offset
+                if key in existing_nicknames:
+                    for player, y in self.player_list:
+                        if player.nickname == key:
+                            player.ranking_points = value[0]
+                            player.state = value[1]
+                            break
+                else:
+                    player = PlayerBox(
+                        position=(self.x_pos - self.rect.w / 2.2, base_y),
+                        dimensions=(
+                            self.rect.width - self.rect.width / 15,
+                            self.rect.height / 10,
+                        ),
+                        color=self.color,
+                        font=self.font,
+                        nickname=key,
+                        ranking_points=value[0],
+                        state=value[1],
+                        image_line=self.line,
+                        image_box=self.box,
+                    )
+                temp_list.append((player, base_y))
+        else:
+            for index, (key, value) in enumerate(self.text.items()):
+                y_offset = index * (self.rect.height / 10)
+                base_y = self.y_pos - self.rect.h / 2.8 + y_offset
 
-            player = PlayerBox(
-                position=(self.x_pos - self.rect.w / 2.2, base_y),
-                dimensions=(
-                    self.rect.width - self.rect.width / 15,
-                    self.rect.height / 10,
-                ),
-                color=self.color,
-                font=self.font,
-                nickname=key,
-                ranking_points=value[0],
-                state=value[1],
-                image_line=self.line,
-                image_box=self.box,
-            )
-            self.player_list.append((player, base_y))
+                player = PlayerBox(
+                    position=(self.x_pos - self.rect.w / 2.2, base_y),
+                    dimensions=(
+                        self.rect.width - self.rect.width / 15,
+                        self.rect.height / 10,
+                    ),
+                    color=self.color,
+                    font=self.font,
+                    nickname=key,
+                    ranking_points=value[0],
+                    state=value[1],
+                    image_line=self.line,
+                    image_box=self.box,
+                )
+                temp_list.append((player, base_y))
+        self.player_list = temp_list
