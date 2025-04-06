@@ -78,6 +78,20 @@ class PlayerBox:
             self.green if str(self.state) in self.green_states else self.red,
         )
 
+    def update_surfaces(self):
+        self.text_surface_nickname = self.font.render(self.nickname, True, self.color)
+        self.text_surface_points = self.font_small.render(
+            f"Ranking points: {self.ranking_points}", True, self.color
+        )
+        self.text_surface_status_title = self.font_small.render(
+            "Status: ", True, self.color
+        )
+        self.text_surface_status = self.font_small.render(
+            self.state,
+            True,
+            self.green if str(self.state) in self.green_states else self.red,
+        )
+
     def update(self, screen: pygame.Surface) -> None:
         text_x = self.rect.x + self.w * 0.075
         text_y = self.rect.y + self.h * 0.1

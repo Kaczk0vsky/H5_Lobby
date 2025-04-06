@@ -206,6 +206,8 @@ class UsersList:
                         if player.nickname == key:
                             player.ranking_points = value[0]
                             player.state = value[1]
+                            player.update_surfaces()
+                            temp_list.append((player, base_y))
                             break
                 else:
                     player = PlayerBox(
@@ -222,7 +224,7 @@ class UsersList:
                         image_line=self.line,
                         image_box=self.box,
                     )
-                temp_list.append((player, base_y))
+                    temp_list.append((player, base_y))
         else:
             for index, (key, value) in enumerate(self.text.items()):
                 y_offset = index * (self.rect.height / 10)
