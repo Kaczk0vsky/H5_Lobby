@@ -35,7 +35,7 @@ fonts_sizes = {
 }
 env_dict = {
     "SERVER_URL": os.getenv("SERVER_URL"),
-    "SERVER_PORT": int(os.getenv("SERVER_PORT")),
+    "SERVER_PORT": os.getenv("SERVER_PORT"),
     "SERVER_LISTEN_ON": os.getenv("SERVER_LISTEN_ON"),
     "DJANGO_SECRET_KEY": os.getenv("DJANGO_SECRET_KEY"),
     "RABITMQ_LOGIN": os.getenv("RABITMQ_LOGIN"),
