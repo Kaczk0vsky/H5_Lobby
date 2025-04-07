@@ -105,7 +105,7 @@ class H5_Lobby(BasicWindow):
 
         def set_all_buttons_active(is_active: bool = False) -> None:
             FIND_GAME_BUTTON.set_active(is_active)
-            VIEW_STATISTICS.set_active(is_active)
+            RANKING.set_active(is_active)
             NEWS.set_active(is_active)
             MY_PROFILE.set_active(is_active)
             PLAYER_PROFILE.set_active(is_active)
@@ -247,7 +247,7 @@ class H5_Lobby(BasicWindow):
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
         )
-        VIEW_STATISTICS = Button(
+        RANKING = Button(
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
             image_inactive=self.CANCEL_BUTTON_INACTIVE,
@@ -255,7 +255,7 @@ class H5_Lobby(BasicWindow):
                 1080 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
-            text_input="View Statistics",
+            text_input="Ranking",
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
@@ -283,7 +283,7 @@ class H5_Lobby(BasicWindow):
                 1580 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
-            text_input="My Account",
+            text_input="My Profile",
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
@@ -359,7 +359,7 @@ class H5_Lobby(BasicWindow):
 
             for button in [
                 FIND_GAME_BUTTON,
-                VIEW_STATISTICS,
+                RANKING,
                 NEWS,
                 MY_PROFILE,
                 PLAYER_PROFILE,
@@ -447,7 +447,7 @@ class H5_Lobby(BasicWindow):
                         set_all_buttons_active(is_active=False)
                         self.__error_msg = self.add_to_queue()
                         continue
-                    if VIEW_STATISTICS.check_for_input(MENU_MOUSE_POS):
+                    if RANKING.check_for_input(MENU_MOUSE_POS):
                         pass
                     if NEWS.check_for_input(MENU_MOUSE_POS):
                         pass
