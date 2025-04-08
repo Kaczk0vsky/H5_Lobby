@@ -60,7 +60,7 @@ def register_new_player(request):
                 {"success": False, "error": "Invalid email format"}, status=400
             )
 
-        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^&+=!]{8,}$", password):
+        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^+=!]{8,}$", password):
             return JsonResponse(
                 {"success": False, "error": "Invalid password"}, status=400
             )
@@ -134,7 +134,7 @@ def login_player(request):
                 {"success": False, "error": "Invalid nickname format"}, status=400
             )
 
-        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^&+=!]{8,}$", password):
+        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^+=!]{8,}$", password):
             return JsonResponse(
                 {"success": False, "error": "Invalid password"}, status=400
             )

@@ -665,7 +665,7 @@ class LoginWindow(BasicWindow):
             return "Nickname has incorrect format!"
 
         if not re.match(
-            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^&+=!]{8,}$",
+            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^+=!]{8,}$",
             self.client_config["password"],
         ):
             self.__window_overlay = True
@@ -733,7 +733,7 @@ class LoginWindow(BasicWindow):
             return "Nickname has incorrect format!"
 
         if not re.match(
-            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^&+=!]{8,}$",
+            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^+=!]{8,}$",
             user_data["password"],
         ):
             self.__window_overlay = True
