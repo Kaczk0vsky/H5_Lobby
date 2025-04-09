@@ -53,7 +53,7 @@ class SoftEtherClient:
         ]
 
         try:
-            subprocess.run(command, capture_output=True, text=True)
+            subprocess.run(command, shell=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             print("Error:", e.stderr)
 
