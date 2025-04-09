@@ -53,6 +53,12 @@ class SoftEtherClient:
         ]
 
         try:
+            if state:
+                subprocess.Popen(
+                    f"cd {self.vpn_path} && vpnclient.exe",
+                    shell=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                )
             subprocess.run(command, shell=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             print("Error:", e.stderr)
