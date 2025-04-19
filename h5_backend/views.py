@@ -1,9 +1,7 @@
 import json
 import os
 import logging
-import re
 
-from dotenv import load_dotenv
 from datetime import timedelta
 
 from django.contrib.auth.models import User
@@ -13,8 +11,6 @@ from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.contrib.auth import authenticate
 from django.db.models import Q
 from django.db import transaction
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
 from django.middleware.csrf import get_token
 from django_ratelimit.decorators import ratelimit
 from django.contrib.auth.tokens import default_token_generator
@@ -25,38 +21,9 @@ from django.urls import reverse
 
 from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player, PlayersMatched, Ban
+from h5_backend.serializers import UserSerializer
 
 logger = logging.getLogger(__name__)
-
-
-class ValidateUser:
-    def __init__(self):
-        load_dotenv()
-
-    def check_fields(self, fields: list):
-        for field in fields:
-            if not field:
-                return JsonResponse({"success": False, "error": "Missing required fields"}, status=400)
-
-    def validate_nickname(self, nickname: str):
-        if not nickname.isalnum():
-            return JsonResponse({"success": False, "error": "Invalid nickname format"}, status=400)
-
-        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
-            return JsonResponse({"success": False, "error": "Invalid nickname format"}, status=400)
-
-    def validate_password(self, password: str):
-        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^+=!]{8,}$", password):
-            return JsonResponse({"success": False, "error": "Invalid password"}, status=400)
-
-    def validate_email(self, email: str):
-        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", email):
-            return JsonResponse({"success": False, "error": "Invalid email format"}, status=400)
-
-        try:
-            validate_email(email)
-        except ValidationError:
-            return JsonResponse({"success": False, "error": "Invalid email format"}, status=400)
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
@@ -71,29 +38,24 @@ class CsrfTokenView(View):
 class RegisterPlayer(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.validator = ValidateUser()
 
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            nickname = data.get("nickname")
-            password = data.get("password")
-            email = data.get("email")
+            serializer = UserSerializer(data=data, required_fields=["nickname", "password", "email"])
+            if not serializer.is_valid():
+                return None, None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+
+            nickname = serializer.validated_data["nickname"]
+            password = serializer.validated_data["password"]
+            email = serializer.validated_data["email"]
+
             return nickname, password, email, None
 
         except json.JSONDecodeError:
             return None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _validate_inputs(self, nickname, password, email):
-        for check in [
-            self.validator.check_fields([nickname, password, email]),
-            self.validator.validate_nickname(nickname),
-            self.validator.validate_password(password),
-            self.validator.validate_email(email),
-        ]:
-            if check is not None:
-                return check
-
+    def _validate_inputs(self, nickname, email):
         if User.objects.filter(username=nickname).exists():
             return JsonResponse({"success": False, "error": "Nickname already exists!"}, status=400)
 
@@ -114,7 +76,7 @@ class RegisterPlayer(View):
             if parse_error:
                 return parse_error
 
-            error_response = self._validate_inputs(nickname, password, email)
+            error_response = self._validate_inputs(nickname, email)
             if error_response:
                 return error_response
 
@@ -135,13 +97,17 @@ class RegisterPlayer(View):
 class LoginPlayer(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.validator = ValidateUser()
 
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            nickname = data.get("nickname")
-            password = data.get("password")
+            serializer = UserSerializer(data=data, required_fields=["nickname", "password"])
+            if not serializer.is_valid():
+                return None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+
+            nickname = serializer.validated_data["nickname"]
+            password = serializer.validated_data["password"]
+
             return nickname, password, None
 
         except json.JSONDecodeError:
@@ -211,12 +177,16 @@ class LoginPlayer(View):
 class GeneratePasswordResetLinkView(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.validator = ValidateUser()
 
     def _parse_request_data(self, request):
         try:
-            nickname = request.GET.get("nickname")
-            email = request.GET.get("email")
+            serializer = UserSerializer(data=request.GET, required_fields=["nickname", "email"])
+            if not serializer.is_valid():
+                return None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+
+            nickname = serializer.validated_data["nickname"]
+            email = serializer.validated_data["email"]
+
             return nickname, email, None
 
         except json.JSONDecodeError:
@@ -266,12 +236,17 @@ class SetPlayerStateView(View):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.validator = ValidateUser()
 
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            return data.get("nickname"), None
+            serializer = UserSerializer(data=data, required_fields=["nickname"])
+            if not serializer.is_valid():
+                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+
+            nickname = serializer.validated_data["nickname"]
+
+            return nickname, None
 
         except json.JSONDecodeError:
             return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
@@ -319,15 +294,17 @@ class SetPlayerStateView(View):
 class RemovePlayerFromQueue(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.validator = ValidateUser()
 
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            nickname = data.get("nickname")
-            queue_accepted = data.get("is_accepted")
-            if queue_accepted not in [True, False]:
-                return None, None, JsonResponse({"success": False, "error": "Invalid or missing 'is_accepted'"}, status=400)
+            serializer = UserSerializer(data=data, required_fields=["nickname", "is_accepted"])
+            if not serializer.is_valid():
+                return None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+
+            nickname = serializer.validated_data["nickname"]
+            queue_accepted = serializer.validated_data["is_accepted"]
+
             return nickname, queue_accepted, None
 
         except json.JSONDecodeError:
@@ -390,12 +367,17 @@ class RemovePlayerFromQueue(View):
 class GetPlayersMatched(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.validator = ValidateUser()
 
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            return data.get("nickname"), None
+            serializer = UserSerializer(data=data, required_fields=["nickname"])
+            if not serializer.is_valid():
+                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+
+            nickname = serializer.validated_data["nickname"]
+
+            return nickname, None
 
         except json.JSONDecodeError:
             return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
@@ -441,12 +423,17 @@ class GetPlayersMatched(View):
 class CheckIfOpponentAccepted(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.validator = ValidateUser()
 
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            return data.get("nickname"), None
+            serializer = UserSerializer(data=data, required_fields=["nickname"])
+            if not serializer.is_valid():
+                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+
+            nickname = serializer.validated_data["nickname"]
+
+            return nickname, None
 
         except json.JSONDecodeError:
             return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
@@ -519,12 +506,17 @@ class CheckIfOpponentAccepted(View):
 class UpdateUsersList(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.validator = ValidateUser()
 
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            return data.get("nickname"), None
+            serializer = UserSerializer(data=data, required_fields=["nickname"])
+            if not serializer.is_valid():
+                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+
+            nickname = serializer.validated_data["nickname"]
+
+            return nickname, None
 
         except json.JSONDecodeError:
             return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
