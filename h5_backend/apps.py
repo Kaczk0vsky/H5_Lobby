@@ -6,5 +6,4 @@ class H5BackendConfig(AppConfig):
     name = "h5_backend"
 
     def ready(self):
-        # Import signals to register them
         import h5_backend.signals
