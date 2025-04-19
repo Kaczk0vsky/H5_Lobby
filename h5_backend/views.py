@@ -76,9 +76,10 @@ class RegisterPlayer(View):
 
     def _parse_request_data(self, request):
         try:
-            nickname = request.GET.get("nickname")
-            password = request.GET.get("password")
-            email = request.GET.get("email")
+            data = json.loads(request.body.decode("utf-8"))
+            nickname = data.get("nickname")
+            password = data.get("password")
+            email = data.get("email")
             return nickname, password, email, None
 
         except json.JSONDecodeError:
@@ -139,8 +140,9 @@ class LoginPlayer(View):
 
     def _parse_request_data(self, request):
         try:
-            nickname = request.GET.get("nickname")
-            password = request.GET.get("password")
+            data = json.loads(request.body.decode("utf-8"))
+            nickname = data.get("nickname")
+            password = data.get("password")
             return nickname, password, None
 
         except json.JSONDecodeError:
