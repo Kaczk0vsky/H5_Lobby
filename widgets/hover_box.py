@@ -35,17 +35,13 @@ class HoverBox:
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
 
     def update(self, screen: pygame.Surface, position: tuple[int, int]):
-        if position[0] in range(self.rect.left, self.rect.right) and position[
-            1
-        ] in range(self.rect.top, self.rect.bottom):
+        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
             screen.blit(self.image_highlighted, self.rect)
         else:
             screen.blit(self.image, self.rect)
 
     def check_for_input(self, position: tuple[int, int]) -> bool:
-        if position[0] in range(self.rect.left, self.rect.right) and position[
-            1
-        ] in range(self.rect.top, self.rect.bottom):
+        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
             play_on_empty(path="resources/button_click.mp3")
             return True
         return False

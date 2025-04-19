@@ -81,9 +81,7 @@ def calculate_time_passed(start_time: float) -> tuple[int, int]:
     return minutes, seconds
 
 
-def check_input_correctnes(
-    inputs: list, text_input: dict[any, list]
-) -> dict[any, list]:
+def check_input_correctnes(inputs: list, text_input: dict[any, list]) -> dict[any, list]:
     if "Nickname" in text_input[0][1]:
         nickname = inputs[0].get_string()
         if len(nickname) <= 16 and len(nickname) >= 3:

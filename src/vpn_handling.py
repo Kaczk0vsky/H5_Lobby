@@ -76,9 +76,7 @@ class SoftEtherClient:
 
         for cmd in commands:
             try:
-                subprocess.run(
-                    cmd, shell=True, capture_output=True, text=True, check=True
-                )
+                subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
                 time.sleep(1)
 
             except subprocess.CalledProcessError as e:

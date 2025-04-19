@@ -78,12 +78,8 @@ class UsersList:
             self.rect.width * 0.97,
             self.rect.height * 0.95,
         )
-        self.image_bg = pygame.transform.scale(
-            image_bg, (self.rect_bg.width, self.rect_bg.height)
-        )
-        self.title_rect = self.title_surface.get_rect(
-            center=(self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 10)
-        )
+        self.image_bg = pygame.transform.scale(image_bg, (self.rect_bg.width, self.rect_bg.height))
+        self.title_rect = self.title_surface.get_rect(center=(self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 10))
         self.line_rect = pygame.Rect(
             self.x_pos - (self.rect.width / 2.65),
             self.y_pos - (self.rect.height / 2.75),
@@ -121,9 +117,7 @@ class UsersList:
 
         max_scroll = max(
             0,
-            len(self.player_list) * player_height
-            - self.rect_bg.height
-            + padding_bottom,
+            len(self.player_list) * player_height - self.rect_bg.height + padding_bottom,
         )
         scroll_range = self.scroll_bar_rect.height - self.scroll.get_height()
 
@@ -133,11 +127,7 @@ class UsersList:
         else:
             self.target_scroll_pos = self.scroll_pos
         self.scroll_rect.y = self.scroll_pos
-        scroll_percent = (
-            (self.scroll_pos - self.scroll_bar_rect.top) / scroll_range
-            if scroll_range > 0
-            else 0
-        )
+        scroll_percent = (self.scroll_pos - self.scroll_bar_rect.top) / scroll_range if scroll_range > 0 else 0
         scroll_offset = scroll_percent * max_scroll
 
         old_clip = screen.get_clip()
@@ -157,9 +147,7 @@ class UsersList:
     def event(self, event) -> None:
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        if event.type == pygame.MOUSEWHEEL and self.rect_bg.collidepoint(
-            (mouse_x, mouse_y)
-        ):
+        if event.type == pygame.MOUSEWHEEL and self.rect_bg.collidepoint((mouse_x, mouse_y)):
             self.target_scroll_pos -= event.y * len(self.text) * 3
             self.limit_scroll_target()
 

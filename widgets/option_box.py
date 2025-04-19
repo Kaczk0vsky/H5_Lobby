@@ -53,9 +53,7 @@ class OptionBox:
         self.rect = pygame.Rect(self.x_pos, self.y_pos, self.w, self.h)
 
     def draw(self, screen: pygame.Surface) -> None:
-        pygame.draw.rect(
-            screen, self.highlight_color if self._menu_active else self.color, self.rect
-        )
+        pygame.draw.rect(screen, self.highlight_color if self._menu_active else self.color, self.rect)
         pygame.draw.rect(screen, (0, 0, 0), self.rect, 2)
         msg = self.font.render(self.option_list[self.selected], 1, (0, 0, 0))
         screen.blit(msg, msg.get_rect(center=self.rect.center))

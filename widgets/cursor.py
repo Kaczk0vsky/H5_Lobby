@@ -14,21 +14,15 @@ class Cursor:
     def __init__(self):
         pygame.init()
         self.CURSOR_IMAGE = pygame.transform.scale(
-            pygame.image.load(
-                os.path.join(os.getcwd(), "resources/cursors/cursor1.png")
-            ),
+            pygame.image.load(os.path.join(os.getcwd(), "resources/cursors/cursor1.png")),
             (32, 32),
         )
         self.CURSOR_IMAGE_CLICKED = pygame.transform.scale(
-            pygame.image.load(
-                os.path.join(os.getcwd(), "resources/cursors/cursor2.png")
-            ),
+            pygame.image.load(os.path.join(os.getcwd(), "resources/cursors/cursor2.png")),
             (32, 32),
         )
         self.CURSOR_IMAGE_CURSED = pygame.transform.scale(
-            pygame.image.load(
-                os.path.join(os.getcwd(), "resources/cursors/cursor3.png")
-            ),
+            pygame.image.load(os.path.join(os.getcwd(), "resources/cursors/cursor3.png")),
             (60, 60),
         )
         self.cursor = pygame.Cursor((8, 8), self.CURSOR_IMAGE)

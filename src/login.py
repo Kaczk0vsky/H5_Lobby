@@ -71,9 +71,7 @@ class LoginWindow(BasicWindow):
         if not is_server_reachable():
             self.__server_unreachable = True
             self.__window_overlay = True
-            self.__error_msg = (
-                "Server unreachable. Visit ToA Discord for more information."
-            )
+            self.__error_msg = "Server unreachable. Visit ToA Discord for more information."
 
         self.client_config = load_client_settings()
         self.set_window_caption(title="Login")
@@ -88,37 +86,21 @@ class LoginWindow(BasicWindow):
 
     def login_window(self):
         self.BUTTON = pygame.transform.scale(self.BUTTON, self.buttons_dims)
-        self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
-            self.BUTTON_HIGHLIGHTED, self.buttons_dims
-        )
+        self.BUTTON_HIGHLIGHTED = pygame.transform.scale(self.BUTTON_HIGHLIGHTED, self.buttons_dims)
         self.BUTTON_INACTIVE = pygame.transform.scale(self.BUTTON, self.buttons_dims)
         self.LONG_BUTTON = pygame.transform.scale(self.BUTTON, self.buttons_dims)
-        self.LONG_BUTTON_HIGHLIGHTED = pygame.transform.scale(
-            self.BUTTON_HIGHLIGHTED, self.buttons_dims
-        )
-        self.QUESTION_MARK = pygame.transform.scale(
-            self.QUESTION_MARK, self.hoverbox_dims
-        )
-        self.QUESTION_MARK_HIGHLIGHTED = pygame.transform.scale(
-            self.QUESTION_MARK_HIGHLIGHTED, self.hoverbox_dims
-        )
+        self.LONG_BUTTON_HIGHLIGHTED = pygame.transform.scale(self.BUTTON_HIGHLIGHTED, self.buttons_dims)
+        self.QUESTION_MARK = pygame.transform.scale(self.QUESTION_MARK, self.hoverbox_dims)
+        self.QUESTION_MARK_HIGHLIGHTED = pygame.transform.scale(self.QUESTION_MARK_HIGHLIGHTED, self.hoverbox_dims)
         self.TEXT_INPUT = pygame.transform.scale(self.TEXT_INPUT, self.input_dims)
         self.TEXT_BG = pygame.transform.scale(self.TEXT_BG, (400, 500))
         self.CHECKBOX = pygame.transform.scale(self.CHECKBOX, self.checkbox_dims)
-        self.CHECKBOX_CHECKED = pygame.transform.scale(
-            self.CHECKBOX_CHECKED, self.checkbox_dims
-        )
+        self.CHECKBOX_CHECKED = pygame.transform.scale(self.CHECKBOX_CHECKED, self.checkbox_dims)
         self.QUIT = pygame.transform.scale(self.QUIT, self.checkbox_dims)
-        self.QUIT_HIGHLIGHTED = pygame.transform.scale(
-            self.QUIT_HIGHLIGHTED, self.checkbox_dims
-        )
+        self.QUIT_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.checkbox_dims)
 
-        REMEMBER_LOGIN_TEXT = self.get_font(self.font_size[0]).render(
-            "Remeber me:", True, self.text_color
-        )
-        REMEMBER_LOGIN_RECT = REMEMBER_LOGIN_TEXT.get_rect(
-            center=(self.text_pos[0], self.text_pos[1])
-        )
+        REMEMBER_LOGIN_TEXT = self.get_font(self.font_size[0]).render("Remeber me:", True, self.text_color)
+        REMEMBER_LOGIN_RECT = REMEMBER_LOGIN_TEXT.get_rect(center=(self.text_pos[0], self.text_pos[1]))
         LOGIN_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
@@ -179,11 +161,7 @@ class LoginWindow(BasicWindow):
             text_color=self.text_color,
             font=self.get_font(self.font_size[0]),
             font_title=self.get_font(self.font_size[1]),
-            text=(
-                self.client_config["nickname"]
-                if self.client_config["remember_password"]
-                else ""
-            ),
+            text=(self.client_config["nickname"] if self.client_config["remember_password"] else ""),
             is_active=True,
         )
         PASSWORD_INPUT = TextInput(
@@ -194,11 +172,7 @@ class LoginWindow(BasicWindow):
             text_color=self.text_color,
             font=self.get_font(self.font_size[0]),
             font_title=self.get_font(self.font_size[1]),
-            text=(
-                self.client_config["password"]
-                if self.client_config["remember_password"]
-                else ""
-            ),
+            text=(self.client_config["password"] if self.client_config["remember_password"] else ""),
             hide_text=True,
         )
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
@@ -233,9 +207,7 @@ class LoginWindow(BasicWindow):
                         if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.quit_game_handling()
                         if CHECK_BOX_PASSWORD.check_for_input(MENU_MOUSE_POS):
-                            self.client_config["remember_password"] = (
-                                not self.client_config["remember_password"]
-                            )
+                            self.client_config["remember_password"] = not self.client_config["remember_password"]
                     else:
                         if self.__error_msg:
                             if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -255,19 +227,13 @@ class LoginWindow(BasicWindow):
                     input.draw(self.SCREEN)
 
             if self.__connection_timer:
-                time_passed = calculate_time_passed(start_time=self.__connection_timer)[
-                    1
-                ]
+                time_passed = calculate_time_passed(start_time=self.__connection_timer)[1]
                 if time_passed >= 3:
                     self.__window_overlay = True
                     self.__error_msg = f"Connecting for {time_passed} seconds..."
 
             if self.__error_msg:
-                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = (
-                    self.error_window(
-                        text=self.__error_msg, dimensions=self.error_window_dims
-                    )
-                )
+                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = self.error_window(text=self.__error_msg, dimensions=self.error_window_dims)
 
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
@@ -282,9 +248,7 @@ class LoginWindow(BasicWindow):
 
     def register_player_window(self):
         self.CHECK_MARK = pygame.transform.scale(self.CHECK_MARK, self.checkbox_dims)
-        self.UNCHECK_MARK = pygame.transform.scale(
-            self.UNCHECK_MARK, self.checkbox_dims
-        )
+        self.UNCHECK_MARK = pygame.transform.scale(self.UNCHECK_MARK, self.checkbox_dims)
 
         nickname_dict = {
             0: [False, "Nickname requirements:"],
@@ -391,9 +355,7 @@ class LoginWindow(BasicWindow):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if not self.__window_overlay:
                         if REGISTER_ACCOUNT_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            self.__error_msg = self.register_new_player(
-                                INPUT_BOXES
-                            ).join()
+                            self.__error_msg = self.register_new_player(INPUT_BOXES).join()
                         elif BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.__remove_all_widgets = True
                         elif HOVER_BOX_NICKNAME.check_for_input(MENU_MOUSE_POS):
@@ -425,18 +387,14 @@ class LoginWindow(BasicWindow):
                     input.draw(self.SCREEN)
 
             if self.__connection_timer:
-                time_passed = calculate_time_passed(start_time=self.__connection_timer)[
-                    1
-                ]
+                time_passed = calculate_time_passed(start_time=self.__connection_timer)[1]
                 if time_passed >= 3:
                     self.__window_overlay = True
                     self.__error_msg = f"Connecting for {time_passed} seconds..."
 
             if self.__error_msg:
-                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(
-                        text=self.__error_msg, dimensions=self.error_window_dims
-                    )
+                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                    text=self.__error_msg, dimensions=self.error_window_dims
                 )
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
@@ -554,10 +512,8 @@ class LoginWindow(BasicWindow):
                     self.__error_msg = f"Connecting for {time_passed[1]} seconds..."
 
             if self.__error_msg:
-                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(
-                        text=self.__error_msg, dimensions=self.error_window_dims
-                    )
+                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                    text=self.__error_msg, dimensions=self.error_window_dims
                 )
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
@@ -583,21 +539,13 @@ class LoginWindow(BasicWindow):
             else:
                 self.check_list.append(self.UNCHECK_MARK)
 
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(
-            self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height)
-        )
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
 
-        self.TITLE_TEXT = self.get_font(self.font_size[0]).render(
-            text_input[0][1], True, self.text_color
-        )
+        self.TITLE_TEXT = self.get_font(self.font_size[0]).render(text_input[0][1], True, self.text_color)
         self.TITLE_RECT = self.TITLE_TEXT.get_rect(center=(x_pos * 2, y_pos))
-        self.FIRST_TEXT = self.get_font(self.font_size[0]).render(
-            text_input[1][1], True, self.text_color
-        )
+        self.FIRST_TEXT = self.get_font(self.font_size[0]).render(text_input[1][1], True, self.text_color)
         self.FIRST_RECT = self.FIRST_TEXT.get_rect(topleft=(x_pos, y_pos + 50))
-        self.SECOND_TEXT = self.get_font(self.font_size[0]).render(
-            text_input[2][1], True, self.text_color
-        )
+        self.SECOND_TEXT = self.get_font(self.font_size[0]).render(text_input[2][1], True, self.text_color)
         self.SECOND_RECT = self.SECOND_TEXT.get_rect(topleft=(x_pos, y_pos + 100))
         self.THIRD_TEXT = None
         self.THIRD_RECT = None
@@ -605,13 +553,9 @@ class LoginWindow(BasicWindow):
         self.FOURTH_RECT = None
 
         if self.__show_password_hint:
-            self.THIRD_TEXT = self.get_font(self.font_size[0]).render(
-                text_input[3][1], True, self.text_color
-            )
+            self.THIRD_TEXT = self.get_font(self.font_size[0]).render(text_input[3][1], True, self.text_color)
             self.THIRD_RECT = self.THIRD_TEXT.get_rect(topleft=(x_pos, y_pos + 150))
-            self.FOURTH_TEXT = self.get_font(self.font_size[0]).render(
-                text_input[4][1], True, self.text_color
-            )
+            self.FOURTH_TEXT = self.get_font(self.font_size[0]).render(text_input[4][1], True, self.text_color)
             self.FOURTH_RECT = self.FOURTH_TEXT.get_rect(topleft=(x_pos, y_pos + 200))
 
         BACK_BUTTON = Button(
@@ -628,24 +572,16 @@ class LoginWindow(BasicWindow):
     def render_hints(self):
         self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
         self.SCREEN.blit(self.TITLE_TEXT, self.TITLE_RECT)
-        self.SCREEN.blit(
-            self.check_list[1], (self.FIRST_RECT.x - 50, self.FIRST_RECT.y)
-        )
+        self.SCREEN.blit(self.check_list[1], (self.FIRST_RECT.x - 50, self.FIRST_RECT.y))
         self.SCREEN.blit(self.FIRST_TEXT, self.FIRST_RECT)
-        self.SCREEN.blit(
-            self.check_list[2], (self.FIRST_RECT.x - 50, self.SECOND_RECT.y)
-        )
+        self.SCREEN.blit(self.check_list[2], (self.FIRST_RECT.x - 50, self.SECOND_RECT.y))
         self.SCREEN.blit(self.SECOND_TEXT, self.SECOND_RECT)
 
         if self.THIRD_TEXT and self.FOURTH_TEXT:
-            self.SCREEN.blit(
-                self.check_list[3], (self.FIRST_RECT.x - 50, self.THIRD_RECT.y)
-            )
+            self.SCREEN.blit(self.check_list[3], (self.FIRST_RECT.x - 50, self.THIRD_RECT.y))
             self.SCREEN.blit(self.THIRD_TEXT, self.THIRD_RECT)
             self.SCREEN.blit(self.FOURTH_TEXT, self.FOURTH_RECT)
-            self.SCREEN.blit(
-                self.check_list[4], (self.FIRST_RECT.x - 50, self.FOURTH_RECT.y)
-            )
+            self.SCREEN.blit(self.check_list[4], (self.FIRST_RECT.x - 50, self.FOURTH_RECT.y))
 
     @run_in_thread
     def login_player(self, inputs: list):
