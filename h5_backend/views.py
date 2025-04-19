@@ -12,7 +12,6 @@ from django.views import View
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.contrib.auth import authenticate
 from django.db.models import Q
-from django.views.decorators.http import require_POST, require_GET
 from django.db import transaction
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
