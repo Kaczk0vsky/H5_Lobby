@@ -508,7 +508,7 @@ class UpdateUsersList(View):
 
 @method_decorator(csrf_protect, name="dispatch")
 @method_decorator(ratelimit(key="user_or_ip", rate="3/m", method="POST", block=True), name="dispatch")
-class HandleMatchReport:
+class HandleMatchReport(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
