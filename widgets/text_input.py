@@ -181,15 +181,11 @@ class TextInput:
         text_width = self.txt_surface.get_width()
         text_x = self.rect_bg.x + (self.rect_bg.width - text_width) / 2
 
-        text_surface_clipped = pygame.Surface(
-            (self.rect_bg.width, self.rect_bg.height), pygame.SRCALPHA
-        )
+        text_surface_clipped = pygame.Surface((self.rect_bg.width, self.rect_bg.height), pygame.SRCALPHA)
 
         text_surface_clipped.blit(self.txt_surface, (0, 0))
 
-        title_rect = self.title_surface.get_rect(
-            center=(self.rect.x + self.rect.w / 2, self.rect.y - self.rect.h / 10)
-        )
+        title_rect = self.title_surface.get_rect(center=(self.rect.x + self.rect.w / 2, self.rect.y - self.rect.h / 10))
         screen.blit(self.title_surface, title_rect.topleft)
         screen.blit(text_surface_clipped, (text_x, self.rect.y + 12.5))
 

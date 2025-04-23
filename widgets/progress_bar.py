@@ -40,16 +40,12 @@ class ProgressBar:
         self.y_pos = position[1]
         self.w = dimensions[0]
         self.h = dimensions[1]
-        self.image_edge = pygame.transform.scale(
-            image_edge, (self.w / 10, self.h * 1.5)
-        )
+        self.image_edge = pygame.transform.scale(image_edge, (self.w / 10, self.h * 1.5))
         self.max_wait_time = max_wait_time
         self.image_frame = pygame.transform.scale(image_frame, (self.w, self.h))
         self.rect = self.image_frame.get_rect(center=(self.x_pos, self.y_pos))
         self.image_bg = pygame.transform.scale(image_bg, (self.w * 0.9, self.h * 0.8))
-        self.rect_bg = self.image_bg.get_rect(
-            center=(self.x_pos + self.w * 0.02, self.y_pos + self.h * 0.175)
-        )
+        self.rect_bg = self.image_bg.get_rect(center=(self.x_pos + self.w * 0.02, self.y_pos + self.h * 0.175))
 
     def draw(self, screen: pygame.Surface, elapsed_time: float) -> bool:
         elapsed_time = time.time() - elapsed_time

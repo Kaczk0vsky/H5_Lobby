@@ -46,9 +46,7 @@ class CheckBox:
             screen.blit(self.image, self.rect)
 
     def check_for_input(self, position: tuple[int, int]) -> bool:
-        if position[0] in range(self.rect.left, self.rect.right) and position[
-            1
-        ] in range(self.rect.top, self.rect.bottom):
+        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
             play_on_empty(path="resources/button_click.mp3")
             self.checked = not self.checked
             self.is_active = True

@@ -72,9 +72,7 @@ class Button:
 
     def update(self, screen: pygame.Surface, position: tuple[int, int]) -> None:
         if self.active:
-            if position[0] in range(self.rect.left, self.rect.right) and position[
-                1
-            ] in range(self.rect.top, self.rect.bottom):
+            if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
                 if self.image_highlighted is not None:
                     screen.blit(self.image_highlighted, self.rect)
             else:
@@ -87,18 +85,14 @@ class Button:
 
     def check_for_input(self, position: tuple[int, int]) -> bool:
         if self.active:
-            if position[0] in range(self.rect.left, self.rect.right) and position[
-                1
-            ] in range(self.rect.top, self.rect.bottom):
+            if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
                 play_on_empty(path="resources/button_click.mp3")
                 return True
             return False
 
     def change_color(self, position: tuple[int, int]) -> None:
         if self.active:
-            if position[0] in range(self.rect.left, self.rect.right) and position[
-                1
-            ] in range(self.rect.top, self.rect.bottom):
+            if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
                 self.text = self.font.render(self.text_input, True, self.hovering_color)
             else:
                 self.text = self.font.render(self.text_input, True, self.base_color)

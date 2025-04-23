@@ -12,9 +12,7 @@ def save_login_information(user_data: dict):
         else:
             data["client_settings"]["nickname"] = ""
             data["client_settings"]["password"] = ""
-        data["client_settings"]["remember_password"] = bool(
-            user_data["remember_password"]
-        )
+        data["client_settings"]["remember_password"] = bool(user_data["remember_password"])
 
     with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
         toml.dump(data, f)

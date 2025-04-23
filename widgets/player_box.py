@@ -50,28 +50,18 @@ class PlayerBox:
         self.red = "#db1102"
         self.green = "#02ba09"
         self.font = font
-        self.font_small = pygame.font.Font(
-            "resources/Quivira.otf", int(self.font.get_height() * 0.6)
-        )
+        self.font_small = pygame.font.Font("resources/Quivira.otf", int(self.font.get_height() * 0.6))
         self.nickname = nickname
         self.ranking_points = ranking_points
         self.state = state
         self.green_states = ["Online", "In queue"]
         self.rect = pygame.Rect(position, dimensions)
-        self.image_line = pygame.transform.scale(
-            image_line, (self.w, image_line.get_height() * 0.4)
-        )
-        self.image_box = pygame.transform.scale(
-            image_box, (image_box.get_width() * 1.25, image_box.get_height() * 1.25)
-        )
+        self.image_line = pygame.transform.scale(image_line, (self.w, image_line.get_height() * 0.4))
+        self.image_box = pygame.transform.scale(image_box, (image_box.get_width() * 1.25, image_box.get_height() * 1.25))
 
         self.text_surface_nickname = self.font.render(self.nickname, True, self.color)
-        self.text_surface_points = self.font_small.render(
-            f"Ranking points: {self.ranking_points}", True, self.color
-        )
-        self.text_surface_status_title = self.font_small.render(
-            "Status: ", True, self.color
-        )
+        self.text_surface_points = self.font_small.render(f"Ranking points: {self.ranking_points}", True, self.color)
+        self.text_surface_status_title = self.font_small.render("Status: ", True, self.color)
         self.text_surface_status = self.font_small.render(
             self.state,
             True,
@@ -80,12 +70,8 @@ class PlayerBox:
 
     def update_surfaces(self):
         self.text_surface_nickname = self.font.render(self.nickname, True, self.color)
-        self.text_surface_points = self.font_small.render(
-            f"Ranking points: {self.ranking_points}", True, self.color
-        )
-        self.text_surface_status_title = self.font_small.render(
-            "Status: ", True, self.color
-        )
+        self.text_surface_points = self.font_small.render(f"Ranking points: {self.ranking_points}", True, self.color)
+        self.text_surface_status_title = self.font_small.render("Status: ", True, self.color)
         self.text_surface_status = self.font_small.render(
             self.state,
             True,

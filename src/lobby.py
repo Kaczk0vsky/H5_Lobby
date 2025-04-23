@@ -78,9 +78,7 @@ class H5_Lobby(BasicWindow):
         self.client_config = client_config
         self.crsf_token = crsf_token
         self.session = session
-        self.transformation_option = (
-            f"{self.config["screen_width"]}x{self.config["screen_hight"]}"
-        )
+        self.transformation_option = f"{self.config["screen_width"]}x{self.config["screen_hight"]}"
         self.font_size = fonts_sizes[self.transformation_option]
 
         self.set_window_caption(title="Menu")
@@ -411,9 +409,7 @@ class H5_Lobby(BasicWindow):
                         )
                     )
                 else:
-                    HEADER_TEXT = self.get_font(self.font_size[0]).render(
-                        "GAME FOUND", True, self.text_color
-                    )
+                    HEADER_TEXT = self.get_font(self.font_size[0]).render("GAME FOUND", True, self.text_color)
                     HEADER_RECT = HEADER_TEXT.get_rect(
                         center=(
                             self.SCREEN.get_width() / 2,
@@ -476,9 +472,7 @@ class H5_Lobby(BasicWindow):
                                 self.__update_queue_status = True
                                 self.__player_accepted = True
                                 set_all_buttons_active(is_active=False)
-                                self.__error_msg = self.remove_from_queue(
-                                    is_accepted=True
-                                )
+                                self.__error_msg = self.remove_from_queue(is_accepted=True)
                                 self.check_if_oponnent_accepted()
 
                     if self.__window_overlay:
@@ -512,14 +506,12 @@ class H5_Lobby(BasicWindow):
                     self.__error_msg = f"Connecting for {time_passed[1]} seconds..."
 
             if self.__error_msg:
-                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = (
-                    self.error_window(
-                        text=self.__error_msg,
-                        dimensions=(
-                            self.config["screen_width"] // 3,
-                            self.config["screen_hight"] // 3,
-                        ),
-                    )
+                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                    text=self.__error_msg,
+                    dimensions=(
+                        self.config["screen_width"] // 3,
+                        self.config["screen_hight"] // 3,
+                    ),
                 )
                 screen_width, screen_height = (
                     self.SCREEN.get_width(),
@@ -545,9 +537,7 @@ class H5_Lobby(BasicWindow):
             self.config["screen_width"] // 3,
             self.config["screen_hight"] // 3,
         )
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(
-            self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height)
-        )
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
 
         if not self.__get_time:
             self.start_time = time.time()
@@ -572,18 +562,14 @@ class H5_Lobby(BasicWindow):
             if not self.__elapsed_time:
                 self.__elapsed_time = time.time()
             if not self.__game_found_music:
-                self.__queue_channel = play_on_empty(
-                    "resources/match_found.wav", volume=bg_sound_volume
-                )
+                self.__queue_channel = play_on_empty("resources/match_found.wav", volume=bg_sound_volume)
                 pygame.mixer.Channel(0).set_volume(0.0)
                 self.__game_found_music = True
 
             if self.__player_accepted:
                 information_str = f"Waiting for {self.__opponent_nickname} to accept..."
             else:
-                information_str = (
-                    f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} RP"
-                )
+                information_str = f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} RP"
             OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
                 information_str,
                 True,
@@ -635,9 +621,7 @@ class H5_Lobby(BasicWindow):
         )
 
     def options_window(self):
-        RESOLUTION_TEXT = self.get_font(self.font_size[1]).render(
-            "Select resolution", True, "#d7fcd4"
-        )
+        RESOLUTION_TEXT = self.get_font(self.font_size[1]).render("Select resolution", True, "#d7fcd4")
         RESOLUTION_RECT = RESOLUTION_TEXT.get_rect(
             center=(
                 130 * (transformation_factors[self.transformation_option][0]),
@@ -704,9 +688,7 @@ class H5_Lobby(BasicWindow):
                         (self.config["screen_width"], self.config["screen_hight"]),
                         pygame.NOFRAME,
                     )
-                    self.BG = pygame.image.load(
-                        os.path.join(os.getcwd(), "resources/background/background.png")
-                    )
+                    self.BG = pygame.image.load(os.path.join(os.getcwd(), "resources/background/background.png"))
                     self.BG = pygame.transform.scale(
                         self.BG,
                         (self.config["screen_width"], self.config["screen_hight"]),
@@ -739,9 +721,7 @@ class H5_Lobby(BasicWindow):
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 self.__connection_timer = None
-                self.check_queue = CustomThread(
-                    target=self.scan_for_players, daemon=True
-                )
+                self.check_queue = CustomThread(target=self.scan_for_players, daemon=True)
                 self.check_queue.start()
                 return None
 
@@ -831,9 +811,7 @@ class H5_Lobby(BasicWindow):
                         self.__update_queue_status = True
                         self.__found_game = True
                         self.__opponent_nickname = json_response.get("opponent")[0]
-                        self.__oponnent_ranking_points = json_response.get("opponent")[
-                            1
-                        ]
+                        self.__oponnent_ranking_points = json_response.get("opponent")[1]
                         break
 
             except Exception as e:
@@ -962,19 +940,13 @@ class H5_Lobby(BasicWindow):
         ctypes.windll.user32.ShowWindow(hwnd, 9)
         foreground_hwnd = ctypes.windll.user32.GetForegroundWindow()
         current_thread_id = ctypes.windll.kernel32.GetCurrentThreadId()
-        foreground_thread_id = ctypes.windll.user32.GetWindowThreadProcessId(
-            foreground_hwnd, 0
-        )
+        foreground_thread_id = ctypes.windll.user32.GetWindowThreadProcessId(foreground_hwnd, 0)
         if foreground_thread_id != current_thread_id:
-            ctypes.windll.user32.AttachThreadInput(
-                current_thread_id, foreground_thread_id, True
-            )
+            ctypes.windll.user32.AttachThreadInput(current_thread_id, foreground_thread_id, True)
         ctypes.windll.user32.SetForegroundWindow(hwnd)
         ctypes.windll.user32.BringWindowToTop(hwnd)
         if foreground_thread_id != current_thread_id:
-            ctypes.windll.user32.AttachThreadInput(
-                current_thread_id, foreground_thread_id, False
-            )
+            ctypes.windll.user32.AttachThreadInput(current_thread_id, foreground_thread_id, False)
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
 
     def run_game(self):
