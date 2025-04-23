@@ -9,8 +9,8 @@ class UserSerializer(serializers.Serializer):
     nickname = serializers.CharField(max_length=16, required=False)
     email = serializers.EmailField(required=False)
     password = serializers.CharField(write_only=True, required=False)
-    is_accepted = serializers.BooleanField(reqired=False)
-    is_won = serializers.BooleanField(reqired=False)
+    is_accepted = serializers.BooleanField(required=False)
+    is_won = serializers.BooleanField(required=False)
 
     def __init__(self, *args, required_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
