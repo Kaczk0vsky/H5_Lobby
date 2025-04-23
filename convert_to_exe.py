@@ -28,13 +28,12 @@ def create_exe_file():
 
     # Run pyinstaller to create an .exe file
     run_command(
-        f'pyinstaller --onefile --noconsole --clean \
+        f'pyinstaller --onefile --clean \
             --icon=resources/icon.ico \
             --version-file=version.txt \
             --add-data="{OBFUSCATED_DIR}/src:{DEST_PATH_SRC}" \
             --add-data="{OBFUSCATED_DIR}/widgets:{DEST_PATH_WIDGETS}" \
             --add-data="{OBFUSCATED_DIR}:{DEST_PATH_SETTINGS}" \
-            --add-data=".env;." \
             --hidden-import=pygame \
             --collect-submodules=pygame \
             --hidden-import=toml \

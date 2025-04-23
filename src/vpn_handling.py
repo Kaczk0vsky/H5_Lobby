@@ -1,6 +1,8 @@
 import os
 import subprocess
 import time
+import psutil
+import ctypes
 
 from src.settings_reader import load_vpn_settings
 from src.global_vars import env_dict
@@ -52,8 +54,19 @@ class SoftEtherClient:
             "H5_Lobby_VPN",
         ]
 
+        soft_ether_state = False
         try:
-            if state:
+            for process in psutil.process_iter():
+                if process.name() == "vpncmgr_x64.exe":
+                    soft_ether_state = True
+
+            if not soft_ether_state:
+                ctypes.windll.user32.MessageBoxW(
+                    0,
+                    "Please open SoftEther VPN Client!",
+                    "Lobby Warning",
+                    0,
+                )
                 subprocess.Popen(
                     f"cd {self.vpn_path} && vpnclient.exe",
                     shell=True,

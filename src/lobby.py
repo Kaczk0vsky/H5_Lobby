@@ -59,6 +59,7 @@ class H5_Lobby(BasicWindow):
     __player_accepted = False
     __queue_status = False
     __update_queue_status = False
+    __generate_report = False
     __elapsed_time = None
     __queue_channel = None
     __error_msg = None
@@ -904,6 +905,49 @@ class H5_Lobby(BasicWindow):
                 pass
 
             time.sleep(15)
+
+    @run_in_thread
+    def handle_match_report(self, is_won: bool, castle: str):
+        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_REPORT']}/"
+        if not self.crsf_token:
+            self.__window_overlay = True
+            return "CRSF Token is not valid"
+
+        user_data = {
+            "nickname": self.client_config["nickname"],
+            "is_won": is_won,
+            "castle": castle,
+        }
+        headers = {
+            "Referer": "https://h5-tavern.pl/",
+            "X-CSRFToken": self.crsf_token,
+            "Content-Type": "application/json",
+        }
+
+        self.__connection_timer = time.time()
+        try:
+            response = self.session.post(url, json=user_data, headers=headers)
+            if response.status_code == 200:
+                self.__generate_report = True
+                self.__connection_timer = None
+                return True
+
+            elif response.status_code == 400:
+                self.__window_overlay = True
+                self.__connection_timer = None
+                return response.json().get("error", "Unknown error occurred")
+
+        except requests.exceptions.ConnectTimeout:
+            self.__window_overlay = True
+            return "Error occured while trying to connect to server!"
+
+        except requests.exceptions.ConnectionError:
+            self.__window_overlay = True
+            return "To many tries, try again later!"
+
+        except:
+            self.__window_overlay = True
+            return "Unknown error occured..."
 
     def minimize_to_tray(self):
         time.sleep(0.1)

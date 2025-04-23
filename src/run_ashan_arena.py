@@ -21,13 +21,33 @@ class AschanArena3Game:
                 return True
         return False
 
+    def load_console_file(self):
+        path = os.path.join(self.game_settings["game_path"], "console.txt")
+
+        if os.path.exists(path):
+            data = {}
+            with open(path, "r") as file:
+                for line in file:
+                    splitted_str = line.strip("\n").split("=")
+                    data[splitted_str[0]] = splitted_str[1]
+            # os.remove(path)
+        else:
+            print("Console file does not exist!")
+            return
+
+        if data["player_won"] == "true":
+            self.lobby.handle_match_report(is_won=True, castle=data["castle"])
+        elif data["player_won"] == "false":
+            self.lobby.handle_match_report(is_won=False, castle=data["castle"])
+
     def run_processes(self):
         self.lobby.minimize_to_tray()
 
         while True:
             is_running = self.check_game_process()
-            time.sleep(0.5)
+            time.sleep(1)
             if not is_running:
                 break
 
         self.lobby.maximize_from_tray()
+        self.load_console_file()

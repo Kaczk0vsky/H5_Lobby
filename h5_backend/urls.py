@@ -17,4 +17,5 @@ urlpatterns = [
         name="check_if_oponnent_accepted",
     ),
     path("get_users_online/", views.update_users_list, name="update_users_list"),
+    path("create_game_report/", views.handle_match_report, name="handle_match_report"),
 ]

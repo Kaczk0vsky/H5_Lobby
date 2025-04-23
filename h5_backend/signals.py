@@ -8,7 +8,6 @@ from h5_backend.models import Player
 @receiver(post_save, sender=User)
 def create_player(sender, instance, created, **kwargs):
     if created:
-        # Automatically create a Player instance when a new User is created
         Player.objects.create(nickname=instance.username)
 
 

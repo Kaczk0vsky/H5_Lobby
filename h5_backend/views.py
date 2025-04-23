@@ -23,7 +23,7 @@ from django.utils.encoding import force_bytes
 from django.urls import reverse
 
 from h5_backend.tasks import add_new_user_to_vpn_server
-from h5_backend.models import Player, PlayersMatched, Ban
+from h5_backend.models import Player, PlayersMatched, Ban, Game
 
 logger = logging.getLogger(__name__)
 
@@ -572,6 +572,47 @@ def update_users_list(request):
         return JsonResponse(
             {"success": False, "error": "Invalid JSON format"}, status=400
         )
+    except Exception as e:
+        logger.error(f"Checking if opponent accepted error: {e}")
+        return JsonResponse(
+            {"success": False, "error": "Something went wrong"}, status=500
+        )
+
+
+@csrf_protect
+@require_POST
+@ratelimit(key="user_or_ip", rate="3/m", method="POST", block=True)
+def handle_match_report(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        nickname = data.get("nickname")
+        is_won = data.get("is_won")
+        castle = data.get("castle")
+
+        try:
+            player = Player.objects.get(nickname=nickname)
+        except Player.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "error": "Players not found"}, status=400
+            )
+
+        match = Game(player_1=player).save()
+
+        if not nickname or not is_won:
+            return JsonResponse(
+                {"success": False, "error": "Missing required fields"}, status=400
+            )
+
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", nickname):
+            return JsonResponse(
+                {"success": False, "error": "Invalid nickname format"}, status=400
+            )
+
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"success": False, "error": "Invalid JSON format"}, status=400
+        )
+
     except Exception as e:
         logger.error(f"Checking if opponent accepted error: {e}")
         return JsonResponse(
