@@ -29,9 +29,7 @@ class Player(models.Model):
         (PLAYING, "playing"),
     ]
     # player state
-    player_state = models.CharField(
-        max_length=30, choices=PLAYER_STATE_CHOICES, default="offline", editable=True
-    )
+    player_state = models.CharField(max_length=30, choices=PLAYER_STATE_CHOICES, default="offline", editable=True)
 
     def __str__(self):
         return f"{self.nickname} - {self.ranking_points} ({self.player_state})"
@@ -79,12 +77,8 @@ class Game(models.Model):
         (FORTRESS, "fortress"),
         (STRONGHOLD, "stronghold"),
     ]
-    castle_1 = models.CharField(
-        max_length=20, choices=CASTLE_TYPE_CHOICES, default="heaven", editable=True
-    )
-    castle_2 = models.CharField(
-        max_length=20, choices=CASTLE_TYPE_CHOICES, default="heaven", editable=True
-    )
+    castle_1 = models.CharField(max_length=20, choices=CASTLE_TYPE_CHOICES, default="heaven", editable=True)
+    castle_2 = models.CharField(max_length=20, choices=CASTLE_TYPE_CHOICES, default="heaven", editable=True)
 
     # who won
     who_won = models.ForeignKey(
@@ -99,6 +93,7 @@ class Game(models.Model):
         editable=False,
         null=True,
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"

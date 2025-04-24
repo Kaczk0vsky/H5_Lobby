@@ -515,24 +515,41 @@ class HandleMatchReport(View):
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            serializer = UserSerializer(data=data, required_fields=["nickname", "is_won"])
+            serializer = UserSerializer(data=data, required_fields=["nickname", "is_won", "castle"])
             if not serializer.is_valid():
-                return None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+                return None, None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
 
             nickname = serializer.validated_data["nickname"]
             game_won = serializer.validated_data["is_won"]
+            castle = serializer.validated_data["castle"]
 
-            return nickname, game_won, None
+            return nickname, game_won, castle, None
 
         except json.JSONDecodeError:
             return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _create_match_report(self, player, game_won):
-        match = Game(player_1=player).save()
+    def _create_match_report(self, player, game_won, castle):
+        if not Game.objects.filter(player_1=player, castle_1=castle, player_2__isnull=True).exists():
+            with transaction.atomic():
+                match = Game(player_1=player, castle_1=castle)
+                if game_won:
+                    match.who_won = player
+                match.save()
+                return
+
+        if Game.objects.filter(player_1__isnull=False, player_2__isnull=True).exists():
+            match = Game.objects.filter(player_1__isnull=False, player_2__isnull=True).get()
+            with transaction.atomic():
+                match.player_2 = player
+                match.castle_2 = castle
+                if game_won:
+                    match.who_won = player
+                match.save()
+                return
 
     def post(self, request, *args, **kwargs):
         try:
-            nickname, game_won, parse_error = self._parse_request_data(request)
+            nickname, game_won, castle, parse_error = self._parse_request_data(request)
             if parse_error:
                 return parse_error
 
@@ -541,7 +558,7 @@ class HandleMatchReport(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Players not found"}, status=400)
 
-            self._create_match_report(player, game_won)
+            self._create_match_report(player, game_won, castle)
 
             return JsonResponse({"success": True, "created": True})
 

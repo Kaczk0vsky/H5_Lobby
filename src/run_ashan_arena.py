@@ -30,22 +30,22 @@ class AschanArena3Game:
                 for line in file:
                     splitted_str = line.strip("\n").split("=")
                     data[splitted_str[0]] = splitted_str[1]
+
+            if data["player_won"] == "true":
+                self.lobby.handle_match_report(is_won=True, castle=data["castle"])
+            elif data["player_won"] == "false":
+                self.lobby.handle_match_report(is_won=False, castle=data["castle"])
             # os.remove(path)
         else:
             print("Console file does not exist!")
             return
-
-        if data["player_won"] == "true":
-            self.lobby.handle_match_report(is_won=True, castle=data["castle"])
-        elif data["player_won"] == "false":
-            self.lobby.handle_match_report(is_won=False, castle=data["castle"])
 
     def run_processes(self):
         self.lobby.minimize_to_tray()
 
         while True:
             is_running = self.check_game_process()
-            time.sleep(1)
+            time.sleep(2)
             if not is_running:
                 break
 
