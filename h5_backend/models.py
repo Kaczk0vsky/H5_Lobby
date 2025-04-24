@@ -89,10 +89,6 @@ class Game(models.Model):
         blank=False,
         related_name="player_who_won",
     )
-    points_change = models.IntegerField(
-        editable=False,
-        null=True,
-    )
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"

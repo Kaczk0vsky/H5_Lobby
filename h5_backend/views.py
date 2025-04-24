@@ -544,10 +544,20 @@ class HandleMatchReport(View):
                 if game_won:
                     match.who_won = player
                 match.save()
+
+                player_won = match.who_won
+                player_lost = match.player_2 if match.who_won == match.player_1 else match.player_1
+                self.__calculate_points_change(player_won, player_lost)
                 return
 
-    def _calculate_points_difference(self, player):
-        pass
+    @staticmethod
+    def __calculate_points_change(player_won, player_lost):
+        # TODO: add the correct formula below
+        player_won.ranking_points += 50
+        player_lost.ranking_points -= 50
+
+        player_won.save()
+        player_lost.save()
 
     def post(self, request, *args, **kwargs):
         try:
@@ -561,7 +571,6 @@ class HandleMatchReport(View):
                 return JsonResponse({"success": False, "error": "Players not found"}, status=400)
 
             self._create_match_report(player, game_won, castle)
-            self._calculate_points_difference(player)
 
             return JsonResponse({"success": True, "created": True})
 
