@@ -353,9 +353,8 @@ class GetPlayersMatched(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
 
-            try:
-                player_matched = PlayersMatched.objects.filter(Q(player_1=player) | Q(player_2=player)).first()
-            except PlayersMatched.DoesNotExist:
+            player_matched = PlayersMatched.objects.filter(Q(player_1=player) | Q(player_2=player)).first()
+            if not player_matched:
                 return JsonResponse({"success": False, "game_found": False})
 
             opponent = player_matched.player_2 if player == player_matched.player_1 else player_matched.player_1
