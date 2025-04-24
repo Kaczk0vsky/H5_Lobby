@@ -506,12 +506,12 @@ class UpdateUsersList(View):
 
 
 @method_decorator(csrf_protect, name="dispatch")
-@method_decorator(ratelimit(key="user_or_ip", rate="3/m", method="POST", block=True), name="dispatch")
+@method_decorator(ratelimit(key="user_or_ip", rate="5/m", method=["GET", "POST"], block=True), name="dispatch")
 class HandleMatchReport(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def _parse_request_data(self, request):
+    def _parse_post_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
             serializer = UserSerializer(data=data, required_fields=["nickname", "is_won", "castle"])
@@ -526,6 +526,19 @@ class HandleMatchReport(View):
 
         except json.JSONDecodeError:
             return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+
+    def _parse_get_data(self, request):
+        try:
+            serializer = UserSerializer(data=request.GET, required_fields=["nickname"])
+            if not serializer.is_valid():
+                return (None, JsonResponse({"success": False, "errors": serializer.errors}, status=400))
+
+            nickname = serializer.validated_data["nickname"]
+
+            return nickname, None
+
+        except json.JSONDecodeError:
+            return (None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400))
 
     def _create_match_report(self, player, game_won, castle):
         if Game.objects.filter(player_1__isnull=False, player_2__isnull=True).exists():
@@ -561,18 +574,45 @@ class HandleMatchReport(View):
 
     def post(self, request, *args, **kwargs):
         try:
-            nickname, game_won, castle, parse_error = self._parse_request_data(request)
+            nickname, game_won, castle, parse_error = self._parse_post_data(request)
             if parse_error:
                 return parse_error
 
             try:
                 player = Player.objects.get(nickname=nickname)
             except Player.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Players not found"}, status=400)
+                return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
             self._create_match_report(player, game_won, castle)
 
             return JsonResponse({"success": True, "created": True})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+        except Exception as e:
+            logger.error(f"Handling creating match report error: {e}")
+            return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            nickname, parse_error = self._parse_get_data(request)
+            if parse_error:
+                return parse_error
+
+            try:
+                player = Player.objects.get(nickname=nickname)
+            except Player.DoesNotExist:
+                return JsonResponse({"success": False, "error": "Player not found"}, status=400)
+
+            game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").first()
+            if not game:
+                return JsonResponse({"success": False, "error": "Game not found"})
+
+            game_data = {
+                game.player_1.nickname: [game.player_1.ranking_points, game.castle_1],
+                game.player_2.nickname: [game.player_2.ranking_points, game.castle_2],
+            }
+            return JsonResponse({"success": True, "game_data": game_data})
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
