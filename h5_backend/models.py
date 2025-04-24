@@ -93,7 +93,6 @@ class Game(models.Model):
         editable=False,
         null=True,
     )
-    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"
