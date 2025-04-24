@@ -529,14 +529,6 @@ class HandleMatchReport(View):
             return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
     def _create_match_report(self, player, game_won, castle):
-        if not Game.objects.filter(player_1=player, castle_1=castle, player_2__isnull=True).exists():
-            with transaction.atomic():
-                match = Game(player_1=player, castle_1=castle)
-                if game_won:
-                    match.who_won = player
-                match.save()
-                return
-
         if Game.objects.filter(player_1__isnull=False, player_2__isnull=True).exists():
             match = Game.objects.filter(player_1__isnull=False, player_2__isnull=True).get()
             with transaction.atomic():
@@ -546,6 +538,17 @@ class HandleMatchReport(View):
                     match.who_won = player
                 match.save()
                 return
+
+        if not Game.objects.filter(player_1=player, castle_1=castle, player_2__isnull=True).exists():
+            with transaction.atomic():
+                match = Game(player_1=player, castle_1=castle)
+                if game_won:
+                    match.who_won = player
+                match.save()
+                return
+
+    def _calculate_points_difference(self, player):
+        pass
 
     def post(self, request, *args, **kwargs):
         try:
@@ -559,6 +562,7 @@ class HandleMatchReport(View):
                 return JsonResponse({"success": False, "error": "Players not found"}, status=400)
 
             self._create_match_report(player, game_won, castle)
+            self._calculate_points_difference(player)
 
             return JsonResponse({"success": True, "created": True})
 
