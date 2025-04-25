@@ -43,6 +43,8 @@ class Game(models.Model):
         Player,
         on_delete=models.CASCADE,
         editable=True,
+        null=True,
+        blank=True,
         db_column="player_1",
         related_name="game_as_player_1",
     )
@@ -50,6 +52,8 @@ class Game(models.Model):
         Player,
         on_delete=models.CASCADE,
         editable=True,
+        null=True,
+        blank=True,
         db_column="player_2",
         related_name="game_as_player_2",
     )
