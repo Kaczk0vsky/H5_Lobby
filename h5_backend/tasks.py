@@ -45,8 +45,6 @@ def check_queue():
         player2 = players_in_queue[1]
 
         with transaction.atomic():
-            player1 = Player.objects.select_for_update().get(id=player1.id)
-            player2 = Player.objects.select_for_update().get(id=player2.id)
             if not Game.objects.filter(
                 Q(player_1=player1, player_2=player2, is_new=True) | Q(player_1=player2, player_2=player1, is_new=True)
             ).exists():
