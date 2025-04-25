@@ -539,22 +539,25 @@ class HandleMatchReport(View):
             return (None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400))
 
     def _create_match_report(self, player, game_won, castle):
-        match = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").first()
+        game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").first()
         with transaction.atomic():
-            if match.player_1 == player:
-                match.castle_1 = castle
+            if game.player_1 == player:
+                game.castle_1 = castle
                 if game_won:
-                    match.who_won = player
+                    game.who_won = player
             else:
-                match.castle_2 = castle
+                game.castle_2 = castle
                 if game_won:
-                    match.who_won = player
+                    game.who_won = player
 
-            player_won = match.who_won
-            player_lost = match.player_2 if match.who_won == match.player_1 else match.player_1
-            self.__calculate_points_change(player_won, player_lost)
-            match.save()
-            return
+            if not game.is_ranking_calculated:
+                player_won = game.who_won
+                player_lost = game.player_2 if game.who_won == game.player_1 else game.player_1
+                self.__calculate_points_change(player_won, player_lost)
+                game.is_ranking_calculated = True
+            game.save()
+
+            return game
 
     @staticmethod
     def __calculate_points_change(player_won, player_lost):
@@ -576,37 +579,13 @@ class HandleMatchReport(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
-            self._create_match_report(player, game_won, castle)
-
-            return JsonResponse({"success": True, "created": True})
-
-        except json.JSONDecodeError:
-            return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
-        except Exception as e:
-            logger.error(f"Handling creating match report error: {e}")
-            return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
-
-    def get(self, request, *args, **kwargs):
-        try:
-            nickname, parse_error = self._parse_get_data(request)
-            if parse_error:
-                return parse_error
-
-            try:
-                player = Player.objects.get(nickname=nickname)
-            except Player.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Player not found"}, status=400)
-
-            try:
-                game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").get()
-            except Game.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Game not found"})
-
+            game = self._create_match_report(player, game_won, castle)
             game_data = {
-                game.player_1.nickname: [game.player_1.ranking_points, game.castle_1],
-                game.player_2.nickname: [game.player_2.ranking_points, game.castle_2],
+                game.player_1.nickname: [game.player_1.ranking_points],
+                game.player_2.nickname: [game.player_2.ranking_points],
             }
-            return JsonResponse({"success": True, "game_data": game_data})
+
+            return JsonResponse({"success": True, "created": True, "game_data": game_data})
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)

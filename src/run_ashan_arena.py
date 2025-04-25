@@ -36,9 +36,6 @@ class AschanArena3Game:
             elif data["player_won"] == "false":
                 self.lobby.handle_match_report(is_won=False, castle=data["castle"])
             # os.remove(path)
-        else:
-            print("Console file does not exist!")
-            return
 
     def run_processes(self):
         self.lobby.minimize_to_tray()

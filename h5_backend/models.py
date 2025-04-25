@@ -104,6 +104,7 @@ class Game(models.Model):
         blank=True,
     )
     is_new = models.BooleanField(default=False)
+    is_ranking_calculated = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"
