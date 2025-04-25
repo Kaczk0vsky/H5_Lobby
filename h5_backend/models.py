@@ -43,8 +43,6 @@ class Game(models.Model):
         Player,
         on_delete=models.CASCADE,
         editable=True,
-        null=True,
-        blank=True,
         db_column="player_1",
         related_name="game_as_player_1",
     )
@@ -52,8 +50,6 @@ class Game(models.Model):
         Player,
         on_delete=models.CASCADE,
         editable=True,
-        null=True,
-        blank=True,
         db_column="player_2",
         related_name="game_as_player_2",
     )
@@ -77,17 +73,31 @@ class Game(models.Model):
         (FORTRESS, "fortress"),
         (STRONGHOLD, "stronghold"),
     ]
-    castle_1 = models.CharField(max_length=20, choices=CASTLE_TYPE_CHOICES, default="heaven", editable=True)
-    castle_2 = models.CharField(max_length=20, choices=CASTLE_TYPE_CHOICES, default="heaven", editable=True)
+    castle_1 = models.CharField(
+        max_length=20,
+        choices=CASTLE_TYPE_CHOICES,
+        default="heaven",
+        editable=True,
+        null=True,
+        blank=True,
+    )
+    castle_2 = models.CharField(
+        max_length=20,
+        choices=CASTLE_TYPE_CHOICES,
+        default="heaven",
+        editable=True,
+        null=True,
+        blank=True,
+    )
 
     # who won
     who_won = models.ForeignKey(
         Player,
         on_delete=models.CASCADE,
         editable=True,
-        null=False,
-        blank=False,
         related_name="player_who_won",
+        null=True,
+        blank=True,
     )
     is_new = models.BooleanField(default=False)
 
