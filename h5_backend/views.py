@@ -539,7 +539,7 @@ class HandleMatchReport(View):
             return (None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400))
 
     def _create_match_report(self, player, game_won, castle):
-        match = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").get()
+        match = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").first()
         with transaction.atomic():
             if match.player_1 == player:
                 match.castle_1 = castle
