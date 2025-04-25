@@ -20,7 +20,7 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse
 
 from h5_backend.tasks import add_new_user_to_vpn_server
-from h5_backend.models import Player, PlayersMatched, Ban, Game
+from h5_backend.models import Player, Ban, Game
 from h5_backend.serializers import UserSerializer
 
 logger = logging.getLogger(__name__)
@@ -289,14 +289,14 @@ class RemovePlayerFromQueue(View):
     def _handle_queue_state(self, player):
         with transaction.atomic():
             try:
-                player_matched = PlayersMatched.objects.get(Q(player_1=player) | Q(player_2=player))
-                oponnent = player_matched.player_2 if player == player_matched.player_1 else player_matched.player_1
-                oponnent.player_state = "in_queue"
-                oponnent.save()
-                player_matched.delete()
-
-            except PlayersMatched.DoesNotExist:
+                game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
+            except Game.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Match not found"}, status=404)
+
+            oponnent = game.player_2 if player == game.player_1 else game.player_1
+            oponnent.player_state = "in_queue"
+            oponnent.save()
+            game.delete()
 
     def post(self, request, *args, **kwargs):
         try:
@@ -352,12 +352,12 @@ class GetPlayersMatched(View):
                 player = Player.objects.get(nickname=nickname)
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
-
-            player_matched = PlayersMatched.objects.filter(Q(player_1=player) | Q(player_2=player)).first()
-            if not player_matched:
+            try:
+                game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
+            except Game.DoesNotExist:
                 return JsonResponse({"success": False, "game_found": False})
 
-            opponent = player_matched.player_2 if player == player_matched.player_1 else player_matched.player_1
+            opponent = game.player_2 if player == game.player_1 else game.player_1
             return JsonResponse(
                 {
                     "success": True,
@@ -391,7 +391,7 @@ class CheckIfOpponentAccepted(View):
         except json.JSONDecodeError:
             return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _handle_opponent_state(self, opponent, player, player_matched):
+    def _handle_opponent_state(self, opponent, player, game):
         if opponent.player_state == "accepted" or opponent.player_state == "playing":
             opponent.player_state = "playing"
             player.player_state = "playing"
@@ -400,11 +400,9 @@ class CheckIfOpponentAccepted(View):
                 opponent.save()
                 player.save()
 
-                if player_matched.to_delete:
-                    player_matched.delete()
-                else:
-                    player_matched.to_delete = True
-                    player_matched.save()
+                if game.is_new:
+                    game.is_new = False
+                    game.save()
 
                 return JsonResponse(
                     {
@@ -416,7 +414,7 @@ class CheckIfOpponentAccepted(View):
 
         elif opponent.player_state == "online" or opponent.player_state == "offline":
             with transaction.atomic():
-                player_matched.delete()
+                game.delete()
                 player.player_state = "in_queue"
                 player.save()
 
@@ -441,12 +439,12 @@ class CheckIfOpponentAccepted(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
             try:
-                player_matched = PlayersMatched.objects.get(Q(player_1=player) | Q(player_2=player))
-            except PlayersMatched.DoesNotExist:
+                game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True))
+            except Game.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
-            opponent = player_matched.player_2 if player == player_matched.player_1 else player_matched.player_1
-            response = self._handle_opponent_state(opponent, player, player_matched)
+            opponent = game.player_2 if player == game.player_1 else game.player_1
+            response = self._handle_opponent_state(opponent, player, game)
             return response
 
         except Exception as e:
@@ -604,8 +602,9 @@ class HandleMatchReport(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
-            game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").first()
-            if not game:
+            try:
+                game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").get()
+            except Game.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Game not found"})
 
             game_data = {

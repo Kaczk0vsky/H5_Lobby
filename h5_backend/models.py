@@ -89,36 +89,10 @@ class Game(models.Model):
         blank=False,
         related_name="player_who_won",
     )
+    is_new = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"
-
-
-class PlayersMatched(models.Model):
-    id = models.IntegerField(editable=False, primary_key=True, unique=True)
-    player_1 = models.ForeignKey(
-        Player,
-        on_delete=models.CASCADE,
-        editable=True,
-        null=True,
-        blank=True,
-        db_column="player_1_matched",
-        related_name="matched_player_1",
-    )
-    player_2 = models.ForeignKey(
-        Player,
-        on_delete=models.CASCADE,
-        editable=True,
-        null=True,
-        blank=True,
-        db_column="player_2_matched",
-        related_name="matched_player_2",
-    )
-    created_at = models.TimeField(auto_now_add=True)
-    to_delete = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.player_1} vs. {self.player_2}"
 
 
 class Ban(models.Model):

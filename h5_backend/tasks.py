@@ -4,13 +4,11 @@ from celery import shared_task
 from django.db import transaction
 from django.db.models import Q
 
-from h5_backend.models import Player, PlayersMatched
+from h5_backend.models import Player, Game
 
 
 @shared_task
-def add_new_user_to_vpn_server(
-    vpn_server_ip: str, vpn_admin_password: str, vpncmd_commands: str
-) -> bool:
+def add_new_user_to_vpn_server(vpn_server_ip: str, vpn_admin_password: str, vpncmd_commands: str) -> bool:
     vpncmd_path = "/usr/local/vpnserver/vpncmd"
     try:
         command = [
@@ -21,9 +19,7 @@ def add_new_user_to_vpn_server(
             "/CMD",
         ]
 
-        result = subprocess.run(
-            command, input=vpncmd_commands, text=True, capture_output=True, check=True
-        )
+        result = subprocess.run(command, input=vpncmd_commands, text=True, capture_output=True, check=True)
 
         if result.returncode != 0:
             print("Error Output:", result.stderr)
@@ -51,21 +47,12 @@ def check_queue():
         with transaction.atomic():
             player1 = Player.objects.select_for_update().get(id=player1.id)
             player2 = Player.objects.select_for_update().get(id=player2.id)
-            if not PlayersMatched.objects.filter(
-                Q(player_1=player1, player_2=player2)
-                | Q(player_1=player2, player_2=player1)
+            if not Game.objects.filter(
+                Q(player_1=player1, player_2=player2, is_new=True) | Q(player_1=player2, player_2=player1, is_new=True)
             ).exists():
-                PlayersMatched.objects.create(
-                    player_1=player1, player_2=player2, to_delete=False
-                )
+                Game.objects.create(player_1=player1, player_2=player2, is_new=True)
 
             player1.player_state = Player.WAITING_ACCEPTANCE
             player2.player_state = Player.WAITING_ACCEPTANCE
             player1.save()
             player2.save()
-
-
-# @worker_ready.connect
-# def start_message_server(sender, **kwargs):
-#     server_thread = threading.Thread(target=Server().start, daemon=True)
-#     server_thread.start()
