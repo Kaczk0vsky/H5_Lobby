@@ -539,27 +539,22 @@ class HandleMatchReport(View):
             return (None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400))
 
     def _create_match_report(self, player, game_won, castle):
-        if Game.objects.filter(player_1__isnull=False, player_2__isnull=True).exists():
-            match = Game.objects.filter(player_1__isnull=False, player_2__isnull=True).get()
-            with transaction.atomic():
-                match.player_2 = player
+        match = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").get()
+        with transaction.atomic():
+            if match.player_1 == player:
+                match.castle_1 = castle
+                if game_won:
+                    match.who_won = player
+            else:
                 match.castle_2 = castle
                 if game_won:
                     match.who_won = player
-                match.save()
-                return
 
-        if not Game.objects.filter(player_1=player, castle_1=castle, player_2__isnull=True).exists():
-            with transaction.atomic():
-                match = Game(player_1=player, castle_1=castle)
-                if game_won:
-                    match.who_won = player
-                match.save()
-
-                player_won = match.who_won
-                player_lost = match.player_2 if match.who_won == match.player_1 else match.player_1
-                self.__calculate_points_change(player_won, player_lost)
-                return
+            player_won = match.who_won
+            player_lost = match.player_2 if match.who_won == match.player_1 else match.player_1
+            self.__calculate_points_change(player_won, player_lost)
+            match.save()
+            return
 
     @staticmethod
     def __calculate_points_change(player_won, player_lost):
