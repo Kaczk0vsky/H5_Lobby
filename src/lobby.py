@@ -59,11 +59,12 @@ class H5_Lobby(BasicWindow):
     __player_accepted = False
     __queue_status = False
     __update_queue_status = False
-    __generate_report = False
+    __update_game_data = False
     __elapsed_time = None
     __queue_channel = None
     __error_msg = None
     __connection_timer = None
+    __game_data = None
 
     def __init__(
         self,
@@ -427,9 +428,42 @@ class H5_Lobby(BasicWindow):
                         pygame.mixer.Channel(0).set_volume(bg_sound_volume)
                         pygame.mixer.Channel(self.__queue_channel).stop()
                         set_queue_vars(state=False)
-                        set_all_buttons_active(True)
+                        set_all_buttons_active(is_active=True)
                         self.remove_from_queue(is_accepted=False)
                         continue
+
+            if self.__game_data:
+                if self.__update_game_data:
+                    set_all_buttons_active(is_active=False)
+                    (
+                        RESULT_TEXT,
+                        RESULT_RECT,
+                        MYSELF_TEXT,
+                        MYSELF_RECT,
+                        MYSELF_POINTS,
+                        MYSELF_POINTS_RECT,
+                        OPPONENT_TEXT,
+                        OPPONENT_RECT,
+                        OPPONENT_POINTS,
+                        OPPONENT_POINTS_RECT,
+                        SUBMIT_REPORT,
+                    ) = self.report_window()
+                    SUBMIT_REPORT.set_active(True)
+                    self.__update_game_data = False
+
+                self.SCREEN.blit(
+                    self.SMALLER_WINDOWS_BG,
+                    (
+                        640 * transformation_factors[self.transformation_option][0],
+                        360 * transformation_factors[self.transformation_option][1],
+                    ),
+                )
+                self.SCREEN.blit(RESULT_TEXT, RESULT_RECT)
+                self.SCREEN.blit(MYSELF_TEXT, MYSELF_RECT)
+                self.SCREEN.blit(MYSELF_POINTS, MYSELF_POINTS_RECT)
+                self.SCREEN.blit(OPPONENT_TEXT, OPPONENT_RECT)
+                self.SCREEN.blit(OPPONENT_POINTS, OPPONENT_POINTS_RECT)
+                SUBMIT_REPORT.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             for event in pygame.event.get():
                 USERS_LIST.event(event)
@@ -475,6 +509,12 @@ class H5_Lobby(BasicWindow):
                                 self.__error_msg = self.remove_from_queue(is_accepted=True)
                                 self.check_if_oponnent_accepted()
 
+                    if self.__game_data:
+                        if SUBMIT_REPORT.check_for_input(MENU_MOUSE_POS):
+                            set_all_buttons_active(is_active=True)
+                            self.__update_game_data = False
+                            self.__game_data = None
+
                     if self.__window_overlay:
                         if self.__error_msg:
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -484,8 +524,8 @@ class H5_Lobby(BasicWindow):
             if self.__opponent_accepted and self.__player_accepted:
                 pygame.mixer.Channel(self.__queue_channel).stop()
                 set_queue_vars(state=False)
-                set_all_buttons_active(is_active=True)
                 self.run_arena()
+                continue
 
             if self.__opponent_declined:
                 self.__update_queue_status = True
@@ -570,17 +610,8 @@ class H5_Lobby(BasicWindow):
                 information_str = f"Waiting for {self.__opponent_nickname} to accept..."
             else:
                 information_str = f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} RP"
-            OPONNENT_TEXT = self.get_font(self.font_size[0]).render(
-                information_str,
-                True,
-                self.text_color,
-            )
-            OPONNENT_RECT = OPONNENT_TEXT.get_rect(
-                center=(
-                    self.SCREEN.get_width() / 2,
-                    self.SCREEN.get_height() / 2.12,
-                )
-            )
+            OPONNENT_TEXT = self.get_font(self.font_size[0]).render(information_str, True, self.text_color)
+            OPONNENT_RECT = OPONNENT_TEXT.get_rect(center=(self.SCREEN.get_width() / 2, self.SCREEN.get_height() / 2.12))
             ACCEPT_BUTTON = Button(
                 image=self.ACCEPT_BUTTON,
                 image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
@@ -618,6 +649,76 @@ class H5_Lobby(BasicWindow):
             OPONNENT_TEXT,
             OPONNENT_RECT,
             PROGRESS_BAR,
+        )
+
+    def report_window(self):
+        overlay_width, overlay_height = (
+            self.config["screen_width"] // 3.75,
+            self.config["screen_hight"] // 2.75,
+        )
+        dims = (640, 360)
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
+
+        if self.__game_data["is_won"]:
+            result_text = "VICTORY"
+            result_color = "#02ba09"
+            player_points_change = f"(+{self.__game_data['points_change']})"
+            opponent_points_change = f"(-{self.__game_data['points_change']})"
+        else:
+            result_text = "DEFEAT"
+            result_color = "#db1102"
+            player_points_change = f"(-{self.__game_data['points_change']})"
+            opponent_points_change = f"(+{self.__game_data['points_change']})"
+
+        player_points = self.__game_data[self.client_config["nickname"]][0]
+        players = [nickname for nickname in self.__game_data if nickname != "points_change"]
+        opponent_nickname = next(nick for nick in players if nick != self.client_config["nickname"])
+        opponent_points = self.__game_data[opponent_nickname][0]
+        opponent_color = "#02ba09" if result_color == "#db1102" else "#db1102"
+
+        RESULT_TEXT = self.get_font(int(self.font_size[0] * 1.5)).render(result_text, True, result_color)
+        RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.2))
+
+        MYSELF_TEXT = self.get_font(self.font_size[0]).render(f"{self.client_config["nickname"]}: ", True, self.text_color)
+        MYSELF_POINTS = self.get_font(self.font_size[0]).render(f"{player_points} {player_points_change}", True, result_color)
+        total_width = MYSELF_TEXT.get_width() + MYSELF_POINTS.get_width()
+        start_x = (dims[0] + overlay_width * 0.5) - (total_width / 2)
+        start_y = dims[1] + overlay_height * 0.375
+        MYSELF_RECT = MYSELF_TEXT.get_rect(topleft=(start_x, start_y))
+        MYSELF_POINTS_RECT = MYSELF_POINTS.get_rect(topleft=(MYSELF_RECT.right, start_y))
+
+        OPPONENT_TEXT = self.get_font(self.font_size[0]).render(f"{opponent_nickname}: ", True, self.text_color)
+        OPPONENT_POINTS = self.get_font(self.font_size[0]).render(f"{opponent_points} {opponent_points_change}", True, opponent_color)
+        total_width = OPPONENT_TEXT.get_width() + OPPONENT_POINTS.get_width()
+        start_x = (dims[0] + overlay_width * 0.5) - (total_width / 2)
+        start_y = dims[1] + overlay_height * 0.5
+        OPPONENT_RECT = OPPONENT_TEXT.get_rect(topleft=(start_x, start_y))
+        OPPONENT_POINTS_RECT = OPPONENT_POINTS.get_rect(topleft=(OPPONENT_RECT.right, start_y))
+
+        SUBMIT_REPORT = Button(
+            image=self.ACCEPT_BUTTON,
+            image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
+            image_inactive=self.ACCEPT_BUTTON_INACTIVE,
+            position=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.8),
+            text_input="Confirm",
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
+        )
+
+        return (
+            RESULT_TEXT,
+            RESULT_RECT,
+            MYSELF_TEXT,
+            MYSELF_RECT,
+            MYSELF_POINTS,
+            MYSELF_POINTS_RECT,
+            OPPONENT_TEXT,
+            OPPONENT_RECT,
+            OPPONENT_POINTS,
+            OPPONENT_POINTS_RECT,
+            SUBMIT_REPORT,
         )
 
     def options_window(self):
@@ -906,7 +1007,9 @@ class H5_Lobby(BasicWindow):
         try:
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
-                self.__generate_report = True
+                self.__game_data = response.json().get("game_data")
+                self.__game_data["is_won"] = is_won
+                self.__update_game_data = True
                 self.__connection_timer = None
                 return True
 
