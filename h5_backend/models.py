@@ -93,6 +93,8 @@ class Game(models.Model):
         null=True,
         blank=True,
     )
+    points_change_winner = models.IntegerField(editable=True, null=True, blank=True)
+    points_change_loser = models.IntegerField(editable=True, null=True, blank=True)
 
     # who won
     who_won = models.ForeignKey(
@@ -104,7 +106,7 @@ class Game(models.Model):
         blank=True,
     )
     is_new = models.BooleanField(default=False)
-    is_ranking_calculated = models.BooleanField(default=False)
+    is_ranked = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"

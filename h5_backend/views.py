@@ -549,27 +549,32 @@ class HandleMatchReport(View):
                 game.castle_2 = castle
                 if game_won:
                     game.who_won = player
+            player_won = game.who_won
+            player_lost = game.player_2 if game.who_won == game.player_1 else game.player_1
 
-            if not game.is_ranking_calculated:
-                player_won = game.who_won
-                player_lost = game.player_2 if game.who_won == game.player_1 else game.player_1
-                points_change = self.__calculate_points_change(player_won, player_lost)
-                game.is_ranking_calculated = True
+            if not game.points_change_winner and not game.points_change_loser:
+                game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
             game.save()
 
-            return game, points_change
+            game_data = {
+                "winner": [player_won.nickname, player_won.ranking_points, game.points_change_winner],
+                "loser": [player_lost.nickname, player_lost.ranking_points, game.points_change_loser],
+            }
+            return game_data
 
     @staticmethod
     def __calculate_points_change(player_won, player_lost):
-        # TODO: add the correct formula below
-        points_change = 50
+        X1 = player_won.ranking_points
+        X2 = player_lost.ranking_points
+        R1 = round(100 * (1 - (1 / (1 + 10 ** ((X2 - X1) / 1800)))) * (1 + (1000 - X1) / 2000))
+        R2 = round(100 * (1 - (1 / (1 + 10 ** ((X2 - X1) / 1800)))))
 
-        player_won.ranking_points += points_change
-        player_lost.ranking_points -= points_change
+        player_won.ranking_points += R1
+        player_lost.ranking_points -= R2
         player_won.save()
         player_lost.save()
 
-        return points_change
+        return R1, R2
 
     def post(self, request, *args, **kwargs):
         try:
@@ -582,12 +587,7 @@ class HandleMatchReport(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
-            game, points_change = self._create_match_report(player, game_won, castle)
-            game_data = {
-                game.player_1.nickname: [game.player_1.ranking_points],
-                game.player_2.nickname: [game.player_2.ranking_points],
-                "points_change": points_change,
-            }
+            game_data = self._create_match_report(player, game_won, castle)
 
             return JsonResponse({"success": True, "created": True, "game_data": game_data})
 

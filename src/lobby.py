@@ -662,18 +662,20 @@ class H5_Lobby(BasicWindow):
         if self.__game_data["is_won"]:
             result_text = "VICTORY"
             result_color = "#02ba09"
-            player_points_change = f"(+{self.__game_data['points_change']})"
-            opponent_points_change = f"(-{self.__game_data['points_change']})"
+            player_points = self.__game_data["winner"][1]
+            player_points_change = f"(+{self.__game_data['winner'][2]})"
+            opponent_nickname = self.__game_data["loser"][0]
+            opponent_points = self.__game_data["loser"][1]
+            opponent_points_change = f"(-{self.__game_data['loser'][2]})"
         else:
             result_text = "DEFEAT"
             result_color = "#db1102"
-            player_points_change = f"(-{self.__game_data['points_change']})"
-            opponent_points_change = f"(+{self.__game_data['points_change']})"
+            player_points_change = f"(-{self.__game_data['loser'][2]})"
+            player_points = self.__game_data["loser"][1]
+            opponent_nickname = self.__game_data["winner"][0]
+            opponent_points = self.__game_data["winner"][1]
+            opponent_points_change = f"(+{self.__game_data['winner'][2]})"
 
-        player_points = self.__game_data[self.client_config["nickname"]][0]
-        players = [nickname for nickname in self.__game_data if nickname != "points_change"]
-        opponent_nickname = next(nick for nick in players if nick != self.client_config["nickname"])
-        opponent_points = self.__game_data[opponent_nickname][0]
         opponent_color = "#02ba09" if result_color == "#db1102" else "#db1102"
 
         RESULT_TEXT = self.get_font(int(self.font_size[0] * 1.5)).render(result_text, True, result_color)
