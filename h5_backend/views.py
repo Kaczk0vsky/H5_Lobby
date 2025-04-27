@@ -545,10 +545,15 @@ class HandleMatchReport(View):
                 game.castle_1 = castle
                 if game_won:
                     game.who_won = player
+                else:
+                    game.who_won = game.player_2
             else:
                 game.castle_2 = castle
                 if game_won:
                     game.who_won = player
+                else:
+                    game_won = game.player_1
+
             player_won = game.who_won
             player_lost = game.player_2 if game.who_won == game.player_1 else game.player_1
 
