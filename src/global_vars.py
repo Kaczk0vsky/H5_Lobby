@@ -6,12 +6,8 @@ load_dotenv()
 
 bg_sound_volume = 0.2
 resolution_choices = [
-    "640x480",
-    "800x600",
     "1280x720",
-    "1600x1200",
     "1920x1080",
-    "1920x1440",
     "2560x1440",
     "Fullscreen",
 ]

@@ -77,7 +77,7 @@ class OptionBox:
             )
             pygame.draw.rect(screen, (0, 0, 0), outer_rect, 2)
 
-    def update(self, event_list: list) -> int:
+    def update(self, event: pygame.event) -> int:
         mpos = pygame.mouse.get_pos()
         self._menu_active = self.rect.collidepoint(mpos)
 
@@ -92,12 +92,11 @@ class OptionBox:
         if not self._menu_active and self._active_option == -1:
             self._draw_menu = False
 
-        for event in event_list:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if self._menu_active:
-                    self._draw_menu = not self._draw_menu
-                elif self._draw_menu and self._active_option >= 0:
-                    self.selected = self._active_option
-                    self._draw_menu = False
-                    return self._active_option
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self._menu_active:
+                self._draw_menu = not self._draw_menu
+            elif self._draw_menu and self._active_option >= 0:
+                self.selected = self._active_option
+                self._draw_menu = False
+                return self._active_option
         return -1

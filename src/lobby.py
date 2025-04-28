@@ -24,6 +24,7 @@ from widgets.button import Button
 from widgets.option_box import OptionBox
 from widgets.progress_bar import ProgressBar
 from widgets.users_list import UsersList
+from widgets.check_box import CheckBox
 
 
 class H5_Lobby(BasicWindow):
@@ -60,6 +61,8 @@ class H5_Lobby(BasicWindow):
     __queue_status = False
     __update_queue_status = False
     __update_game_data = False
+    __options_status = False
+    __update_options_status = False
     __elapsed_time = None
     __queue_channel = None
     __error_msg = None
@@ -86,10 +89,7 @@ class H5_Lobby(BasicWindow):
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.create_lobby_elements()
 
-        self.SCREEN = pygame.display.set_mode(
-            (self.config["screen_width"], self.config["screen_hight"]),
-            pygame.NOFRAME,
-        )
+        self.SCREEN = pygame.display.set_mode((self.config["screen_width"], self.config["screen_hight"]))
 
     def main_menu(self):
         def set_queue_vars(state: bool = False) -> None:
@@ -122,6 +122,10 @@ class H5_Lobby(BasicWindow):
         self.player_list_dims = (
             self.config["screen_width"] / 4.7,
             self.config["screen_hight"] / 1.1,
+        )
+        self.options_position = (
+            self.config["screen_width"] / 1.7,
+            self.config["screen_hight"] / 9.9,
         )
 
         self.BG = pygame.transform.scale(
@@ -231,6 +235,10 @@ class H5_Lobby(BasicWindow):
         )
         self.CHECKBOX = pygame.transform.scale(
             self.CHECKBOX,
+            (40, 40),
+        )
+        self.CHECKBOX_CHECKED = pygame.transform.scale(
+            self.CHECKBOX_CHECKED,
             (40, 40),
         )
         FIND_GAME_BUTTON = Button(
@@ -465,6 +473,33 @@ class H5_Lobby(BasicWindow):
                 self.SCREEN.blit(OPPONENT_POINTS, OPPONENT_POINTS_RECT)
                 SUBMIT_REPORT.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
+            if self.__options_status:
+                if self.__update_options_status:
+                    set_all_buttons_active(is_active=False)
+                    (
+                        RESOLUTION_TEXT,
+                        RESOLUTION_RECT,
+                        RESOLUTION_CHOICES,
+                        RANKED_TEXT,
+                        RANKED_RECT,
+                        CHECKBOX_RANKED,
+                        BACK_SETTINGS,
+                    ) = self.options_window()
+                    self.__update_options_status = False
+
+                self.SCREEN.blit(
+                    self.SMALLER_WINDOWS_BG,
+                    (
+                        self.options_position[0] * transformation_factors[self.transformation_option][0],
+                        self.options_position[1] * transformation_factors[self.transformation_option][1],
+                    ),
+                )
+                self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
+                self.SCREEN.blit(RANKED_TEXT, RANKED_RECT)
+                CHECKBOX_RANKED.update(self.SCREEN)
+                BACK_SETTINGS.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                RESOLUTION_CHOICES.draw(self.SCREEN)
+
             for event in pygame.event.get():
                 USERS_LIST.event(event)
                 if event.type == pygame.QUIT:
@@ -487,7 +522,9 @@ class H5_Lobby(BasicWindow):
                     if PLAYER_PROFILE.check_for_input(MENU_MOUSE_POS):
                         pass
                     if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):
-                        self.options_window()
+                        self.__update_options_status = True
+                        self.__options_status = True
+                        continue
                     if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                         if self.__queue_status:
                             self.remove_from_queue(is_accepted=False)
@@ -520,6 +557,42 @@ class H5_Lobby(BasicWindow):
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
                                 self.__window_overlay = False
                                 self.__error_msg = None
+
+                    if self.__options_status:
+                        selected_option = RESOLUTION_CHOICES.update(event)
+                        if selected_option != -1:
+                            resolution = resolution_choices[selected_option]
+                            if "fullscreen" in resolution.lower():
+                                monitor_resolution = pygame.display.Info()
+                                self.SCREEN = pygame.display.set_mode(
+                                    (monitor_resolution.current_w, monitor_resolution.current_h),
+                                    pygame.FULLSCREEN,
+                                )
+                            else:
+                                self.transformation_option = resolution
+                                resolutions = resolution.split("x")
+                                self.config["screen_width"] = int(resolutions[0])
+                                self.config["screen_hight"] = int(resolutions[1])
+                                # TODO: add rescale function
+                                break
+                                self.SCREEN = pygame.display.set_mode((self.config["screen_width"], self.config["screen_hight"]))
+                                self.BG = pygame.image.load(os.path.join(os.getcwd(), "resources/background/background.png"))
+                                self.BG = pygame.transform.scale(
+                                    self.BG,
+                                    (self.config["screen_width"], self.config["screen_hight"]),
+                                )
+
+                            with open(os.path.join(os.getcwd(), "settings.toml"), "r") as f:
+                                data = toml.load(f)
+                                data["resolution"] = self.config
+
+                            with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
+                                toml.dump(data, f)
+                        if CHECKBOX_RANKED.check_for_input(MENU_MOUSE_POS):
+                            pass
+                        if BACK_SETTINGS.check_for_input(MENU_MOUSE_POS):
+                            set_all_buttons_active(is_active=True)
+                            self.__options_status = False
 
             if self.__opponent_accepted and self.__player_accepted:
                 pygame.mixer.Channel(self.__queue_channel).stop()
@@ -656,7 +729,10 @@ class H5_Lobby(BasicWindow):
             self.config["screen_width"] // 3.75,
             self.config["screen_hight"] // 2.75,
         )
-        dims = (640, 360)
+        dims = (
+            640 * transformation_factors[self.transformation_option][0],
+            360 * transformation_factors[self.transformation_option][1],
+        )
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
 
         if self.__game_data["is_won"]:
@@ -724,30 +800,20 @@ class H5_Lobby(BasicWindow):
         )
 
     def options_window(self):
-        RESOLUTION_TEXT = self.get_font(self.font_size[1]).render("Select resolution", True, "#d7fcd4")
-        RESOLUTION_RECT = RESOLUTION_TEXT.get_rect(
-            center=(
-                130 * (transformation_factors[self.transformation_option][0]),
-                300 * transformation_factors[self.transformation_option][1],
-            ),
+        overlay_width, overlay_height = (
+            self.config["screen_width"] // 5,
+            self.config["screen_hight"] // 3.5,
         )
-        BACK_BUTTON = Button(
-            image=self.BUTTON,
-            image_highlited=self.BUTTON_HIGHLIGHTED,
-            position=(
-                290 * (transformation_factors[self.transformation_option][0]),
-                800 * (transformation_factors[self.transformation_option][1]),
-            ),
-            text_input="Back",
-            font=self.get_font(self.font_size[1]),
-            base_color=self.text_color,
-            hovering_color=self.hovering_color,
+        dims = (
+            self.options_position[0] * transformation_factors[self.transformation_option][0],
+            self.options_position[1] * transformation_factors[self.transformation_option][1],
         )
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
+
+        RESOLUTION_TEXT = self.get_font(self.font_size[1]).render("Resolution:", True, self.text_color)
+        RESOLUTION_RECT = RESOLUTION_TEXT.get_rect(center=(dims[0] + overlay_width * 0.3, dims[1] + overlay_height * 0.2))
         RESOLUTION_CHOICES = OptionBox(
-            position=(
-                (self.SCREEN.get_width() / 6.5),
-                (self.SCREEN.get_height() / 3.9),
-            ),
+            position=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.15),
             dimensions=(160, 40),
             color=pygame.Color("gray"),
             highlight_color=pygame.Color("deepskyblue"),
@@ -756,56 +822,36 @@ class H5_Lobby(BasicWindow):
             selected=resolution_choices.index(self.transformation_option),
         )
 
-        while True:
-            self.SCREEN.blit(self.BG, (0, 0))
-            self.cursor.update()
-            OPTIONS_MOUSE_POS = pygame.mouse.get_pos()
+        RANKED_TEXT = self.get_font(self.font_size[1]).render("Play ranked:", True, self.text_color)
+        RANKED_RECT = RANKED_TEXT.get_rect(center=(dims[0] + overlay_width * 0.3, dims[1] + overlay_height * 0.4))
+        CHECKBOX_RANKED = CheckBox(
+            position=(dims[0] + overlay_width * 0.7, dims[1] + overlay_height * 0.4),
+            image=self.CHECKBOX,
+            image_checked=self.CHECKBOX_CHECKED,
+            checked=self.client_config["remember_password"],  # change this
+        )
 
-            self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
+        BACK_SETTINGS = Button(
+            image=self.CANCEL_BUTTON,
+            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
+            image_inactive=self.CANCEL_BUTTON_INACTIVE,
+            position=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.8),
+            text_input="Back",
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
+        )
 
-            BACK_BUTTON.handle_button(self.SCREEN, OPTIONS_MOUSE_POS)
-
-            event_list = pygame.event.get()
-            for event in event_list:
-                if event.type == pygame.QUIT:
-                    self.quit_game_handling(self.crsf_token, self.session)
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if BACK_BUTTON.check_for_input(OPTIONS_MOUSE_POS):
-                        self.main_menu()
-
-            selected_option = RESOLUTION_CHOICES.update(event_list)
-            if selected_option != -1:
-                resolution = resolution_choices[selected_option]
-                if "fullscreen" in resolution.lower():
-                    monitor_resolution = pygame.display.Info()
-                    self.SCREEN = pygame.display.set_mode(
-                        (monitor_resolution.current_w, monitor_resolution.current_h),
-                        pygame.FULLSCREEN,
-                    )
-                else:
-                    self.transformation_option = resolution
-                    resolutions = resolution.split("x")
-                    self.config["screen_width"] = int(resolutions[0])
-                    self.config["screen_hight"] = int(resolutions[1])
-                    self.SCREEN = pygame.display.set_mode(
-                        (self.config["screen_width"], self.config["screen_hight"]),
-                        pygame.NOFRAME,
-                    )
-                    self.BG = pygame.image.load(os.path.join(os.getcwd(), "resources/background/background.png"))
-                    self.BG = pygame.transform.scale(
-                        self.BG,
-                        (self.config["screen_width"], self.config["screen_hight"]),
-                    )
-
-                with open(os.path.join(os.getcwd(), "settings.toml"), "r") as f:
-                    data = toml.load(f)
-                    data["resolution"] = self.config
-
-                with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
-                    toml.dump(data, f)
-
-            RESOLUTION_CHOICES.draw(self.SCREEN)
-            pygame.display.update()
+        return (
+            RESOLUTION_TEXT,
+            RESOLUTION_RECT,
+            RESOLUTION_CHOICES,
+            RANKED_TEXT,
+            RANKED_RECT,
+            CHECKBOX_RANKED,
+            BACK_SETTINGS,
+        )
 
     def add_to_queue(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_ADD"]}/"

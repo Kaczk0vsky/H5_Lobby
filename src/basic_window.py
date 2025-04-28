@@ -101,6 +101,7 @@ class BasicWindow:
         self.QUIT = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/close_dark.png"))
         self.QUIT_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/close_highlighted.png"))
         self.CHECKBOX = pygame.image.load(os.path.join(os.getcwd(), "resources/checkbox/check_box.png"))
+        self.CHECKBOX_CHECKED = pygame.image.load(os.path.join(os.getcwd(), "resources/checkbox/check_box_checked.png"))
 
     def create_login_elements(self) -> None:
         self.create_universal_elements()
@@ -110,7 +111,6 @@ class BasicWindow:
         self.UNCHECK_MARK = pygame.image.load(os.path.join(os.getcwd(), "resources/symbols/uncheck.png"))
         self.TEXT_INPUT = pygame.image.load(os.path.join(os.getcwd(), "resources/main_menu/text_input.png"))
         self.TEXT_BG = pygame.image.load(os.path.join(os.getcwd(), "resources/background/text_inputs_bg.png"))
-        self.CHECKBOX_CHECKED = pygame.image.load(os.path.join(os.getcwd(), "resources/checkbox/check_box_checked.png"))
 
     def create_lobby_elements(self) -> None:
         self.create_universal_elements()
