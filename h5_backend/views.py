@@ -602,3 +602,52 @@ class HandleMatchReport(View):
         except Exception as e:
             logger.error(f"Handling creating match report error: {e}")
             return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
+
+
+@method_decorator(csrf_protect, name="dispatch")
+@method_decorator(ratelimit(key="user_or_ip", rate="5/m", method=["GET", "POST"], block=True), name="dispatch")
+class GetProfileInformation(View):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _parse_request_data(self, request):
+        try:
+            serializer = UserSerializer(data=request.GET, required_fields=["nickname"])
+            if not serializer.is_valid():
+                return (None, JsonResponse({"success": False, "errors": serializer.errors}, status=400))
+
+            nickname = serializer.validated_data["nickname"]
+
+            return nickname, None
+
+        except json.JSONDecodeError:
+            return (None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400))
+
+    def get(self, request, *args, **kwargs):
+        try:
+            nickname, parse_error = self._parse_request_data(request)
+            if parse_error:
+                return parse_error
+
+            try:
+                player = Player.objects.get(username=nickname)
+            except Player.DoesNotExist:
+                return JsonResponse({"success": False, "error": "User not found"}, status=404)
+
+            games_won_ranked = Game.objects.filter(Q(player_1=player) | Q(player_2=player), who_won=player, is_ranked=True).count()
+            games_won_unranked = Game.objects.filter(Q(player_1=player) | Q(player_2=player), who_won=player, is_ranked=False).count()
+            total_rankeds_won = Game.objects.filter(Q(player_1=player) | Q(player_2=player), is_ranked=True).count()
+            total_unrankeds_won = Game.objects.filter(Q(player_1=player) | Q(player_2=player), is_ranked=False).count()
+
+            player_information = {
+                "ranking_points": player.ranking_points,
+                "ranking_position": player.ranking_position,
+                "ranked_games": [games_won_ranked, total_rankeds_won - games_won_ranked],
+                "unranked_games": [games_won_unranked, total_unrankeds_won - games_won_unranked],
+                "total_games": total_rankeds_won + total_unrankeds_won,
+            }
+            return JsonResponse({"success": True, "player_information": player_information})
+
+        except Exception as e:
+            logger.error(f"Password reset link error: {e}")
+            return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)

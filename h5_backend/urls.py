@@ -23,4 +23,5 @@ urlpatterns = [
     path("check_if_oponnent_accepted/", views.CheckIfOpponentAccepted.as_view(), name="check_if_oponnent_accepted"),
     path("get_users_online/", views.UpdateUsersList.as_view(), name="update_users_list"),
     path("create_game_report/", views.HandleMatchReport.as_view(), name="handle_match_report"),
+    path("get_profile/", views.GetProfileInformation.as_view(), name="get_profile"),
 ]

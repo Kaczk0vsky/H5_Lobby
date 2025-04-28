@@ -368,6 +368,7 @@ class H5_Lobby(BasicWindow):
             box=self.CHECKBOX,
         )
         self.refresh_friends_list(USERS_LIST)
+        self.get_user_profile()
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -789,17 +790,20 @@ class H5_Lobby(BasicWindow):
         )
 
     def profile_window(self):
+        self.__profile_data = "s"
         NICKNAME_TEXT = self.get_font(int(self.font_size[0] * 1.2)).render(self.client_config["nickname"], True, self.hovering_color)
         NICKNAME_RECT = NICKNAME_TEXT.get_rect(
             center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.175)
         )
         NICKNAME_LINE = (self.profile_position[0] + self.profile_dims[0] * 0.1, self.profile_position[1] + self.profile_dims[1] * 0.25)
-        POINTS_TEXT = self.get_font(int(self.font_size[1])).render("2137 PKT", True, self.text_color)
+        POINTS_TEXT = self.get_font(int(self.font_size[1])).render(f"{self.__profile_data["ranking_points"]} PKT", True, self.text_color)
         POINTS_RECT = POINTS_TEXT.get_rect(
             center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.325)
         )
         POINTS_LINE = (self.profile_position[0] + self.profile_dims[0] * 0.1, self.profile_position[1] + self.profile_dims[1] * 0.375)
-        RANKING_POSITION_TEXT = self.get_font(int(self.font_size[1])).render("Ranking position: 1", True, self.text_color)
+        RANKING_POSITION_TEXT = self.get_font(int(self.font_size[1])).render(
+            f"Ranking position: {self.__profile_data["ranking_position"]}", True, self.text_color
+        )
         RANKING_POSITION_RECT = RANKING_POSITION_TEXT.get_rect(
             center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.425)
         )
@@ -809,15 +813,19 @@ class H5_Lobby(BasicWindow):
         GAMES_RECT = GAMES_TEXT.get_rect(
             center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.55)
         )
-        RANKED_TEXT = self.get_font(int(self.font_size[1])).render("Ranked: 25/42", True, self.text_color)
+        RANKED_TEXT = self.get_font(int(self.font_size[1])).render(
+            f"Ranked: {self.__profile_data["ranked_games"][0]}/{self.__profile_data["ranked_games"][1]}", True, self.text_color
+        )
         RANKED_RECT = RANKED_TEXT.get_rect(
             center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.65)
         )
-        UNRANKED_TEXT = self.get_font(int(self.font_size[1])).render("Unranked: 12/6", True, self.text_color)
+        UNRANKED_TEXT = self.get_font(int(self.font_size[1])).render(
+            f"Unranked: {self.__profile_data["unranked_games"][0]}/{self.__profile_data["unranked_games"][1]}", True, self.text_color
+        )
         UNRANKED_RECT = UNRANKED_TEXT.get_rect(
             center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.725)
         )
-        TOTAL_TEXT = self.get_font(int(self.font_size[1])).render("Total Games: 171", True, self.text_color)
+        TOTAL_TEXT = self.get_font(int(self.font_size[1])).render(f"Total Games: {self.__profile_data["total_games"]}", True, self.text_color)
         TOTAL_RECT = TOTAL_TEXT.get_rect(
             center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.8)
         )
@@ -1185,6 +1193,45 @@ class H5_Lobby(BasicWindow):
                 self.__game_data = response.json().get("game_data")
                 self.__game_data["is_won"] = is_won
                 self.__update_game_data = True
+                self.__connection_timer = None
+                return True
+
+            elif response.status_code == 400:
+                self.__window_overlay = True
+                self.__connection_timer = None
+                return response.json().get("error", "Unknown error occurred")
+
+        except requests.exceptions.ConnectTimeout:
+            self.__window_overlay = True
+            return "Error occured while trying to connect to server!"
+
+        except requests.exceptions.ConnectionError:
+            self.__window_overlay = True
+            return "To many tries, try again later!"
+
+        except:
+            self.__window_overlay = True
+            return "Unknown error occured..."
+
+    @run_in_thread
+    def get_user_profile(self):
+        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_PROFILE']}/"
+        if not self.crsf_token:
+            self.__window_overlay = True
+            return "CRSF Token is not valid"
+
+        user_data = {"nickname": self.client_config["nickname"]}
+        headers = {
+            "Referer": "https://h5-tavern.pl/",
+            "X-CSRFToken": self.crsf_token,
+            "Content-Type": "application/json",
+        }
+
+        self.__connection_timer = time.time()
+        try:
+            response = self.session.get(url, params=user_data, headers=headers)
+            if response.status_code == 200:
+                self.__profile_data = response.json().get("player_information")
                 self.__connection_timer = None
                 return True
 
