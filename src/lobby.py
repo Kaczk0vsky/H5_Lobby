@@ -790,7 +790,6 @@ class H5_Lobby(BasicWindow):
         )
 
     def profile_window(self):
-        self.__profile_data = "s"
         NICKNAME_TEXT = self.get_font(int(self.font_size[0] * 1.2)).render(self.client_config["nickname"], True, self.hovering_color)
         NICKNAME_RECT = NICKNAME_TEXT.get_rect(
             center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.175)
@@ -1273,6 +1272,8 @@ class H5_Lobby(BasicWindow):
         if foreground_thread_id != current_thread_id:
             ctypes.windll.user32.AttachThreadInput(current_thread_id, foreground_thread_id, False)
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
+        # Reload profile information
+        self.get_user_profile()
 
     def run_game(self):
         self.main_menu()
