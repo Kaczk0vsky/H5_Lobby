@@ -102,6 +102,7 @@ class BasicWindow:
         self.QUIT_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/close_highlighted.png"))
         self.CHECKBOX = pygame.image.load(os.path.join(os.getcwd(), "resources/checkbox/check_box.png"))
         self.CHECKBOX_CHECKED = pygame.image.load(os.path.join(os.getcwd(), "resources/checkbox/check_box_checked.png"))
+        self.LINE = pygame.image.load(os.path.join(os.getcwd(), "resources/background/line.png"))
 
     def create_login_elements(self) -> None:
         self.create_universal_elements()
@@ -142,7 +143,7 @@ class BasicWindow:
         self.PROGRESS_BAR_EDGE = pygame.image.load(os.path.join(os.getcwd(), "resources/progress_bar/progress_bar_edge.png"))
         self.SCROLL = pygame.image.load(os.path.join(os.getcwd(), "resources/background/scroll.png"))
         self.SCROLL_BAR = pygame.image.load(os.path.join(os.getcwd(), "resources/background/scroll_bar.png"))
-        self.LINE = pygame.image.load(os.path.join(os.getcwd(), "resources/background/line.png"))
+        self.PROFILE_FRAME = pygame.image.load(os.path.join(os.getcwd(), "resources/profile/statistics_bg.png"))
 
     def error_window(self, text: str, dimensions: tuple[int, int]) -> tuple:
         overlay_width, overlay_height = dimensions

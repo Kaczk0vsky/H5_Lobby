@@ -61,6 +61,8 @@ class H5_Lobby(BasicWindow):
     __queue_status = False
     __update_queue_status = False
     __update_game_data = False
+    __profile_status = False
+    __update_profile_status = False
     __options_status = False
     __update_options_status = False
     __elapsed_time = None
@@ -123,6 +125,14 @@ class H5_Lobby(BasicWindow):
             self.config["screen_width"] / 4.7,
             self.config["screen_hight"] / 1.1,
         )
+        self.profile_dims = (
+            480 * (transformation_factors[self.transformation_option][0]),
+            320 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.profile_position = (
+            (self.SCREEN.get_width() - self.profile_dims[0]) * 0.02 * (transformation_factors[self.transformation_option][0]),
+            (self.SCREEN.get_height() - self.profile_dims[1]) * 0.325 * (transformation_factors[self.transformation_option][1]),
+        )
         self.options_position = (
             self.config["screen_width"] / 1.7,
             self.config["screen_hight"] / 9.9,
@@ -169,13 +179,21 @@ class H5_Lobby(BasicWindow):
             self.ICON_SQUARE_HIGHLIGHTED,
             self.top_elements_dims,
         )
-        self.QUIT = pygame.transform.scale(
+        self.QUIT_LOBBY = pygame.transform.scale(
             self.QUIT,
             self.top_elements_dims,
         )
-        self.QUIT_HIGHLIGHTED = pygame.transform.scale(
+        self.QUIT_LOBBY_HIGHLIGHTED = pygame.transform.scale(
             self.QUIT_HIGHLIGHTED,
             self.top_elements_dims,
+        )
+        self.QUIT_PROFILE = pygame.transform.scale(
+            self.QUIT,
+            (40, 40),
+        )
+        self.QUIT_PROFILE_HIGHLIGHTED = pygame.transform.scale(
+            self.QUIT_HIGHLIGHTED,
+            (40, 40),
         )
         self.BUTTON = pygame.transform.scale(
             self.BUTTON,
@@ -237,10 +255,9 @@ class H5_Lobby(BasicWindow):
             self.CHECKBOX,
             (40, 40),
         )
-        self.CHECKBOX_CHECKED = pygame.transform.scale(
-            self.CHECKBOX_CHECKED,
-            (40, 40),
-        )
+        self.PROFILE_FRAME = pygame.transform.scale(self.PROFILE_FRAME, (self.profile_dims[0], self.profile_dims[1]))
+        self.PROFILE_LINE = pygame.transform.scale(self.LINE, (self.profile_dims[0] * 0.8, 2))
+
         FIND_GAME_BUTTON = Button(
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
@@ -324,8 +341,8 @@ class H5_Lobby(BasicWindow):
             inactive_color=self.inactive_color,
         )
         QUIT_BUTTON = Button(
-            image=self.QUIT,
-            image_highlited=self.QUIT_HIGHLIGHTED,
+            image=self.QUIT_LOBBY,
+            image_highlited=self.QUIT_LOBBY_HIGHLIGHTED,
             position=(
                 1870 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -473,6 +490,46 @@ class H5_Lobby(BasicWindow):
                 self.SCREEN.blit(OPPONENT_POINTS, OPPONENT_POINTS_RECT)
                 SUBMIT_REPORT.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
+            if self.__profile_status:
+                if self.__update_profile_status:
+                    (
+                        NICKNAME_TEXT,
+                        NICKNAME_RECT,
+                        NICKNAME_LINE,
+                        POINTS_TEXT,
+                        POINTS_RECT,
+                        POINTS_LINE,
+                        RANKING_POSITION_TEXT,
+                        RANKING_POSITION_RECT,
+                        RANKING_POSITION_LINE,
+                        GAMES_TEXT,
+                        GAMES_RECT,
+                        RANKED_TEXT,
+                        RANKED_RECT,
+                        UNRANKED_TEXT,
+                        UNRANKED_RECT,
+                        TOTAL_TEXT,
+                        TOTAL_RECT,
+                        CLOSE_BUTTON,
+                    ) = self.profile_window()
+                    self.__update_profile_status = False
+
+                self.SCREEN.blit(
+                    self.PROFILE_FRAME,
+                    (self.profile_position[0], self.profile_position[1]),
+                )
+                self.SCREEN.blit(NICKNAME_TEXT, NICKNAME_RECT)
+                self.SCREEN.blit(self.PROFILE_LINE, NICKNAME_LINE)
+                self.SCREEN.blit(POINTS_TEXT, POINTS_RECT)
+                self.SCREEN.blit(self.PROFILE_LINE, POINTS_LINE)
+                self.SCREEN.blit(RANKING_POSITION_TEXT, RANKING_POSITION_RECT)
+                self.SCREEN.blit(self.PROFILE_LINE, RANKING_POSITION_LINE)
+                self.SCREEN.blit(GAMES_TEXT, GAMES_RECT)
+                self.SCREEN.blit(RANKED_TEXT, RANKED_RECT)
+                self.SCREEN.blit(UNRANKED_TEXT, UNRANKED_RECT)
+                self.SCREEN.blit(TOTAL_TEXT, TOTAL_RECT)
+                CLOSE_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+
             if self.__options_status:
                 if self.__update_options_status:
                     set_all_buttons_active(is_active=False)
@@ -518,7 +575,9 @@ class H5_Lobby(BasicWindow):
                     if NEWS.check_for_input(MENU_MOUSE_POS):
                         pass
                     if MY_PROFILE.check_for_input(MENU_MOUSE_POS):
-                        pass
+                        self.__update_profile_status = True
+                        self.__profile_status = True
+                        continue
                     if PLAYER_PROFILE.check_for_input(MENU_MOUSE_POS):
                         pass
                     if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -551,6 +610,11 @@ class H5_Lobby(BasicWindow):
                             set_all_buttons_active(is_active=True)
                             self.__update_game_data = False
                             self.__game_data = None
+
+                    if self.__profile_status:
+                        if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
+                            self.__update_profile_status = False
+                            self.__profile_status = False
 
                     if self.__window_overlay:
                         if self.__error_msg:
@@ -722,6 +786,69 @@ class H5_Lobby(BasicWindow):
             OPONNENT_TEXT,
             OPONNENT_RECT,
             PROGRESS_BAR,
+        )
+
+    def profile_window(self):
+        NICKNAME_TEXT = self.get_font(int(self.font_size[0] * 1.2)).render(self.client_config["nickname"], True, self.hovering_color)
+        NICKNAME_RECT = NICKNAME_TEXT.get_rect(
+            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.175)
+        )
+        NICKNAME_LINE = (self.profile_position[0] + self.profile_dims[0] * 0.1, self.profile_position[1] + self.profile_dims[1] * 0.25)
+        POINTS_TEXT = self.get_font(int(self.font_size[1])).render("2137 PKT", True, self.text_color)
+        POINTS_RECT = POINTS_TEXT.get_rect(
+            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.325)
+        )
+        POINTS_LINE = (self.profile_position[0] + self.profile_dims[0] * 0.1, self.profile_position[1] + self.profile_dims[1] * 0.375)
+        RANKING_POSITION_TEXT = self.get_font(int(self.font_size[1])).render("Ranking position: 1", True, self.text_color)
+        RANKING_POSITION_RECT = RANKING_POSITION_TEXT.get_rect(
+            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.425)
+        )
+        RANKING_POSITION_LINE = (self.profile_position[0] + self.profile_dims[0] * 0.1, self.profile_position[1] + self.profile_dims[1] * 0.475)
+
+        GAMES_TEXT = self.get_font(int(self.font_size[1])).render("Games played:", True, self.text_color)
+        GAMES_RECT = GAMES_TEXT.get_rect(
+            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.55)
+        )
+        RANKED_TEXT = self.get_font(int(self.font_size[1])).render("Ranked: 25/42", True, self.text_color)
+        RANKED_RECT = RANKED_TEXT.get_rect(
+            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.65)
+        )
+        UNRANKED_TEXT = self.get_font(int(self.font_size[1])).render("Unranked: 12/6", True, self.text_color)
+        UNRANKED_RECT = UNRANKED_TEXT.get_rect(
+            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.725)
+        )
+        TOTAL_TEXT = self.get_font(int(self.font_size[1])).render("Total Games: 171", True, self.text_color)
+        TOTAL_RECT = TOTAL_TEXT.get_rect(
+            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.8)
+        )
+        CLOSE_BUTTON = Button(
+            image=self.QUIT_PROFILE,
+            image_highlited=self.QUIT_PROFILE_HIGHLIGHTED,
+            position=(self.profile_position[0] + self.profile_dims[0] * 0.875, self.profile_position[1] + self.profile_dims[1] * 0.125),
+            font=self.get_font(self.font_size[1]),
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+
+        return (
+            NICKNAME_TEXT,
+            NICKNAME_RECT,
+            NICKNAME_LINE,
+            POINTS_TEXT,
+            POINTS_RECT,
+            POINTS_LINE,
+            RANKING_POSITION_TEXT,
+            RANKING_POSITION_RECT,
+            RANKING_POSITION_LINE,
+            GAMES_TEXT,
+            GAMES_RECT,
+            RANKED_TEXT,
+            RANKED_RECT,
+            UNRANKED_TEXT,
+            UNRANKED_RECT,
+            TOTAL_TEXT,
+            TOTAL_RECT,
+            CLOSE_BUTTON,
         )
 
     def report_window(self):
