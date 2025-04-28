@@ -630,7 +630,7 @@ class GetProfileInformation(View):
                 return parse_error
 
             try:
-                player = Player.objects.get(username=nickname)
+                player = Player.objects.get(nickname=nickname)
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "User not found"}, status=404)
 

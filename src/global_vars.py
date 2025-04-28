@@ -45,4 +45,5 @@ env_dict = {
     "PATH_CHECK_OPONNENT": os.getenv("PATH_CHECK_OPONNENT"),
     "PATH_TO_USERS_LIST": os.getenv("PATH_TO_USERS_LIST"),
     "PATH_TO_REPORT": os.getenv("PATH_TO_REPORT"),
+    "PATH_TO_PROFILE": os.getenv("PATH_TO_PROFILE"),
 }
