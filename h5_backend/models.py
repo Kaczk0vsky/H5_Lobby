@@ -80,7 +80,6 @@ class Game(models.Model):
     castle_1 = models.CharField(
         max_length=20,
         choices=CASTLE_TYPE_CHOICES,
-        default="heaven",
         editable=True,
         null=True,
         blank=True,
@@ -88,7 +87,6 @@ class Game(models.Model):
     castle_2 = models.CharField(
         max_length=20,
         choices=CASTLE_TYPE_CHOICES,
-        default="heaven",
         editable=True,
         null=True,
         blank=True,
