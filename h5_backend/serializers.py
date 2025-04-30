@@ -11,7 +11,7 @@ class UserSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, required=False)
     is_accepted = serializers.BooleanField(required=False)
     is_won = serializers.BooleanField(required=False)
-    castle = serializers.CharField(required=False)
+    castle = serializers.CharField(required=False, allow_null=True, allow_blank=True)
 
     def __init__(self, *args, required_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
