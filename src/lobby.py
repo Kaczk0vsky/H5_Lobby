@@ -134,6 +134,10 @@ class H5_Lobby(BasicWindow):
             (self.SCREEN.get_height() - self.frame_dims[1]) * 0.85 * (transformation_factors[self.transformation_option][1]),
         )
         self.quit_frame_dims = (
+            60 * (transformation_factors[self.transformation_option][0]),
+            60 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.chackbox_dims = (
             40 * (transformation_factors[self.transformation_option][0]),
             40 * (transformation_factors[self.transformation_option][1]),
         )
@@ -270,14 +274,15 @@ class H5_Lobby(BasicWindow):
         )
         self.CHECKBOX = pygame.transform.scale(
             self.CHECKBOX,
-            self.quit_frame_dims,
+            self.chackbox_dims,
         )
         self.CHECKBOX_CHECKED = pygame.transform.scale(
             self.CHECKBOX_CHECKED,
-            self.quit_frame_dims,
+            self.chackbox_dims,
         )
         self.LEFT_FRAME = pygame.transform.scale(self.LEFT_FRAME, self.frame_dims)
-        self.PROFILE_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 2))
+        self.NARROW_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 3))
+        self.WIDE_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 5))
 
         FIND_GAME_BUTTON = Button(
             image=self.BUTTON,
@@ -504,6 +509,12 @@ class H5_Lobby(BasicWindow):
                 self.SCREEN.blit(OPPONENT_POINTS, OPPONENT_POINTS_RECT)
                 SUBMIT_REPORT.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
+            if self.__profile_status or self.__options_status:
+                self.SCREEN.blit(
+                    self.LEFT_FRAME,
+                    (self.frame_position[0], self.frame_position[1]),
+                )
+
             if self.__profile_status:
                 if self.__update_profile_status:
                     (
@@ -516,14 +527,32 @@ class H5_Lobby(BasicWindow):
                         RANKING_POSITION_TEXT,
                         RANKING_POSITION_RECT,
                         RANKING_POSITION_LINE,
-                        GAMES_TEXT,
-                        GAMES_RECT,
-                        RANKED_TEXT,
-                        RANKED_RECT,
-                        UNRANKED_TEXT,
-                        UNRANKED_RECT,
-                        TOTAL_TEXT,
-                        TOTAL_RECT,
+                        RANKED_STATICTICS_TEXT,
+                        RANKED_STATISTICS_RECT,
+                        RANKED_GAMES_PLAYED_TEXT,
+                        RANKED_GAMES_PLAYED_RECT,
+                        RANKED_WINS_LOSES_TEXT,
+                        RANKED_WINS_LOSES_RECT,
+                        RANKED_WINARTIO_TEXT,
+                        RANKED_WINRATIO_RECT,
+                        RANKED_POSITION_LINE,
+                        UNRANKED_STATICTICS_TEXT,
+                        UNRANKED_STATISTICS_RECT,
+                        UNRANKED_GAMES_PLAYED_TEXT,
+                        UNRANKED_GAMES_PLAYED_RECT,
+                        UNRANKED_WINS_LOSES_TEXT,
+                        UNRANKED_WINS_LOSES_RECT,
+                        UNRANKED_WINARTIO_TEXT,
+                        UNRANKED_WINRATIO_RECT,
+                        UNRANKED_POSITION_LINE,
+                        TOTAL_STATICTICS_TEXT,
+                        TOTAL_STATISTICS_RECT,
+                        TOTAL_GAMES_PLAYED_TEXT,
+                        TOTAL_GAMES_PLAYED_RECT,
+                        TOTAL_WINS_LOSES_TEXT,
+                        TOTAL_WINS_LOSES_RECT,
+                        TOTAL_WINARTIO_TEXT,
+                        TOTAL_WINRATIO_RECT,
                         CLOSE_BUTTON,
                     ) = self.profile_window()
                     self.__update_profile_status = False
@@ -533,20 +562,29 @@ class H5_Lobby(BasicWindow):
                     (self.frame_position[0], self.frame_position[1]),
                 )
                 self.SCREEN.blit(NICKNAME_TEXT, NICKNAME_RECT)
-                self.SCREEN.blit(self.PROFILE_LINE, NICKNAME_LINE)
+                self.SCREEN.blit(self.WIDE_LINE, NICKNAME_LINE)
                 self.SCREEN.blit(POINTS_TEXT, POINTS_RECT)
-                self.SCREEN.blit(self.PROFILE_LINE, POINTS_LINE)
+                self.SCREEN.blit(self.NARROW_LINE, POINTS_LINE)
                 self.SCREEN.blit(RANKING_POSITION_TEXT, RANKING_POSITION_RECT)
-                self.SCREEN.blit(self.PROFILE_LINE, RANKING_POSITION_LINE)
-                self.SCREEN.blit(GAMES_TEXT, GAMES_RECT)
-                self.SCREEN.blit(RANKED_TEXT, RANKED_RECT)
-                self.SCREEN.blit(UNRANKED_TEXT, UNRANKED_RECT)
-                self.SCREEN.blit(TOTAL_TEXT, TOTAL_RECT)
+                self.SCREEN.blit(self.NARROW_LINE, RANKING_POSITION_LINE)
+                self.SCREEN.blit(RANKED_STATICTICS_TEXT, RANKED_STATISTICS_RECT)
+                self.SCREEN.blit(RANKED_GAMES_PLAYED_TEXT, RANKED_GAMES_PLAYED_RECT)
+                self.SCREEN.blit(RANKED_WINS_LOSES_TEXT, RANKED_WINS_LOSES_RECT)
+                self.SCREEN.blit(RANKED_WINARTIO_TEXT, RANKED_WINRATIO_RECT)
+                self.SCREEN.blit(self.NARROW_LINE, RANKED_POSITION_LINE)
+                self.SCREEN.blit(UNRANKED_STATICTICS_TEXT, UNRANKED_STATISTICS_RECT)
+                self.SCREEN.blit(UNRANKED_GAMES_PLAYED_TEXT, UNRANKED_GAMES_PLAYED_RECT)
+                self.SCREEN.blit(UNRANKED_WINS_LOSES_TEXT, UNRANKED_WINS_LOSES_RECT)
+                self.SCREEN.blit(UNRANKED_WINARTIO_TEXT, UNRANKED_WINRATIO_RECT)
+                self.SCREEN.blit(self.NARROW_LINE, UNRANKED_POSITION_LINE)
+                self.SCREEN.blit(TOTAL_STATICTICS_TEXT, TOTAL_STATISTICS_RECT)
+                self.SCREEN.blit(TOTAL_GAMES_PLAYED_TEXT, TOTAL_GAMES_PLAYED_RECT)
+                self.SCREEN.blit(TOTAL_WINS_LOSES_TEXT, TOTAL_WINS_LOSES_RECT)
+                self.SCREEN.blit(TOTAL_WINARTIO_TEXT, TOTAL_WINRATIO_RECT)
                 CLOSE_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self.__options_status:
                 if self.__update_options_status:
-                    set_all_buttons_active(is_active=False)
                     (
                         RESOLUTION_TEXT,
                         RESOLUTION_RECT,
@@ -554,18 +592,14 @@ class H5_Lobby(BasicWindow):
                         RANKED_TEXT,
                         RANKED_RECT,
                         CHECKBOX_RANKED,
-                        BACK_SETTINGS,
+                        CLOSE_BUTTON,
                     ) = self.options_window()
                     self.__update_options_status = False
 
-                self.SCREEN.blit(
-                    self.LEFT_FRAME,
-                    (self.frame_position[0], self.frame_position[1]),
-                )
                 self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
                 self.SCREEN.blit(RANKED_TEXT, RANKED_RECT)
                 CHECKBOX_RANKED.update(self.SCREEN)
-                BACK_SETTINGS.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                CLOSE_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 RESOLUTION_CHOICES.draw(self.SCREEN)
 
             for event in pygame.event.get():
@@ -623,6 +657,8 @@ class H5_Lobby(BasicWindow):
                             self.__game_data = None
 
                     if self.__profile_status:
+                        if self.__options_status:
+                            self.__options_status = False
                         if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.__update_profile_status = False
                             self.__profile_status = False
@@ -634,6 +670,8 @@ class H5_Lobby(BasicWindow):
                                 self.__error_msg = None
 
                     if self.__options_status:
+                        if self.__profile_status:
+                            self.__profile_status = False
                         selected_option = RESOLUTION_CHOICES.update(event)
                         if selected_option != -1:
                             resolution = resolution_choices[selected_option]
@@ -665,7 +703,7 @@ class H5_Lobby(BasicWindow):
                                 toml.dump(data, f)
                         if CHECKBOX_RANKED.check_for_input(MENU_MOUSE_POS):
                             pass
-                        if BACK_SETTINGS.check_for_input(MENU_MOUSE_POS):
+                        if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
                             set_all_buttons_active(is_active=True)
                             self.__options_status = False
 
@@ -800,49 +838,121 @@ class H5_Lobby(BasicWindow):
         )
 
     def profile_window(self):
-        NICKNAME_TEXT = self.get_font(int(self.font_size[0] * 1.2)).render(self.client_config["nickname"], True, self.hovering_color)
+        NICKNAME_TEXT = self.get_font(int(self.font_size[0] * 1.75)).render(self.client_config["nickname"], True, self.hovering_color)
         NICKNAME_RECT = NICKNAME_TEXT.get_rect(
-            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.175)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.15)
         )
-        NICKNAME_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.25)
-        POINTS_TEXT = self.get_font(int(self.font_size[1])).render(f"{self.__profile_data["ranking_points"]} PKT", True, self.text_color)
+        NICKNAME_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.1875)
+
+        POINTS_TEXT = self.get_font(int(self.font_size[0])).render(f"{self.__profile_data['ranking_points']} PKT", True, self.text_color)
         POINTS_RECT = POINTS_TEXT.get_rect(
-            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.325)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.225)
         )
-        POINTS_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.375)
-        RANKING_POSITION_TEXT = self.get_font(int(self.font_size[1])).render(
-            f"Ranking position: {self.__profile_data["ranking_position"]}", True, self.text_color
+        POINTS_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.2625)
+
+        RANKING_POSITION_TEXT = self.get_font(int(self.font_size[0])).render(
+            f"Ranking position: {self.__profile_data['ranking_position']}", True, self.text_color
         )
         RANKING_POSITION_RECT = RANKING_POSITION_TEXT.get_rect(
-            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.425)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.305)
         )
-        RANKING_POSITION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.475)
+        RANKING_POSITION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.3425)
 
-        GAMES_TEXT = self.get_font(int(self.font_size[1])).render("Games played:", True, self.text_color)
-        GAMES_RECT = GAMES_TEXT.get_rect(
-            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.55)
+        RANKED_STATICTICS_TEXT = self.get_font(int(self.font_size[0])).render("Ranked Statistics", True, self.text_color)
+        RANKED_STATISTICS_RECT = RANKED_STATICTICS_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.375)
         )
-        RANKED_TEXT = self.get_font(int(self.font_size[1])).render(
-            f"Ranked: {self.__profile_data["ranked_games"][0]}/{self.__profile_data["ranked_games"][1]}", True, self.text_color
+
+        RANKED_GAMES_PLAYED_TEXT = self.get_font(int(self.font_size[1])).render(
+            f"Games played: {self.__profile_data['ranked_games'][0] + self.__profile_data['ranked_games'][1]}", True, self.text_color
         )
-        RANKED_RECT = RANKED_TEXT.get_rect(
-            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.65)
+        RANKED_GAMES_PLAYED_RECT = RANKED_GAMES_PLAYED_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.41)
         )
-        UNRANKED_TEXT = self.get_font(int(self.font_size[1])).render(
-            f"Unranked: {self.__profile_data["unranked_games"][0]}/{self.__profile_data["unranked_games"][1]}", True, self.text_color
+
+        RANKED_WINS_LOSES_TEXT = self.get_font(int(self.font_size[1])).render(
+            f"Wins/Loses: {self.__profile_data['ranked_games'][0]}/{self.__profile_data['ranked_games'][1]}", True, self.text_color
         )
-        UNRANKED_RECT = UNRANKED_TEXT.get_rect(
-            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.725)
+        RANKED_WINS_LOSES_RECT = RANKED_WINS_LOSES_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.44)
         )
-        TOTAL_TEXT = self.get_font(int(self.font_size[1])).render(f"Total Games: {self.__profile_data["total_games"]}", True, self.text_color)
-        TOTAL_RECT = TOTAL_TEXT.get_rect(
-            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.8)
+
+        try:
+            winrate = (
+                self.__profile_data["ranked_games"][0] / (self.__profile_data["ranked_games"][0] + self.__profile_data["ranked_games"][1])
+            ) * 100
+        except ZeroDivisionError:
+            winrate = 0
+        RANKED_WINARTIO_TEXT = self.get_font(int(self.font_size[1])).render(f"Win rate: {winrate} %", True, self.text_color)
+        RANKED_WINRATIO_RECT = RANKED_WINARTIO_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.47)
         )
+        RANKED_POSITION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.5)
+
+        UNRANKED_STATICTICS_TEXT = self.get_font(int(self.font_size[0])).render("Unranked Statistics", True, self.text_color)
+        UNRANKED_STATISTICS_RECT = UNRANKED_STATICTICS_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.5375)
+        )
+
+        UNRANKED_GAMES_PLAYED_TEXT = self.get_font(int(self.font_size[1])).render(
+            f"Games played: {self.__profile_data['unranked_games'][0] + self.__profile_data['unranked_games'][1]}", True, self.text_color
+        )
+        UNRANKED_GAMES_PLAYED_RECT = UNRANKED_GAMES_PLAYED_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.5725)
+        )
+
+        UNRANKED_WINS_LOSES_TEXT = self.get_font(int(self.font_size[1])).render(
+            f"Wins/Loses: {self.__profile_data['unranked_games'][0]}/{self.__profile_data['unranked_games'][1]}", True, self.text_color
+        )
+        UNRANKED_WINS_LOSES_RECT = UNRANKED_WINS_LOSES_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.6075)
+        )
+
+        try:
+            winrate = (
+                self.__profile_data["unranked_games"][0] / (self.__profile_data["unranked_games"][0] + self.__profile_data["unranked_games"][1])
+            ) * 100
+        except ZeroDivisionError:
+            winrate = 0
+        UNRANKED_WINARTIO_TEXT = self.get_font(int(self.font_size[1])).render(f"Win rate: {winrate} %", True, self.text_color)
+        UNRANKED_WINRATIO_RECT = UNRANKED_WINARTIO_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.6425)
+        )
+        UNRANKED_POSITION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.6725)
+
+        TOTAL_STATICTICS_TEXT = self.get_font(int(self.font_size[0])).render("Total Statistics", True, self.text_color)
+        TOTAL_STATISTICS_RECT = TOTAL_STATICTICS_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.71)
+        )
+
+        TOTAL_GAMES_PLAYED_TEXT = self.get_font(int(self.font_size[1])).render(
+            f"Games played: {self.__profile_data['total_games']}", True, self.text_color
+        )
+        TOTAL_GAMES_PLAYED_RECT = TOTAL_GAMES_PLAYED_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.745)
+        )
+
+        total_wins = self.__profile_data["ranked_games"][0] + self.__profile_data["unranked_games"][0]
+        total_loses = self.__profile_data["ranked_games"][1] + self.__profile_data["unranked_games"][1]
+        TOTAL_WINS_LOSES_TEXT = self.get_font(int(self.font_size[1])).render(f"Wins/Loses: {total_wins}/{total_loses}", True, self.text_color)
+        TOTAL_WINS_LOSES_RECT = TOTAL_WINS_LOSES_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.78)
+        )
+
+        try:
+            winrate = (total_wins / (total_wins + total_loses)) * 100
+        except ZeroDivisionError:
+            winrate = 0
+        TOTAL_WINARTIO_TEXT = self.get_font(int(self.font_size[1])).render(f"Win rate: {winrate} %", True, self.text_color)
+        TOTAL_WINRATIO_RECT = TOTAL_WINARTIO_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.815)
+        )
+
         CLOSE_BUTTON = Button(
             image=self.QUIT_FRAME,
             image_highlited=self.QUIT_FRAME_HIGHLIGHTED,
-            position=(self.frame_position[0] + self.frame_dims[0] * 0.875, self.frame_position[1] + self.frame_dims[1] * 0.125),
-            font=self.get_font(self.font_size[1]),
+            position=(self.frame_position[0] + self.frame_dims[0] * 0.875, self.frame_position[1] + self.frame_dims[1] * 0.0875),
+            font=self.get_font(self.font_size[0]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -857,14 +967,32 @@ class H5_Lobby(BasicWindow):
             RANKING_POSITION_TEXT,
             RANKING_POSITION_RECT,
             RANKING_POSITION_LINE,
-            GAMES_TEXT,
-            GAMES_RECT,
-            RANKED_TEXT,
-            RANKED_RECT,
-            UNRANKED_TEXT,
-            UNRANKED_RECT,
-            TOTAL_TEXT,
-            TOTAL_RECT,
+            RANKED_STATICTICS_TEXT,
+            RANKED_STATISTICS_RECT,
+            RANKED_GAMES_PLAYED_TEXT,
+            RANKED_GAMES_PLAYED_RECT,
+            RANKED_WINS_LOSES_TEXT,
+            RANKED_WINS_LOSES_RECT,
+            RANKED_WINARTIO_TEXT,
+            RANKED_WINRATIO_RECT,
+            RANKED_POSITION_LINE,
+            UNRANKED_STATICTICS_TEXT,
+            UNRANKED_STATISTICS_RECT,
+            UNRANKED_GAMES_PLAYED_TEXT,
+            UNRANKED_GAMES_PLAYED_RECT,
+            UNRANKED_WINS_LOSES_TEXT,
+            UNRANKED_WINS_LOSES_RECT,
+            UNRANKED_WINARTIO_TEXT,
+            UNRANKED_WINRATIO_RECT,
+            UNRANKED_POSITION_LINE,
+            TOTAL_STATICTICS_TEXT,
+            TOTAL_STATISTICS_RECT,
+            TOTAL_GAMES_PLAYED_TEXT,
+            TOTAL_GAMES_PLAYED_RECT,
+            TOTAL_WINS_LOSES_TEXT,
+            TOTAL_WINS_LOSES_RECT,
+            TOTAL_WINARTIO_TEXT,
+            TOTAL_WINRATIO_RECT,
             CLOSE_BUTTON,
         )
 
@@ -975,16 +1103,13 @@ class H5_Lobby(BasicWindow):
             checked=self.client_config["remember_password"],  # change this
         )
 
-        BACK_SETTINGS = Button(
-            image=self.CANCEL_BUTTON,
-            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
-            image_inactive=self.CANCEL_BUTTON_INACTIVE,
-            position=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.8),
-            text_input="Back",
+        CLOSE_BUTTON = Button(
+            image=self.QUIT_FRAME,
+            image_highlited=self.QUIT_FRAME_HIGHLIGHTED,
+            position=(self.frame_position[0] + self.frame_dims[0] * 0.875, self.frame_position[1] + self.frame_dims[1] * 0.0875),
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
-            inactive_color=self.inactive_color,
         )
 
         return (
@@ -994,7 +1119,7 @@ class H5_Lobby(BasicWindow):
             RANKED_TEXT,
             RANKED_RECT,
             CHECKBOX_RANKED,
-            BACK_SETTINGS,
+            CLOSE_BUTTON,
         )
 
     def add_to_queue(self):
