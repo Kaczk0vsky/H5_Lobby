@@ -114,28 +114,28 @@ class H5_Lobby(BasicWindow):
             OPTIONS_BUTTON.set_active(is_active)
 
         self.button_dims = (
-            self.config["screen_width"] / 9,
-            self.config["screen_hight"] / 17,
+            200 * (transformation_factors[self.transformation_option][0]),
+            60 * (transformation_factors[self.transformation_option][1]),
         )
         self.top_elements_dims = (
-            self.config["screen_width"] / 28,
-            self.config["screen_hight"] / 17,
+            50 * (transformation_factors[self.transformation_option][0]),
+            50 * (transformation_factors[self.transformation_option][1]),
         )
         self.player_list_dims = (
-            self.config["screen_width"] / 4.7,
-            self.config["screen_hight"] / 1.1,
+            400 * (transformation_factors[self.transformation_option][0]),
+            1000 * (transformation_factors[self.transformation_option][1]),
         )
-        self.profile_dims = (
-            480 * (transformation_factors[self.transformation_option][0]),
-            320 * (transformation_factors[self.transformation_option][1]),
+        self.frame_dims = (
+            520 * (transformation_factors[self.transformation_option][0]),
+            800 * (transformation_factors[self.transformation_option][1]),
         )
-        self.profile_position = (
-            (self.SCREEN.get_width() - self.profile_dims[0]) * 0.02 * (transformation_factors[self.transformation_option][0]),
-            (self.SCREEN.get_height() - self.profile_dims[1]) * 0.325 * (transformation_factors[self.transformation_option][1]),
+        self.frame_position = (
+            (self.SCREEN.get_width() - self.frame_dims[0]) * 0.01 * (transformation_factors[self.transformation_option][0]),
+            (self.SCREEN.get_height() - self.frame_dims[1]) * 0.85 * (transformation_factors[self.transformation_option][1]),
         )
-        self.options_position = (
-            self.config["screen_width"] / 1.7,
-            self.config["screen_hight"] / 9.9,
+        self.quit_frame_dims = (
+            40 * (transformation_factors[self.transformation_option][0]),
+            40 * (transformation_factors[self.transformation_option][1]),
         )
 
         self.BG = pygame.transform.scale(
@@ -146,10 +146,6 @@ class H5_Lobby(BasicWindow):
             self.TOP_BAR,
             (self.config["screen_width"] / 1.5, self.config["screen_hight"] / 10),
         )
-        self.NEWS = pygame.transform.scale(
-            self.NEWS,
-            (self.config["screen_width"] / 2, self.config["screen_hight"] / 1.5),
-        )
         self.PLAYER_LIST = pygame.transform.scale(
             self.PLAYER_LIST,
             self.player_list_dims,
@@ -158,10 +154,13 @@ class H5_Lobby(BasicWindow):
             self.player_list_dims,
             pygame.SRCALPHA,
         )
-        # TODO: add individual picture
+
         self.PLAYER_LIST_FRAME = pygame.transform.scale(
-            self.PROGRESS_BAR_FRAME,
-            (300, 80),
+            self.LEFT_FRAME,
+            (
+                300 * (transformation_factors[self.transformation_option][0]),
+                80 * (transformation_factors[self.transformation_option][1]),
+            ),
         )
         self.OPTIONS = pygame.transform.scale(
             self.OPTIONS,
@@ -187,13 +186,13 @@ class H5_Lobby(BasicWindow):
             self.QUIT_HIGHLIGHTED,
             self.top_elements_dims,
         )
-        self.QUIT_PROFILE = pygame.transform.scale(
+        self.QUIT_FRAME = pygame.transform.scale(
             self.QUIT,
-            (40, 40),
+            self.quit_frame_dims,
         )
-        self.QUIT_PROFILE_HIGHLIGHTED = pygame.transform.scale(
+        self.QUIT_FRAME_HIGHLIGHTED = pygame.transform.scale(
             self.QUIT_HIGHLIGHTED,
-            (40, 40),
+            self.quit_frame_dims,
         )
         self.BUTTON = pygame.transform.scale(
             self.BUTTON,
@@ -229,39 +228,60 @@ class H5_Lobby(BasicWindow):
         )
         self.PROGRESS_BAR_FRAME = pygame.transform.scale(
             self.PROGRESS_BAR_FRAME,
-            (580, 60),
+            (
+                580 * (transformation_factors[self.transformation_option][0]),
+                60 * (transformation_factors[self.transformation_option][1]),
+            ),
         )
         self.PROGRESS_BAR_BG = pygame.transform.scale(
             self.PROGRESS_BAR_BG,
-            (500, 30),
+            (
+                500 * (transformation_factors[self.transformation_option][0]),
+                30 * (transformation_factors[self.transformation_option][1]),
+            ),
         )
         self.PROGRESS_BAR_EDGE = pygame.transform.scale(
             self.PROGRESS_BAR_EDGE,
-            (60, 80),
+            (
+                60 * (transformation_factors[self.transformation_option][0]),
+                80 * (transformation_factors[self.transformation_option][1]),
+            ),
         )
         self.SCROLL = pygame.transform.scale(
             self.SCROLL,
-            (30, 100),
+            (
+                30 * (transformation_factors[self.transformation_option][0]),
+                100 * (transformation_factors[self.transformation_option][1]),
+            ),
         )
         self.SCROLL_BAR = pygame.transform.scale(
             self.SCROLL_BAR,
-            (50, self.config["screen_hight"] / 1.2),
+            (
+                50 * (transformation_factors[self.transformation_option][0]),
+                900 * (transformation_factors[self.transformation_option][1]),
+            ),
         )
         self.LINE = pygame.transform.scale(
             self.LINE,
-            (self.config["screen_width"] / 5.8, 5),
+            (
+                330 * (transformation_factors[self.transformation_option][0]),
+                5 * (transformation_factors[self.transformation_option][1]),
+            ),
         )
         self.CHECKBOX = pygame.transform.scale(
             self.CHECKBOX,
-            (40, 40),
+            self.quit_frame_dims,
         )
-        self.PROFILE_FRAME = pygame.transform.scale(self.PROFILE_FRAME, (self.profile_dims[0], self.profile_dims[1]))
-        self.PROFILE_LINE = pygame.transform.scale(self.LINE, (self.profile_dims[0] * 0.8, 2))
+        self.CHECKBOX_CHECKED = pygame.transform.scale(
+            self.CHECKBOX_CHECKED,
+            self.quit_frame_dims,
+        )
+        self.LEFT_FRAME = pygame.transform.scale(self.LEFT_FRAME, self.frame_dims)
+        self.PROFILE_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 2))
 
         FIND_GAME_BUTTON = Button(
-            image=self.CANCEL_BUTTON,
-            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
-            image_inactive=self.CANCEL_BUTTON_INACTIVE,
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
                 830 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -270,12 +290,10 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
-            inactive_color=self.inactive_color,
         )
         RANKING = Button(
-            image=self.CANCEL_BUTTON,
-            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
-            image_inactive=self.CANCEL_BUTTON_INACTIVE,
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
                 1080 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -284,12 +302,10 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
-            inactive_color=self.inactive_color,
         )
         NEWS = Button(
-            image=self.CANCEL_BUTTON,
-            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
-            image_inactive=self.CANCEL_BUTTON_INACTIVE,
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
                 1330 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -298,12 +314,10 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
-            inactive_color=self.inactive_color,
         )
         MY_PROFILE = Button(
-            image=self.CANCEL_BUTTON,
-            image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
-            image_inactive=self.CANCEL_BUTTON_INACTIVE,
+            image=self.BUTTON,
+            image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
                 1580 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
@@ -312,7 +326,6 @@ class H5_Lobby(BasicWindow):
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
-            inactive_color=self.inactive_color,
         )
         PLAYER_PROFILE = Button(
             image=self.ICON_SQUARE,
@@ -516,8 +529,8 @@ class H5_Lobby(BasicWindow):
                     self.__update_profile_status = False
 
                 self.SCREEN.blit(
-                    self.PROFILE_FRAME,
-                    (self.profile_position[0], self.profile_position[1]),
+                    self.LEFT_FRAME,
+                    (self.frame_position[0], self.frame_position[1]),
                 )
                 self.SCREEN.blit(NICKNAME_TEXT, NICKNAME_RECT)
                 self.SCREEN.blit(self.PROFILE_LINE, NICKNAME_LINE)
@@ -546,11 +559,8 @@ class H5_Lobby(BasicWindow):
                     self.__update_options_status = False
 
                 self.SCREEN.blit(
-                    self.SMALLER_WINDOWS_BG,
-                    (
-                        self.options_position[0] * transformation_factors[self.transformation_option][0],
-                        self.options_position[1] * transformation_factors[self.transformation_option][1],
-                    ),
+                    self.LEFT_FRAME,
+                    (self.frame_position[0], self.frame_position[1]),
                 )
                 self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
                 self.SCREEN.blit(RANKED_TEXT, RANKED_RECT)
@@ -792,46 +802,46 @@ class H5_Lobby(BasicWindow):
     def profile_window(self):
         NICKNAME_TEXT = self.get_font(int(self.font_size[0] * 1.2)).render(self.client_config["nickname"], True, self.hovering_color)
         NICKNAME_RECT = NICKNAME_TEXT.get_rect(
-            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.175)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.175)
         )
-        NICKNAME_LINE = (self.profile_position[0] + self.profile_dims[0] * 0.1, self.profile_position[1] + self.profile_dims[1] * 0.25)
+        NICKNAME_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.25)
         POINTS_TEXT = self.get_font(int(self.font_size[1])).render(f"{self.__profile_data["ranking_points"]} PKT", True, self.text_color)
         POINTS_RECT = POINTS_TEXT.get_rect(
-            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.325)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.325)
         )
-        POINTS_LINE = (self.profile_position[0] + self.profile_dims[0] * 0.1, self.profile_position[1] + self.profile_dims[1] * 0.375)
+        POINTS_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.375)
         RANKING_POSITION_TEXT = self.get_font(int(self.font_size[1])).render(
             f"Ranking position: {self.__profile_data["ranking_position"]}", True, self.text_color
         )
         RANKING_POSITION_RECT = RANKING_POSITION_TEXT.get_rect(
-            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.425)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.425)
         )
-        RANKING_POSITION_LINE = (self.profile_position[0] + self.profile_dims[0] * 0.1, self.profile_position[1] + self.profile_dims[1] * 0.475)
+        RANKING_POSITION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.475)
 
         GAMES_TEXT = self.get_font(int(self.font_size[1])).render("Games played:", True, self.text_color)
         GAMES_RECT = GAMES_TEXT.get_rect(
-            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.55)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.55)
         )
         RANKED_TEXT = self.get_font(int(self.font_size[1])).render(
             f"Ranked: {self.__profile_data["ranked_games"][0]}/{self.__profile_data["ranked_games"][1]}", True, self.text_color
         )
         RANKED_RECT = RANKED_TEXT.get_rect(
-            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.65)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.65)
         )
         UNRANKED_TEXT = self.get_font(int(self.font_size[1])).render(
             f"Unranked: {self.__profile_data["unranked_games"][0]}/{self.__profile_data["unranked_games"][1]}", True, self.text_color
         )
         UNRANKED_RECT = UNRANKED_TEXT.get_rect(
-            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.725)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.725)
         )
         TOTAL_TEXT = self.get_font(int(self.font_size[1])).render(f"Total Games: {self.__profile_data["total_games"]}", True, self.text_color)
         TOTAL_RECT = TOTAL_TEXT.get_rect(
-            center=(self.profile_position[0] + self.profile_dims[0] * 0.5, self.profile_position[1] + self.profile_dims[1] * 0.8)
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.8)
         )
         CLOSE_BUTTON = Button(
-            image=self.QUIT_PROFILE,
-            image_highlited=self.QUIT_PROFILE_HIGHLIGHTED,
-            position=(self.profile_position[0] + self.profile_dims[0] * 0.875, self.profile_position[1] + self.profile_dims[1] * 0.125),
+            image=self.QUIT_FRAME,
+            image_highlited=self.QUIT_FRAME_HIGHLIGHTED,
+            position=(self.frame_position[0] + self.frame_dims[0] * 0.875, self.frame_position[1] + self.frame_dims[1] * 0.125),
             font=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
@@ -939,8 +949,8 @@ class H5_Lobby(BasicWindow):
             self.config["screen_hight"] // 3.5,
         )
         dims = (
-            self.options_position[0] * transformation_factors[self.transformation_option][0],
-            self.options_position[1] * transformation_factors[self.transformation_option][1],
+            self.frame_position[0] * transformation_factors[self.transformation_option][0],
+            self.frame_position[1] * transformation_factors[self.transformation_option][1],
         )
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
 
