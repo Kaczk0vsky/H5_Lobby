@@ -147,7 +147,7 @@ class BasicWindow:
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(screen_width // 2, overlay_y + overlay_height * 2 // 3),
             text_input="Back",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.get_font(self.font_size[1]),
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )

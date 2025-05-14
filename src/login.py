@@ -12,6 +12,7 @@ from src.helpers import (
     calculate_time_passed,
     check_input_correctnes,
     is_server_reachable,
+    render_small_caps,
 )
 from src.vpn_handling import SoftEtherClient
 from src.settings_reader import load_client_settings
@@ -107,7 +108,7 @@ class LoginWindow(BasicWindow):
             image_inactive=self.BUTTON_INACTIVE,
             position=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Sign In",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
@@ -118,7 +119,7 @@ class LoginWindow(BasicWindow):
             image_inactive=self.BUTTON_INACTIVE,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Sing Up",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
@@ -129,7 +130,7 @@ class LoginWindow(BasicWindow):
             image_inactive=self.BUTTON_INACTIVE,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 130),
             text_input="Forgot Password?",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
@@ -143,7 +144,7 @@ class LoginWindow(BasicWindow):
             image=self.QUIT,
             image_highlited=self.QUIT_HIGHLIGHTED,
             position=(550, 95),
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -159,8 +160,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Username",
             text_color=self.text_color,
-            font=self.get_font(self.font_size[0]),
-            font_title=self.get_font(self.font_size[1]),
+            font_size=self.font_size[0],
+            font_title_size=self.font_size[1],
             text=(self.client_config["nickname"] if self.client_config["remember_password"] else ""),
             is_active=True,
         )
@@ -170,8 +171,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Password",
             text_color=self.text_color,
-            font=self.get_font(self.font_size[0]),
-            font_title=self.get_font(self.font_size[1]),
+            font_size=self.font_size[0],
+            font_title_size=self.font_size[1],
             text=(self.client_config["password"] if self.client_config["remember_password"] else ""),
             hide_text=True,
         )
@@ -268,7 +269,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Submit",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -277,7 +278,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 130),
             text_input="Back",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -297,8 +298,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Username",
             text_color=self.text_color,
-            font=self.get_font(self.font_size[0]),
-            font_title=self.get_font(self.font_size[1]),
+            font_size=self.font_size[0],
+            font_title_size=self.font_size[1],
             is_active=True,
         )
         PASSWORD_INPUT = TextInput(
@@ -307,8 +308,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Password",
             text_color=self.text_color,
-            font=self.get_font(self.font_size[0]),
-            font_title=self.get_font(self.font_size[1]),
+            font_size=self.font_size[0],
+            font_title_size=self.font_size[1],
             hide_text=True,
         )
         REPEAT_PASSWORD_INPUT = TextInput(
@@ -317,8 +318,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Repeat Password",
             text_color=self.text_color,
-            font=self.get_font(self.font_size[0]),
-            font_title=self.get_font(self.font_size[1]),
+            font_size=self.font_size[0],
+            font_title_size=self.font_size[1],
             hide_text=True,
         )
         EMAIL_INPUT = TextInput(
@@ -327,8 +328,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Email",
             text_color=self.text_color,
-            font=self.get_font(self.font_size[0]),
-            font_title=self.get_font(self.font_size[1]),
+            font_size=self.font_size[0],
+            font_title_size=self.font_size[1],
         )
         INPUT_BOXES = [
             NICKNAME_INPUT,
@@ -433,7 +434,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1]),
             text_input="Submit",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -442,7 +443,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
             text_input="Back",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -452,8 +453,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Username",
             text_color=self.text_color,
-            font=self.get_font(self.font_size[0]),
-            font_title=self.get_font(self.font_size[1]),
+            font_size=self.font_size[0],
+            font_title_size=self.font_size[1],
             is_active=True,
         )
         EMAIL_INPUT = TextInput(
@@ -462,8 +463,8 @@ class LoginWindow(BasicWindow):
             image=self.TEXT_INPUT,
             title="Email",
             text_color=self.text_color,
-            font=self.get_font(self.font_size[0]),
-            font_title=self.get_font(self.font_size[1]),
+            font_size=self.font_size[0],
+            font_title_size=self.font_size[1],
         )
         INPUT_BOXES = [
             NICKNAME_INPUT,
@@ -541,11 +542,11 @@ class LoginWindow(BasicWindow):
 
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
 
-        self.TITLE_TEXT = self.get_font(self.font_size[0]).render(text_input[0][1], True, self.text_color)
+        self.TITLE_TEXT = render_small_caps(text_input[0][1], self.font_size[0], self.text_color)
         self.TITLE_RECT = self.TITLE_TEXT.get_rect(center=(x_pos * 2, y_pos))
-        self.FIRST_TEXT = self.get_font(self.font_size[0]).render(text_input[1][1], True, self.text_color)
+        self.FIRST_TEXT = render_small_caps(text_input[1][1], self.font_size[0], self.text_color)
         self.FIRST_RECT = self.FIRST_TEXT.get_rect(topleft=(x_pos, y_pos + 50))
-        self.SECOND_TEXT = self.get_font(self.font_size[0]).render(text_input[2][1], True, self.text_color)
+        self.SECOND_TEXT = render_small_caps(text_input[2][1], self.font_size[0], self.text_color)
         self.SECOND_RECT = self.SECOND_TEXT.get_rect(topleft=(x_pos, y_pos + 100))
         self.THIRD_TEXT = None
         self.THIRD_RECT = None
@@ -553,9 +554,9 @@ class LoginWindow(BasicWindow):
         self.FOURTH_RECT = None
 
         if self.__show_password_hint:
-            self.THIRD_TEXT = self.get_font(self.font_size[0]).render(text_input[3][1], True, self.text_color)
+            self.THIRD_TEXT = render_small_caps(text_input[3][1], self.font_size[0], self.text_color)
             self.THIRD_RECT = self.THIRD_TEXT.get_rect(topleft=(x_pos, y_pos + 150))
-            self.FOURTH_TEXT = self.get_font(self.font_size[0]).render(text_input[4][1], True, self.text_color)
+            self.FOURTH_TEXT = render_small_caps(text_input[4][1], self.font_size[0], self.text_color)
             self.FOURTH_RECT = self.FOURTH_TEXT.get_rect(topleft=(x_pos, y_pos + 200))
 
         BACK_BUTTON = Button(
@@ -563,7 +564,7 @@ class LoginWindow(BasicWindow):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(400, 420),
             text_input="Back",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )

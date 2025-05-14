@@ -1,6 +1,6 @@
 import pygame
 
-from src.helpers import play_on_empty
+from src.helpers import play_on_empty, render_small_caps
 
 
 class Button:
@@ -41,7 +41,7 @@ class Button:
         position: tuple[float, float],
         image: pygame.Surface,
         image_highlited: pygame.Surface,
-        font: pygame.font.Font,
+        font_size: int,
         base_color: str,
         hovering_color: str,
         text_input: str = "",
@@ -52,7 +52,7 @@ class Button:
         self.image_highlighted = image_highlited
         self.x_pos = position[0]
         self.y_pos = position[1]
-        self.font = font
+        self.font_size = font_size
         self.base_color = base_color
         self.hovering_color = hovering_color
         self.text_input = text_input
@@ -65,7 +65,7 @@ class Button:
         if image_inactive:
             self.image_inactive = image_inactive
         if self.text_input:
-            self.text = self.font.render(self.text_input, True, self.base_color)
+            self.text = render_small_caps(self.text_input, self.font_size, self.base_color)
             self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
         if self.image is None:
             self.image = self.text
@@ -95,11 +95,11 @@ class Button:
     def change_color(self, position: tuple[int, int]) -> None:
         if self.active:
             if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
-                self.text = self.font.render(self.text_input, True, self.hovering_color)
+                self.text = render_small_caps(self.text_input, self.font_size, self.hovering_color)
             else:
-                self.text = self.font.render(self.text_input, True, self.base_color)
+                self.text = render_small_caps(self.text_input, self.font_size, self.base_color)
         else:
-            self.text = self.font.render(self.text_input, True, self.inactive_color)
+            self.text = render_small_caps(self.text_input, self.font_size, self.inactive_color)
 
     def handle_button(self, screen: pygame.Surface, position: tuple[int, int]) -> None:
         if self.text_input:

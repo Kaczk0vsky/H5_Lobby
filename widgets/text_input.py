@@ -1,5 +1,7 @@
 import pygame
 
+from src.helpers import render_small_caps
+
 
 class TextInput:
     """
@@ -61,8 +63,8 @@ class TextInput:
         image: pygame.Surface,
         title: str,
         text_color: pygame.Color,
-        font: pygame.font.Font,
-        font_title: pygame.font.Font,
+        font_size: int,
+        font_title_size: int,
         text_bg_color: pygame.Color = pygame.Color("#1e2120"),
         text: str = "",
         is_active: bool = False,
@@ -81,8 +83,8 @@ class TextInput:
         self.hide_text = hide_text
         self.hidden_text = text
         self.text = text
-        self.font = font
-        self.font_title = font_title
+        self.font_size = font_size
+        self.font_title_size = font_title_size
         self.rect = pygame.Rect(self.x_pos, self.y_pos, self.w, self.h)
         self.rect_bg = pygame.Rect(
             self.x_pos + 12.5,
@@ -90,12 +92,8 @@ class TextInput:
             self.w - self.w * 0.085,
             self.h - self.h * 0.45,
         )
-        self.txt_surface = self.font.render(
-            len(self.text) * "*" if self.hide_text else self.text,
-            True,
-            self.text_color,
-        )
-        self.title_surface = self.font_title.render(self.title, True, self.text_color)
+        self.txt_surface = render_small_caps(len(self.text) * "*" if self.hide_text else self.text, self.font_size, self.text_color)
+        self.title_surface = render_small_caps(self.title, self.font_title_size, self.text_color)
 
         TextInput.__id += 1
         TextInput._instances.append(self)
@@ -143,11 +141,7 @@ class TextInput:
                     instance._tab_pressed = False
                     self._enter_pressed = False
 
-        self.txt_surface = self.font.render(
-            len(self.text) * "*" if self.hide_text else self.text,
-            True,
-            self.text_color,
-        )
+        self.txt_surface = render_small_caps(len(self.text) * "*" if self.hide_text else self.text, self.font_size, self.text_color)
 
     def get_string(self) -> str:
         if len(self.text) == len(self.hidden_text):
@@ -165,11 +159,7 @@ class TextInput:
                     self.text = self.text[:-1]
                     if self.hidden_text:
                         self.hidden_text = self.hidden_text[:-1]
-                    self.txt_surface = self.font.render(
-                        len(self.text) * "*" if self.hide_text else self.text,
-                        True,
-                        self.text_color,
-                    )
+                    self.txt_surface = render_small_caps(len(self.text) * "*" if self.hide_text else self.text, self.font_size, self.text_color)
                 self._last_backspace_time = current_time
         self.__update_text_surface()
 

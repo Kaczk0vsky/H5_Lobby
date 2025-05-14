@@ -1,5 +1,7 @@
 import pygame
 
+from src.helpers import render_small_caps
+
 
 class OptionBox:
     """
@@ -37,7 +39,7 @@ class OptionBox:
         dimensions: tuple[int, int],
         color: pygame.Color,
         highlight_color: pygame.Color,
-        font: pygame.font.Font,
+        font_size: int,
         option_list: list,
         selected: int = 0,
     ):
@@ -47,7 +49,7 @@ class OptionBox:
         self.h = dimensions[1]
         self.color = color
         self.highlight_color = highlight_color
-        self.font = font
+        self.font_size = font_size
         self.option_list = option_list
         self.selected = selected
         self.rect = pygame.Rect(self.x_pos, self.y_pos, self.w, self.h)
@@ -55,7 +57,7 @@ class OptionBox:
     def draw(self, screen: pygame.Surface) -> None:
         pygame.draw.rect(screen, self.highlight_color if self._menu_active else self.color, self.rect)
         pygame.draw.rect(screen, (0, 0, 0), self.rect, 2)
-        msg = self.font.render(self.option_list[self.selected], 1, (0, 0, 0))
+        msg = render_small_caps(self.option_list[self.selected], self.font_size, (0, 0, 0))
         screen.blit(msg, msg.get_rect(center=self.rect.center))
 
         if self._draw_menu:
@@ -67,7 +69,7 @@ class OptionBox:
                     self.highlight_color if i == self._active_option else self.color,
                     rect,
                 )
-                msg = self.font.render(text, 1, (0, 0, 0))
+                msg = render_small_caps(text, self.font_size, (0, 0, 0))
                 screen.blit(msg, msg.get_rect(center=rect.center))
             outer_rect = (
                 self.rect.x,

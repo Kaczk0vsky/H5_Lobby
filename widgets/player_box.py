@@ -1,5 +1,7 @@
 import pygame
 
+from src.helpers import render_small_caps
+
 
 class PlayerBox:
     """
@@ -37,7 +39,7 @@ class PlayerBox:
         position: tuple[float, float],
         dimensions: tuple[int, int],
         color: pygame.Color,
-        font: pygame.font.Font,
+        font_size: int,
         nickname: str,
         ranking_points: int,
         state: str,
@@ -49,8 +51,8 @@ class PlayerBox:
         self.color = color
         self.red = "#db1102"
         self.green = "#02ba09"
-        self.font = font
-        self.font_small = pygame.font.Font("resources/Quivira.otf", int(self.font.get_height() * 0.6))
+        self.font_size = font_size
+        self.font_small = int(self.font_size * 0.65)
         self.nickname = nickname
         self.ranking_points = ranking_points
         self.state = state
@@ -59,24 +61,16 @@ class PlayerBox:
         self.image_line = pygame.transform.scale(image_line, (self.w, image_line.get_height() * 0.4))
         self.image_box = pygame.transform.scale(image_box, (image_box.get_width() * 1.25, image_box.get_height() * 1.25))
 
-        self.text_surface_nickname = self.font.render(self.nickname, True, self.color)
-        self.text_surface_points = self.font_small.render(f"Ranking points: {self.ranking_points}", True, self.color)
-        self.text_surface_status_title = self.font_small.render("Status: ", True, self.color)
-        self.text_surface_status = self.font_small.render(
-            self.state,
-            True,
-            self.green if str(self.state) in self.green_states else self.red,
-        )
+        self.text_surface_nickname = render_small_caps(self.nickname, self.font_size, self.color)
+        self.text_surface_points = render_small_caps(f"Ranking points: {self.ranking_points}", self.font_small, self.color)
+        self.text_surface_status_title = render_small_caps("Status: ", self.font_small, self.color)
+        self.text_surface_status = render_small_caps(self.state, self.font_small, self.green if str(self.state) in self.green_states else self.red)
 
     def update_surfaces(self):
-        self.text_surface_nickname = self.font.render(self.nickname, True, self.color)
-        self.text_surface_points = self.font_small.render(f"Ranking points: {self.ranking_points}", True, self.color)
-        self.text_surface_status_title = self.font_small.render("Status: ", True, self.color)
-        self.text_surface_status = self.font_small.render(
-            self.state,
-            True,
-            self.green if str(self.state) in self.green_states else self.red,
-        )
+        self.text_surface_nickname = render_small_caps(self.nickname, self.font_size, self.color)
+        self.text_surface_points = render_small_caps(f"Ranking points: {self.ranking_points}", self.font_small, self.color)
+        self.text_surface_status_title = render_small_caps("Status: ", self.font_small, self.color)
+        self.text_surface_status = render_small_caps(self.state, self.font_small, self.green if str(self.state) in self.green_states else self.red)
 
     def update(self, screen: pygame.Surface) -> None:
         text_x = self.rect.x + self.w * 0.075

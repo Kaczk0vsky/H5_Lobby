@@ -17,7 +17,7 @@ from src.global_vars import (
 )
 from src.basic_window import BasicWindow
 from src.run_ashan_arena import AschanArena3Game
-from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state
+from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state, render_small_caps
 from src.custom_thread import CustomThread
 from src.decorators import run_in_thread
 from widgets.button import Button
@@ -292,7 +292,7 @@ class H5_Lobby(BasicWindow):
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="Find Game",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -304,7 +304,7 @@ class H5_Lobby(BasicWindow):
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="Ranking",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -316,7 +316,7 @@ class H5_Lobby(BasicWindow):
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="News",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -328,7 +328,7 @@ class H5_Lobby(BasicWindow):
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="My Profile",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -340,7 +340,7 @@ class H5_Lobby(BasicWindow):
                 1730 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
@@ -353,7 +353,7 @@ class H5_Lobby(BasicWindow):
                 1800 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
@@ -365,7 +365,7 @@ class H5_Lobby(BasicWindow):
                 1870 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -375,7 +375,7 @@ class H5_Lobby(BasicWindow):
                 590 * (transformation_factors[self.transformation_option][1]),
             ),
             color=self.text_color,
-            font=self.get_font(self.font_size[0]),
+            font_size=self.font_size[0],
             title="Players Online",
             image=self.PLAYER_LIST,
             image_bg=self.PLAYER_LIST_BG,
@@ -442,11 +442,7 @@ class H5_Lobby(BasicWindow):
                     ACCEPT_QUEUE.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 if not self.__found_game:
                     minutes, seconds = calculate_time_passed(self.start_time)
-                    HEADER_TEXT = self.get_font(self.font_size[0]).render(
-                        f"Waiting for opponent: {minutes}:{seconds:02d}",
-                        True,
-                        self.text_color,
-                    )
+                    HEADER_TEXT = render_small_caps(f"Waiting for opponent: {minutes}:{seconds:02d}", self.font_size[0], self.text_color)
                     HEADER_RECT = HEADER_TEXT.get_rect(
                         center=(
                             self.SCREEN.get_width() / 2,
@@ -454,7 +450,7 @@ class H5_Lobby(BasicWindow):
                         )
                     )
                 else:
-                    HEADER_TEXT = self.get_font(self.font_size[0]).render("GAME FOUND", True, self.text_color)
+                    HEADER_TEXT = render_small_caps("Game Found", int(self.font_size[0] * 2), self.hovering_color)
                     HEADER_RECT = HEADER_TEXT.get_rect(
                         center=(
                             self.SCREEN.get_width() / 2,
@@ -774,7 +770,7 @@ class H5_Lobby(BasicWindow):
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
             position=(overlay_width * 1.5, overlay_height * 1.8),
             text_input="Cancel",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -796,7 +792,7 @@ class H5_Lobby(BasicWindow):
                 information_str = f"Waiting for {self.__opponent_nickname} to accept..."
             else:
                 information_str = f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} RP"
-            OPONNENT_TEXT = self.get_font(self.font_size[0]).render(information_str, True, self.text_color)
+            OPONNENT_TEXT = render_small_caps(information_str, self.font_size[0], self.text_color)
             OPONNENT_RECT = OPONNENT_TEXT.get_rect(center=(self.SCREEN.get_width() / 2, self.SCREEN.get_height() / 2.12))
             ACCEPT_BUTTON = Button(
                 image=self.ACCEPT_BUTTON,
@@ -804,7 +800,7 @@ class H5_Lobby(BasicWindow):
                 image_inactive=self.ACCEPT_BUTTON_INACTIVE,
                 position=(overlay_width * 1.3, overlay_height * 1.8),
                 text_input="Accept",
-                font=self.get_font(self.font_size[1]),
+                font_size=self.font_size[1],
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
                 inactive_color=self.inactive_color,
@@ -815,7 +811,7 @@ class H5_Lobby(BasicWindow):
                 image_inactive=self.CANCEL_BUTTON_INACTIVE,
                 position=(overlay_width * 1.7, overlay_height * 1.8),
                 text_input="Cancel",
-                font=self.get_font(self.font_size[1]),
+                font_size=self.font_size[1],
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
                 inactive_color=self.inactive_color,
@@ -838,40 +834,44 @@ class H5_Lobby(BasicWindow):
         )
 
     def profile_window(self):
-        NICKNAME_TEXT = self.get_font(int(self.font_size[0] * 1.75)).render(self.client_config["nickname"], True, self.hovering_color)
+        NICKNAME_TEXT = render_small_caps(self.client_config["nickname"], int(self.font_size[0] * 1.75), self.hovering_color)
         NICKNAME_RECT = NICKNAME_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.15)
         )
         NICKNAME_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.1875)
 
-        POINTS_TEXT = self.get_font(int(self.font_size[0])).render(f"{self.__profile_data['ranking_points']} PKT", True, self.text_color)
+        POINTS_TEXT = render_small_caps(f"{self.__profile_data['ranking_points']} PKT", int(self.font_size[0]), self.text_color)
         POINTS_RECT = POINTS_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.225)
         )
         POINTS_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.2625)
 
-        RANKING_POSITION_TEXT = self.get_font(int(self.font_size[0])).render(
-            f"Ranking position: {self.__profile_data['ranking_position']}", True, self.text_color
+        RANKING_POSITION_TEXT = render_small_caps(
+            f"Ranking position: {self.__profile_data['ranking_position']}", int(self.font_size[0]), self.text_color
         )
         RANKING_POSITION_RECT = RANKING_POSITION_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.305)
         )
         RANKING_POSITION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.3425)
 
-        RANKED_STATICTICS_TEXT = self.get_font(int(self.font_size[0])).render("Ranked Statistics", True, self.text_color)
+        RANKED_STATICTICS_TEXT = render_small_caps("Ranked Statistics", int(self.font_size[0]), self.text_color)
         RANKED_STATISTICS_RECT = RANKED_STATICTICS_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.375)
         )
 
-        RANKED_GAMES_PLAYED_TEXT = self.get_font(int(self.font_size[1])).render(
-            f"Games played: {self.__profile_data['ranked_games'][0] + self.__profile_data['ranked_games'][1]}", True, self.text_color
+        RANKED_GAMES_PLAYED_TEXT = render_small_caps(
+            f"Games played: {self.__profile_data['ranked_games'][0] + self.__profile_data['ranked_games'][1]}",
+            int(self.font_size[1]),
+            self.text_color,
         )
         RANKED_GAMES_PLAYED_RECT = RANKED_GAMES_PLAYED_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.41)
         )
 
-        RANKED_WINS_LOSES_TEXT = self.get_font(int(self.font_size[1])).render(
-            f"Wins/Loses: {self.__profile_data['ranked_games'][0]}/{self.__profile_data['ranked_games'][1]}", True, self.text_color
+        RANKED_WINS_LOSES_TEXT = render_small_caps(
+            f"Wins/Loses: {self.__profile_data['ranked_games'][0]}/{self.__profile_data['ranked_games'][1]}",
+            int(self.font_size[1]),
+            self.text_color,
         )
         RANKED_WINS_LOSES_RECT = RANKED_WINS_LOSES_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.44)
@@ -883,26 +883,31 @@ class H5_Lobby(BasicWindow):
             ) * 100
         except ZeroDivisionError:
             winrate = 0
-        RANKED_WINARTIO_TEXT = self.get_font(int(self.font_size[1])).render(f"Win rate: {winrate} %", True, self.text_color)
+
+        RANKED_WINARTIO_TEXT = render_small_caps(f"Win rate: {winrate} %", int(self.font_size[1]), self.text_color)
         RANKED_WINRATIO_RECT = RANKED_WINARTIO_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.47)
         )
         RANKED_POSITION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.5)
 
-        UNRANKED_STATICTICS_TEXT = self.get_font(int(self.font_size[0])).render("Unranked Statistics", True, self.text_color)
+        UNRANKED_STATICTICS_TEXT = render_small_caps("Unranked Statistics", int(self.font_size[0]), self.text_color)
         UNRANKED_STATISTICS_RECT = UNRANKED_STATICTICS_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.5375)
         )
 
-        UNRANKED_GAMES_PLAYED_TEXT = self.get_font(int(self.font_size[1])).render(
-            f"Games played: {self.__profile_data['unranked_games'][0] + self.__profile_data['unranked_games'][1]}", True, self.text_color
+        UNRANKED_GAMES_PLAYED_TEXT = render_small_caps(
+            f"Games played: {self.__profile_data['unranked_games'][0] + self.__profile_data['unranked_games'][1]}",
+            int(self.font_size[1]),
+            self.text_color,
         )
         UNRANKED_GAMES_PLAYED_RECT = UNRANKED_GAMES_PLAYED_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.5725)
         )
 
-        UNRANKED_WINS_LOSES_TEXT = self.get_font(int(self.font_size[1])).render(
-            f"Wins/Loses: {self.__profile_data['unranked_games'][0]}/{self.__profile_data['unranked_games'][1]}", True, self.text_color
+        UNRANKED_WINS_LOSES_TEXT = render_small_caps(
+            f"Wins/Loses: {self.__profile_data['unranked_games'][0]}/{self.__profile_data['unranked_games'][1]}",
+            int(self.font_size[1]),
+            self.text_color,
         )
         UNRANKED_WINS_LOSES_RECT = UNRANKED_WINS_LOSES_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.6075)
@@ -914,27 +919,25 @@ class H5_Lobby(BasicWindow):
             ) * 100
         except ZeroDivisionError:
             winrate = 0
-        UNRANKED_WINARTIO_TEXT = self.get_font(int(self.font_size[1])).render(f"Win rate: {winrate} %", True, self.text_color)
+        UNRANKED_WINARTIO_TEXT = render_small_caps(f"Win rate: {winrate} %", int(self.font_size[1]), self.text_color)
         UNRANKED_WINRATIO_RECT = UNRANKED_WINARTIO_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.6425)
         )
         UNRANKED_POSITION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.6725)
 
-        TOTAL_STATICTICS_TEXT = self.get_font(int(self.font_size[0])).render("Total Statistics", True, self.text_color)
+        TOTAL_STATICTICS_TEXT = render_small_caps("Total Statistics", int(self.font_size[0]), self.text_color)
         TOTAL_STATISTICS_RECT = TOTAL_STATICTICS_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.71)
         )
 
-        TOTAL_GAMES_PLAYED_TEXT = self.get_font(int(self.font_size[1])).render(
-            f"Games played: {self.__profile_data['total_games']}", True, self.text_color
-        )
+        TOTAL_GAMES_PLAYED_TEXT = render_small_caps(f"Games played: {self.__profile_data['total_games']}", int(self.font_size[1]), self.text_color)
         TOTAL_GAMES_PLAYED_RECT = TOTAL_GAMES_PLAYED_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.745)
         )
 
         total_wins = self.__profile_data["ranked_games"][0] + self.__profile_data["unranked_games"][0]
         total_loses = self.__profile_data["ranked_games"][1] + self.__profile_data["unranked_games"][1]
-        TOTAL_WINS_LOSES_TEXT = self.get_font(int(self.font_size[1])).render(f"Wins/Loses: {total_wins}/{total_loses}", True, self.text_color)
+        TOTAL_WINS_LOSES_TEXT = render_small_caps(f"Wins/Loses: {total_wins}/{total_loses}", int(self.font_size[1]), self.text_color)
         TOTAL_WINS_LOSES_RECT = TOTAL_WINS_LOSES_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.78)
         )
@@ -943,7 +946,7 @@ class H5_Lobby(BasicWindow):
             winrate = (total_wins / (total_wins + total_loses)) * 100
         except ZeroDivisionError:
             winrate = 0
-        TOTAL_WINARTIO_TEXT = self.get_font(int(self.font_size[1])).render(f"Win rate: {winrate} %", True, self.text_color)
+        TOTAL_WINARTIO_TEXT = render_small_caps(f"Win rate: {winrate} %", int(self.font_size[1]), self.text_color)
         TOTAL_WINRATIO_RECT = TOTAL_WINARTIO_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.815)
         )
@@ -952,7 +955,7 @@ class H5_Lobby(BasicWindow):
             image=self.QUIT_FRAME,
             image_highlited=self.QUIT_FRAME_HIGHLIGHTED,
             position=(self.frame_position[0] + self.frame_dims[0] * 0.875, self.frame_position[1] + self.frame_dims[1] * 0.0875),
-            font=self.get_font(self.font_size[0]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -1026,19 +1029,19 @@ class H5_Lobby(BasicWindow):
 
         opponent_color = "#02ba09" if result_color == "#db1102" else "#db1102"
 
-        RESULT_TEXT = self.get_font(int(self.font_size[0] * 1.5)).render(result_text, True, result_color)
+        RESULT_TEXT = render_small_caps(result_text, int(self.font_size[0] * 1.5), result_color)
         RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.2))
 
-        MYSELF_TEXT = self.get_font(self.font_size[0]).render(f"{self.client_config["nickname"]}: ", True, self.text_color)
-        MYSELF_POINTS = self.get_font(self.font_size[0]).render(f"{player_points} {player_points_change}", True, result_color)
+        MYSELF_TEXT = render_small_caps(f"{self.client_config["nickname"]}: ", self.font_size[0], self.text_color)
+        MYSELF_POINTS = render_small_caps(f"{player_points} {player_points_change}", self.font_size[0], result_color)
         total_width = MYSELF_TEXT.get_width() + MYSELF_POINTS.get_width()
         start_x = (dims[0] + overlay_width * 0.5) - (total_width / 2)
         start_y = dims[1] + overlay_height * 0.375
         MYSELF_RECT = MYSELF_TEXT.get_rect(topleft=(start_x, start_y))
         MYSELF_POINTS_RECT = MYSELF_POINTS.get_rect(topleft=(MYSELF_RECT.right, start_y))
 
-        OPPONENT_TEXT = self.get_font(self.font_size[0]).render(f"{opponent_nickname}: ", True, self.text_color)
-        OPPONENT_POINTS = self.get_font(self.font_size[0]).render(f"{opponent_points} {opponent_points_change}", True, opponent_color)
+        OPPONENT_TEXT = render_small_caps(f"{opponent_nickname}: ", self.font_size[0], self.text_color)
+        OPPONENT_POINTS = render_small_caps(f"{opponent_points} {opponent_points_change}", self.font_size[0], opponent_color)
         total_width = OPPONENT_TEXT.get_width() + OPPONENT_POINTS.get_width()
         start_x = (dims[0] + overlay_width * 0.5) - (total_width / 2)
         start_y = dims[1] + overlay_height * 0.5
@@ -1051,7 +1054,7 @@ class H5_Lobby(BasicWindow):
             image_inactive=self.ACCEPT_BUTTON_INACTIVE,
             position=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.8),
             text_input="Confirm",
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
@@ -1082,19 +1085,19 @@ class H5_Lobby(BasicWindow):
         )
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
 
-        RESOLUTION_TEXT = self.get_font(self.font_size[1]).render("Resolution:", True, self.text_color)
+        RESOLUTION_TEXT = render_small_caps("Resolution:", self.font_size[1], self.text_color)
         RESOLUTION_RECT = RESOLUTION_TEXT.get_rect(center=(dims[0] + overlay_width * 0.3, dims[1] + overlay_height * 0.2))
         RESOLUTION_CHOICES = OptionBox(
             position=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.15),
             dimensions=(160, 40),
             color=pygame.Color("gray"),
             highlight_color=pygame.Color("deepskyblue"),
-            font=pygame.font.SysFont(None, 30),
+            font_size=self.font_size[1],
             option_list=resolution_choices,
             selected=resolution_choices.index(self.transformation_option),
         )
 
-        RANKED_TEXT = self.get_font(self.font_size[1]).render("Play ranked:", True, self.text_color)
+        RANKED_TEXT = render_small_caps("Play ranked:", self.font_size[1], self.text_color)
         RANKED_RECT = RANKED_TEXT.get_rect(center=(dims[0] + overlay_width * 0.3, dims[1] + overlay_height * 0.4))
         CHECKBOX_RANKED = CheckBox(
             position=(dims[0] + overlay_width * 0.7, dims[1] + overlay_height * 0.4),
@@ -1107,7 +1110,7 @@ class H5_Lobby(BasicWindow):
             image=self.QUIT_FRAME,
             image_highlited=self.QUIT_FRAME_HIGHLIGHTED,
             position=(self.frame_position[0] + self.frame_dims[0] * 0.875, self.frame_position[1] + self.frame_dims[1] * 0.0875),
-            font=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )

@@ -1,6 +1,7 @@
 import pygame
 
 from widgets.player_box import PlayerBox
+from src.helpers import render_small_caps
 
 
 class UsersList:
@@ -43,7 +44,7 @@ class UsersList:
         self,
         position: tuple[float, float],
         color: pygame.Color,
-        font: pygame.font.Font,
+        font_size: int,
         title: str,
         image: pygame.Surface,
         image_bg: pygame.Surface,
@@ -57,7 +58,7 @@ class UsersList:
         self.x_pos = position[0]
         self.y_pos = position[1]
         self.color = color
-        self.font = font
+        self.font_size = font_size
         self.title = title
         self.image = image
         self.image_box = image_box
@@ -70,7 +71,7 @@ class UsersList:
         self.scroll_dragging = False
         self.player_list = []
 
-        self.title_surface = self.font.render(self.title, True, self.color)
+        self.title_surface = render_small_caps(self.title, self.font_size, self.color)
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         self.rect_bg = pygame.Rect(
             self.x_pos - (self.rect.width / 2.15),
@@ -205,7 +206,7 @@ class UsersList:
                             self.rect.height / 10,
                         ),
                         color=self.color,
-                        font=self.font,
+                        font_size=self.font_size,
                         nickname=key,
                         ranking_points=value[0],
                         state=value[1],
@@ -225,7 +226,7 @@ class UsersList:
                         self.rect.height / 10,
                     ),
                     color=self.color,
-                    font=self.font,
+                    font_size=self.font_size,
                     nickname=key,
                     ranking_points=value[0],
                     state=value[1],

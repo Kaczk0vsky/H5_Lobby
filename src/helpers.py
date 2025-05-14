@@ -134,3 +134,41 @@ def is_server_reachable(
 
 def format_state(state: str) -> str:
     return state.replace("_", " ").capitalize()
+
+
+def render_small_caps(text: str, font_size: int, color: tuple) -> pygame.Surface:
+    font_large = pygame.font.Font("resources/Quivira.otf", font_size)
+    font_small = pygame.font.Font("resources/Quivira.otf", int(font_size * 0.65))
+
+    surfaces = []
+    max_ascent = max(font_large.get_ascent(), font_small.get_ascent())
+    max_bottom = 0
+
+    for char in text:
+        if char.islower():
+            font = font_small
+            char_upper = char.upper()
+        else:
+            font = font_large
+            char_upper = char
+
+        surf = font.render(char_upper, True, color)
+        ascent = font.get_ascent()
+        offset_y = max_ascent - ascent
+
+        bottom = offset_y + surf.get_height()
+        max_bottom = max(max_bottom, bottom)
+
+        surfaces.append((surf, offset_y))
+
+    total_width = sum(surf.get_width() for surf, _ in surfaces)
+    total_height = max_bottom
+
+    result_surface = pygame.Surface((total_width, total_height), pygame.SRCALPHA)
+
+    x_offset = 0
+    for surf, offset_y in surfaces:
+        result_surface.blit(surf, (x_offset, offset_y))
+        x_offset += surf.get_width()
+
+    return result_surface
