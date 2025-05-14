@@ -129,6 +129,8 @@ class BasicWindow:
         self.SCROLL_BAR = pygame.image.load(os.path.join(os.getcwd(), "resources/players_online/scroll_bar.png"))
         self.LEFT_FRAME = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/frame.png"))
         self.HELP_FRAME = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/help_window.png"))
+        self.DISCORD_LOGO = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/discord_logo.png"))
+        self.DISCORD_LOGO_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/discord_logo_highlighted.png"))
 
     def error_window(self, text: str, dimensions: tuple[int, int]) -> tuple:
         overlay_width, overlay_height = dimensions

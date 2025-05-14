@@ -5,6 +5,7 @@ import time
 import requests
 import random
 import ctypes
+import webbrowser
 
 from pygame.locals import *
 
@@ -14,6 +15,7 @@ from src.global_vars import (
     fonts_sizes,
     bg_sound_volume,
     env_dict,
+    discord_invite,
 )
 from src.basic_window import BasicWindow
 from src.run_ashan_arena import AschanArena3Game
@@ -281,6 +283,8 @@ class H5_Lobby(BasicWindow):
             self.chackbox_dims,
         )
         self.LEFT_FRAME = pygame.transform.scale(self.LEFT_FRAME, self.frame_dims)
+        self.DISCORD_LOGO = pygame.transform.scale(self.DISCORD_LOGO, self.quit_frame_dims)
+        self.DISCORD_LOGO_HIGHLIGHTED = pygame.transform.scale(self.DISCORD_LOGO_HIGHLIGHTED, self.quit_frame_dims)
         self.NARROW_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 3))
         self.WIDE_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 5))
 
@@ -300,7 +304,7 @@ class H5_Lobby(BasicWindow):
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
-                1080 * (transformation_factors[self.transformation_option][0]),
+                1060 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="Ranking",
@@ -312,7 +316,7 @@ class H5_Lobby(BasicWindow):
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
-                1330 * (transformation_factors[self.transformation_option][0]),
+                1290 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="News",
@@ -324,10 +328,21 @@ class H5_Lobby(BasicWindow):
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
-                1580 * (transformation_factors[self.transformation_option][0]),
+                1520 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="My Profile",
+            font_size=self.font_size[1],
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+        )
+        DISCORD = Button(
+            image=self.DISCORD_LOGO,
+            image_highlited=self.DISCORD_LOGO_HIGHLIGHTED,
+            position=(
+                1660 * (transformation_factors[self.transformation_option][0]),
+                50 * (transformation_factors[self.transformation_option][1]),
+            ),
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
@@ -406,6 +421,7 @@ class H5_Lobby(BasicWindow):
                 RANKING,
                 NEWS,
                 MY_PROFILE,
+                DISCORD,
                 PLAYER_PROFILE,
                 OPTIONS_BUTTON,
                 QUIT_BUTTON,
@@ -621,6 +637,8 @@ class H5_Lobby(BasicWindow):
                         if self.__options_status:
                             self.__options_status = False
                         continue
+                    if DISCORD.check_for_input(MENU_MOUSE_POS):
+                        webbrowser.open(discord_invite)
                     if PLAYER_PROFILE.check_for_input(MENU_MOUSE_POS):
                         pass
                     if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):

@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 bg_sound_volume = 0.2
+discord_invite = "https://discord.gg/rdNaEYSJ"
 resolution_choices = [
     "1280x720",
     "1920x1080",
