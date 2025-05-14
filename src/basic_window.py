@@ -86,9 +86,6 @@ class BasicWindow:
         pygame.quit()
         sys.exit()
 
-    def get_font(self, font_size: int = 75) -> pygame.font.Font:
-        return pygame.font.Font("resources/Quivira.otf", font_size)
-
     def create_universal_elements(self) -> None:
         self.BG = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/bg.png"))
         self.SMALLER_WINDOWS_BG = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/player_search_frame.png"))

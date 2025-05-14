@@ -136,9 +136,13 @@ def format_state(state: str) -> str:
     return state.replace("_", " ").capitalize()
 
 
+def get_font(font_size: int = 75) -> pygame.font.Font:
+    return pygame.font.Font("resources/Quivira.otf", font_size)
+
+
 def render_small_caps(text: str, font_size: int, color: tuple) -> pygame.Surface:
-    font_large = pygame.font.Font("resources/Quivira.otf", font_size)
-    font_small = pygame.font.Font("resources/Quivira.otf", int(font_size * 0.65))
+    font_large = get_font(font_size)
+    font_small = get_font(int(font_size * 0.65))
 
     surfaces = []
     max_ascent = max(font_large.get_ascent(), font_small.get_ascent())

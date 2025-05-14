@@ -100,7 +100,7 @@ class LoginWindow(BasicWindow):
         self.QUIT = pygame.transform.scale(self.QUIT, self.checkbox_dims)
         self.QUIT_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.checkbox_dims)
 
-        REMEMBER_LOGIN_TEXT = self.get_font(self.font_size[0]).render("Remeber me:", True, self.text_color)
+        REMEMBER_LOGIN_TEXT = render_small_caps("Remeber me:", self.font_size[0], self.text_color)
         REMEMBER_LOGIN_RECT = REMEMBER_LOGIN_TEXT.get_rect(center=(self.text_pos[0], self.text_pos[1]))
         LOGIN_BUTTON = Button(
             image=self.BUTTON,
