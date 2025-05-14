@@ -5,6 +5,7 @@ import sys
 
 from src.settings_reader import load_resolution_settings
 from src.global_vars import bg_sound_volume, env_dict
+from src.helpers import render_small_caps
 from widgets.button import Button
 from widgets.cursor import Cursor
 
@@ -139,7 +140,7 @@ class BasicWindow:
 
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
 
-        WRONG_PASSWORD_TEXT = self.get_font(self.font_size[0]).render(text, True, self.text_color)
+        WRONG_PASSWORD_TEXT = render_small_caps(text, int(self.font_size[0] * 1.5), self.text_color)
         WRONG_PASSOWRD_RECT = WRONG_PASSWORD_TEXT.get_rect(center=(screen_width // 2, overlay_y + overlay_height // 3))
 
         BACK_BUTTON = Button(
@@ -147,7 +148,7 @@ class BasicWindow:
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(screen_width // 2, overlay_y + overlay_height * 2 // 3),
             text_input="Back",
-            font_size=self.get_font(self.font_size[1]),
+            font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
