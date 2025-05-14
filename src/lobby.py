@@ -618,12 +618,16 @@ class H5_Lobby(BasicWindow):
                     if MY_PROFILE.check_for_input(MENU_MOUSE_POS):
                         self.__update_profile_status = True
                         self.__profile_status = True
+                        if self.__options_status:
+                            self.__options_status = False
                         continue
                     if PLAYER_PROFILE.check_for_input(MENU_MOUSE_POS):
                         pass
                     if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.__update_options_status = True
                         self.__options_status = True
+                        if self.__profile_status:
+                            self.__profile_status = False
                         continue
                     if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                         if self.__queue_status:
@@ -653,8 +657,6 @@ class H5_Lobby(BasicWindow):
                             self.__game_data = None
 
                     if self.__profile_status:
-                        if self.__options_status:
-                            self.__options_status = False
                         if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.__update_profile_status = False
                             self.__profile_status = False
@@ -700,7 +702,6 @@ class H5_Lobby(BasicWindow):
                         if CHECKBOX_RANKED.check_for_input(MENU_MOUSE_POS):
                             pass
                         if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            set_all_buttons_active(is_active=True)
                             self.__options_status = False
 
             if self.__opponent_accepted and self.__player_accepted:
