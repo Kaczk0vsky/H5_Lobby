@@ -144,12 +144,12 @@ WantedBy=multi-user.target
 5) `sudo systemctl daemon-reload`
 6) `sudo systemctl enable celery-worker.service`
 7) `sudo systemctl enable celery-beat.service`
-8) `sudo systemctl start celery-wroker.service`
+8) `sudo systemctl start celery-worker.service`
 9) `sudo systemctl start celery-beat.service`
 
 
 ##### 8. SoftEtherVPN server creation
-1) `sudo apt-get install lynx -y`
+1) `sudo apt-get install lynx -y & sudo apt install build-essential`
 2) `lynx http://www.softether-download.com/files/softether/` - find latets version, select linux, then VPN server. Next press "d" to download the file.
 3) `tar -xvzf softether-vpnserver-v4.42-9798-rtm-2023.06.30-linux-x64-64bit.tar.gz ` - the file name may be different, change accordingly
 4) `cd vpnserver/ & make`
