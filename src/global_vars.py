@@ -12,6 +12,7 @@ resolution_choices = [
     "2560x1440",
     "Fullscreen",
 ]
+points_choices = [str(val) for val in range(1000, 2050, 50)]
 transformation_factors = {
     "800x600": (0.4167, 0.5556),
     "1280x720": (0.6667, 0.6667),

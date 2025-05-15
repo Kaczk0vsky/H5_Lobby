@@ -12,3 +12,6 @@ vpn_path = ""
 nickname = ""
 password = ""
 remember_password = false
+volume = 0.2
+points_treshold = 1000
+is_ranked = true

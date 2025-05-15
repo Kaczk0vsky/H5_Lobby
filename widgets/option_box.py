@@ -1,6 +1,6 @@
 import pygame
 
-from src.helpers import render_small_caps
+from src.helpers import render_small_caps, play_on_empty
 
 
 class OptionBox:
@@ -29,14 +29,14 @@ class OptionBox:
             Returns the index of the selected option if changed, otherwise -1.
     """
 
-    _active_option = -1
-    _draw_menu = False
-    _menu_active = False
-
     def __init__(
         self,
         position: tuple[float, float],
         dimensions: tuple[int, int],
+        arrow_left: pygame.Surface,
+        arrow_left_highlighted: pygame.Surface,
+        arrow_right: pygame.Surface,
+        arrow_right_highlighted: pygame.Surface,
         color: pygame.Color,
         highlight_color: pygame.Color,
         font_size: int,
@@ -47,58 +47,59 @@ class OptionBox:
         self.y_pos = position[1]
         self.w = dimensions[0]
         self.h = dimensions[1]
+        self.arrow_left = arrow_left
+        self.arrow_left_highlighted = arrow_left_highlighted
+        self.arrow_right = arrow_right
+        self.arrow_right_highlighted = arrow_right_highlighted
         self.color = color
         self.highlight_color = highlight_color
         self.font_size = font_size
         self.option_list = option_list
         self.selected = selected
-        self.rect = pygame.Rect(self.x_pos, self.y_pos, self.w, self.h)
 
-    def draw(self, screen: pygame.Surface) -> None:
-        pygame.draw.rect(screen, self.highlight_color if self._menu_active else self.color, self.rect)
-        pygame.draw.rect(screen, (0, 0, 0), self.rect, 2)
-        msg = render_small_caps(self.option_list[self.selected], self.font_size, (0, 0, 0))
-        screen.blit(msg, msg.get_rect(center=self.rect.center))
+        self.text = render_small_caps(self.option_list[self.selected], self.font_size, self.color)
+        self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
+        self._update_arrow_rects()
 
-        if self._draw_menu:
-            for i, text in enumerate(self.option_list):
-                rect = self.rect.copy()
-                rect.y += (i + 1) * self.rect.height
-                pygame.draw.rect(
-                    screen,
-                    self.highlight_color if i == self._active_option else self.color,
-                    rect,
-                )
-                msg = render_small_caps(text, self.font_size, (0, 0, 0))
-                screen.blit(msg, msg.get_rect(center=rect.center))
-            outer_rect = (
-                self.rect.x,
-                self.rect.y + self.rect.height,
-                self.rect.width,
-                self.rect.height * len(self.option_list),
-            )
-            pygame.draw.rect(screen, (0, 0, 0), outer_rect, 2)
+    def _update_arrow_rects(self):
+        center_y = self.text_rect.centery
 
-    def update(self, event: pygame.event) -> int:
-        mpos = pygame.mouse.get_pos()
-        self._menu_active = self.rect.collidepoint(mpos)
+        self.arrow_left_rect = self.arrow_left.get_rect()
+        self.arrow_left_rect.midright = (self.text_rect.left - self.text_rect.width * 0.1, center_y)
 
-        self._active_option = -1
-        for i in range(len(self.option_list)):
-            rect = self.rect.copy()
-            rect.y += (i + 1) * self.rect.height
-            if rect.collidepoint(mpos):
-                self._active_option = i
-                break
+        self.arrow_right_rect = self.arrow_right.get_rect()
+        self.arrow_right_rect.midleft = (self.text_rect.right + self.text_rect.width * 0.1, center_y)
 
-        if not self._menu_active and self._active_option == -1:
-            self._draw_menu = False
+    def update(self, screen: pygame.Surface, position: tuple[int, int]) -> int:
+        self.text = render_small_caps(self.option_list[self.selected], self.font_size, self.color)
+        self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self._menu_active:
-                self._draw_menu = not self._draw_menu
-            elif self._draw_menu and self._active_option >= 0:
-                self.selected = self._active_option
-                self._draw_menu = False
-                return self._active_option
-        return -1
+        self._update_arrow_rects()
+        screen.blit(self.text, self.text_rect)
+
+        if self.arrow_left_rect.collidepoint(position):
+            screen.blit(self.arrow_left_highlighted, self.arrow_left_rect)
+        else:
+            screen.blit(self.arrow_left, self.arrow_left_rect)
+
+        if self.arrow_right_rect.collidepoint(position):
+            screen.blit(self.arrow_right_highlighted, self.arrow_right_rect)
+        else:
+            screen.blit(self.arrow_right, self.arrow_right_rect)
+
+    def check_for_input(self, position: tuple[int, int]) -> bool:
+        if self.arrow_left_rect.collidepoint(position):
+            play_on_empty(path="resources/button_click.mp3")
+            self.selected -= 1
+            if self.selected == -1:
+                self.selected = len(self.option_list) - 1
+            return True
+
+        if self.arrow_right_rect.collidepoint(position):
+            play_on_empty(path="resources/button_click.mp3")
+            self.selected += 1
+            if self.selected == len(self.option_list):
+                self.selected = 0
+            return True
+
+        return False

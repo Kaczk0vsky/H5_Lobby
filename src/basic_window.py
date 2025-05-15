@@ -96,11 +96,11 @@ class BasicWindow:
         self.CHECKBOX = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/iconsquare_dark.png"))
         self.CHECKBOX_CHECKED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/selected.png"))
         self.LINE = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/separating_stripe.png"))
+        self.QUESTION_MARK = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/qm1.png"))
+        self.QUESTION_MARK_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/qm2.png"))
 
     def create_login_elements(self) -> None:
         self.create_universal_elements()
-        self.QUESTION_MARK = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/qm1.png"))
-        self.QUESTION_MARK_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/qm2.png"))
         self.CHECK_MARK = pygame.image.load(os.path.join(os.getcwd(), "resources/registration/yes2.png"))
         self.CHECK_MARK_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/registration/yes1.png"))
         self.UNCHECK_MARK = pygame.image.load(os.path.join(os.getcwd(), "resources/registration/no2.png"))
@@ -131,6 +131,12 @@ class BasicWindow:
         self.HELP_FRAME = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/help_window.png"))
         self.DISCORD_LOGO = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/discord_logo.png"))
         self.DISCORD_LOGO_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/discord_logo_highlighted.png"))
+        self.ARROW_LEFT = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/settings_arrow_left_dark.png"))
+        self.ARROW_LEFT_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/settings_arrow_left_light.png"))
+        self.ARROW_RIGHT = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/settings_arrow_right_dark.png"))
+        self.ARROW_RIGHT_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/settings_arrow_right_light.png"))
+        self.SETTINGS_SCROLL_BAR = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/sound_settings_scroll_bar.png"))
+        self.SETTINGS_SCROLL_MARKER = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/sound_settings_scroll.png"))
 
     def error_window(self, text: str, dimensions: tuple[int, int]) -> tuple:
         overlay_width, overlay_height = dimensions

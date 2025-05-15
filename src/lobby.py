@@ -11,6 +11,7 @@ from pygame.locals import *
 
 from src.global_vars import (
     resolution_choices,
+    points_choices,
     transformation_factors,
     fonts_sizes,
     bg_sound_volume,
@@ -27,6 +28,8 @@ from widgets.option_box import OptionBox
 from widgets.progress_bar import ProgressBar
 from widgets.users_list import UsersList
 from widgets.check_box import CheckBox
+from widgets.hover_box import HoverBox
+from widgets.slider import Slider
 
 
 class H5_Lobby(BasicWindow):
@@ -131,6 +134,10 @@ class H5_Lobby(BasicWindow):
             520 * (transformation_factors[self.transformation_option][0]),
             800 * (transformation_factors[self.transformation_option][1]),
         )
+        self.option_box_dims = (
+            160 * (transformation_factors[self.transformation_option][0]),
+            40 * (transformation_factors[self.transformation_option][1]),
+        )
         self.frame_position = (
             (self.SCREEN.get_width() - self.frame_dims[0]) * 0.01 * (transformation_factors[self.transformation_option][0]),
             (self.SCREEN.get_height() - self.frame_dims[1]) * 0.85 * (transformation_factors[self.transformation_option][1]),
@@ -139,9 +146,21 @@ class H5_Lobby(BasicWindow):
             60 * (transformation_factors[self.transformation_option][0]),
             60 * (transformation_factors[self.transformation_option][1]),
         )
-        self.chackbox_dims = (
+        self.checkbox_dims = (
             40 * (transformation_factors[self.transformation_option][0]),
             40 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.settings_checkbox_dims = (
+            50 * (transformation_factors[self.transformation_option][0]),
+            50 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.hoverbox_dims = (
+            40 * (transformation_factors[self.transformation_option][0]),
+            60 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.arrows_dims = (
+            30 * (transformation_factors[self.transformation_option][0]),
+            30 * (transformation_factors[self.transformation_option][1]),
         )
 
         self.BG = pygame.transform.scale(
@@ -274,19 +293,35 @@ class H5_Lobby(BasicWindow):
                 5 * (transformation_factors[self.transformation_option][1]),
             ),
         )
-        self.CHECKBOX = pygame.transform.scale(
-            self.CHECKBOX,
-            self.chackbox_dims,
-        )
-        self.CHECKBOX_CHECKED = pygame.transform.scale(
-            self.CHECKBOX_CHECKED,
-            self.chackbox_dims,
-        )
+        self.CHECKBOX = pygame.transform.scale(self.CHECKBOX, self.checkbox_dims)
+        self.CHECKBOX_CHECKED = pygame.transform.scale(self.CHECKBOX_CHECKED, self.checkbox_dims)
+        self.CHECKBOX_SETTINGS = pygame.transform.scale(self.CHECKBOX, self.settings_checkbox_dims)
+        self.CHECKBOX_SETTINGS_CHECKED = pygame.transform.scale(self.CHECKBOX_CHECKED, self.settings_checkbox_dims)
+        self.QUESTION_MARK = pygame.transform.scale(self.QUESTION_MARK, self.hoverbox_dims)
+        self.QUESTION_MARK_HIGHLIGHTED = pygame.transform.scale(self.QUESTION_MARK_HIGHLIGHTED, self.hoverbox_dims)
         self.LEFT_FRAME = pygame.transform.scale(self.LEFT_FRAME, self.frame_dims)
         self.DISCORD_LOGO = pygame.transform.scale(self.DISCORD_LOGO, self.quit_frame_dims)
         self.DISCORD_LOGO_HIGHLIGHTED = pygame.transform.scale(self.DISCORD_LOGO_HIGHLIGHTED, self.quit_frame_dims)
         self.NARROW_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 3))
         self.WIDE_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 5))
+        self.ARROW_LEFT = pygame.transform.scale(self.ARROW_LEFT, self.arrows_dims)
+        self.ARROW_LEFT_HIGHLIGHTED = pygame.transform.scale(self.ARROW_LEFT_HIGHLIGHTED, self.arrows_dims)
+        self.ARROW_RIGHT = pygame.transform.scale(self.ARROW_RIGHT, self.arrows_dims)
+        self.ARROW_RIGHT_HIGHLIGHTED = pygame.transform.scale(self.ARROW_RIGHT_HIGHLIGHTED, self.arrows_dims)
+        self.SETTINGS_SCROLL_BAR = pygame.transform.scale(
+            self.SETTINGS_SCROLL_BAR,
+            (
+                250 * (transformation_factors[self.transformation_option][0]),
+                30 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.SETTINGS_SCROLL_MARKER = pygame.transform.scale(
+            self.SETTINGS_SCROLL_MARKER,
+            (
+                30 * (transformation_factors[self.transformation_option][0]),
+                30 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
 
         FIND_GAME_BUTTON = Button(
             image=self.BUTTON,
@@ -598,21 +633,46 @@ class H5_Lobby(BasicWindow):
             if self.__options_status:
                 if self.__update_options_status:
                     (
+                        SETTINGS_TEXT,
+                        SETTINGS_RECT,
+                        SETTINGS_LINE,
                         RESOLUTION_TEXT,
                         RESOLUTION_RECT,
                         RESOLUTION_CHOICES,
+                        RESOLUTION_LINE,
+                        VOLUME_TEXT,
+                        VOLUME_RECT,
+                        VOLUME_SLIDER,
+                        VOLUME_LINE,
+                        POINTS_TRESHOLD_TEXT,
+                        POINTS_TRESHOLD_RECT,
+                        POINTS_CHOICES,
+                        POINTS_HOVER_BOX,
+                        POINTS_TRESHOLD_LINE,
                         RANKED_TEXT,
                         RANKED_RECT,
+                        RANKED_LINE,
                         CHECKBOX_RANKED,
                         CLOSE_BUTTON,
                     ) = self.options_window()
                     self.__update_options_status = False
 
+                self.SCREEN.blit(SETTINGS_TEXT, SETTINGS_RECT)
+                self.SCREEN.blit(self.WIDE_LINE, SETTINGS_LINE)
                 self.SCREEN.blit(RESOLUTION_TEXT, RESOLUTION_RECT)
+                self.SCREEN.blit(self.NARROW_LINE, RESOLUTION_LINE)
+                self.SCREEN.blit(VOLUME_TEXT, VOLUME_RECT)
+                self.SCREEN.blit(self.NARROW_LINE, VOLUME_LINE)
+                self.SCREEN.blit(POINTS_TRESHOLD_TEXT, POINTS_TRESHOLD_RECT)
+                POINTS_HOVER_BOX.update(self.SCREEN, MENU_MOUSE_POS)
+                self.SCREEN.blit(self.NARROW_LINE, POINTS_TRESHOLD_LINE)
                 self.SCREEN.blit(RANKED_TEXT, RANKED_RECT)
+                self.SCREEN.blit(self.NARROW_LINE, RANKED_LINE)
                 CHECKBOX_RANKED.update(self.SCREEN)
                 CLOSE_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
-                RESOLUTION_CHOICES.draw(self.SCREEN)
+                RESOLUTION_CHOICES.update(self.SCREEN, MENU_MOUSE_POS)
+                POINTS_CHOICES.update(self.SCREEN, MENU_MOUSE_POS)
+                VOLUME_SLIDER.update(self.SCREEN, MENU_MOUSE_POS)
 
             for event in pygame.event.get():
                 USERS_LIST.event(event)
@@ -688,35 +748,41 @@ class H5_Lobby(BasicWindow):
                     if self.__options_status:
                         if self.__profile_status:
                             self.__profile_status = False
-                        selected_option = RESOLUTION_CHOICES.update(event)
-                        if selected_option != -1:
-                            resolution = resolution_choices[selected_option]
-                            if "fullscreen" in resolution.lower():
-                                monitor_resolution = pygame.display.Info()
-                                self.SCREEN = pygame.display.set_mode(
-                                    (monitor_resolution.current_w, monitor_resolution.current_h),
-                                    pygame.FULLSCREEN,
-                                )
-                            else:
-                                self.transformation_option = resolution
-                                resolutions = resolution.split("x")
-                                self.config["screen_width"] = int(resolutions[0])
-                                self.config["screen_hight"] = int(resolutions[1])
-                                # TODO: add rescale function
-                                break
-                                self.SCREEN = pygame.display.set_mode((self.config["screen_width"], self.config["screen_hight"]))
-                                self.BG = pygame.image.load(os.path.join(os.getcwd(), "resources/background/background.png"))
-                                self.BG = pygame.transform.scale(
-                                    self.BG,
-                                    (self.config["screen_width"], self.config["screen_hight"]),
-                                )
+                        # selected_option = RESOLUTION_CHOICES.update(self.SCREEN, MENU_MOUSE_POS)
+                        # if selected_option != -1:
+                        #     resolution = resolution_choices[selected_option]
+                        #     if "fullscreen" in resolution.lower():
+                        #         monitor_resolution = pygame.display.Info()
+                        #         self.SCREEN = pygame.display.set_mode(
+                        #             (monitor_resolution.current_w, monitor_resolution.current_h),
+                        #             pygame.FULLSCREEN,
+                        #         )
+                        #     else:
+                        #         self.transformation_option = resolution
+                        #         resolutions = resolution.split("x")
+                        #         self.config["screen_width"] = int(resolutions[0])
+                        #         self.config["screen_hight"] = int(resolutions[1])
+                        # TODO: add rescale function
+                        # break
+                        # self.SCREEN = pygame.display.set_mode((self.config["screen_width"], self.config["screen_hight"]))
+                        # self.BG = pygame.image.load(os.path.join(os.getcwd(), "resources/background/background.png"))
+                        # self.BG = pygame.transform.scale(
+                        #     self.BG,
+                        #     (self.config["screen_width"], self.config["screen_hight"]),
+                        # )
 
-                            with open(os.path.join(os.getcwd(), "settings.toml"), "r") as f:
-                                data = toml.load(f)
-                                data["resolution"] = self.config
+                        # with open(os.path.join(os.getcwd(), "settings.toml"), "r") as f:
+                        #     data = toml.load(f)
+                        #     data["resolution"] = self.config
 
-                            with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
-                                toml.dump(data, f)
+                        # with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
+                        #     toml.dump(data, f)
+                        if RESOLUTION_CHOICES.check_for_input(MENU_MOUSE_POS):
+                            pass
+                        if POINTS_CHOICES.check_for_input(MENU_MOUSE_POS):
+                            pass
+                        if POINTS_HOVER_BOX.check_for_input(MENU_MOUSE_POS):
+                            pass
                         if CHECKBOX_RANKED.check_for_input(MENU_MOUSE_POS):
                             pass
                         if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -810,7 +876,7 @@ class H5_Lobby(BasicWindow):
             if self.__player_accepted:
                 information_str = f"Waiting for {self.__opponent_nickname} to accept..."
             else:
-                information_str = f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} RP"
+                information_str = f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} PKT"
             OPONNENT_TEXT = render_small_caps(information_str, self.font_size[0], self.text_color)
             OPONNENT_RECT = OPONNENT_TEXT.get_rect(center=(self.SCREEN.get_width() / 2, self.SCREEN.get_height() / 2.12))
             ACCEPT_BUTTON = Button(
@@ -1094,36 +1160,81 @@ class H5_Lobby(BasicWindow):
         )
 
     def options_window(self):
-        overlay_width, overlay_height = (
-            self.config["screen_width"] // 5,
-            self.config["screen_hight"] // 3.5,
+        SETTINGS_TEXT = render_small_caps("Settings", int(self.font_size[0] * 1.5), self.text_color)
+        SETTINGS_RECT = SETTINGS_TEXT.get_rect(
+            center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.15)
         )
-        dims = (
-            self.frame_position[0] * transformation_factors[self.transformation_option][0],
-            self.frame_position[1] * transformation_factors[self.transformation_option][1],
-        )
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
+        SETTINGS_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.1875)
 
-        RESOLUTION_TEXT = render_small_caps("Resolution:", self.font_size[1], self.text_color)
-        RESOLUTION_RECT = RESOLUTION_TEXT.get_rect(center=(dims[0] + overlay_width * 0.3, dims[1] + overlay_height * 0.2))
+        RESOLUTION_TEXT = render_small_caps("Resolution:", self.font_size[0], self.text_color)
+        RESOLUTION_RECT = RESOLUTION_TEXT.get_rect(
+            topleft=(self.frame_position[0] + self.frame_dims[0] * 0.125, self.frame_position[1] + self.frame_dims[1] * 0.21)
+        )
         RESOLUTION_CHOICES = OptionBox(
-            position=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.15),
-            dimensions=(160, 40),
-            color=pygame.Color("gray"),
-            highlight_color=pygame.Color("deepskyblue"),
+            position=(self.frame_position[0] + self.frame_dims[0] * 0.675, self.frame_position[1] + self.frame_dims[1] * 0.235),
+            dimensions=self.option_box_dims,
+            arrow_left=self.ARROW_LEFT,
+            arrow_left_highlighted=self.ARROW_LEFT_HIGHLIGHTED,
+            arrow_right=self.ARROW_RIGHT,
+            arrow_right_highlighted=self.ARROW_RIGHT_HIGHLIGHTED,
+            color=self.text_color,
+            highlight_color=self.hovering_color,
             font_size=self.font_size[1],
             option_list=resolution_choices,
             selected=resolution_choices.index(self.transformation_option),
         )
+        RESOLUTION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.28)
 
-        RANKED_TEXT = render_small_caps("Play ranked:", self.font_size[1], self.text_color)
-        RANKED_RECT = RANKED_TEXT.get_rect(center=(dims[0] + overlay_width * 0.3, dims[1] + overlay_height * 0.4))
+        VOLUME_TEXT = render_small_caps("Volume:", self.font_size[0], self.text_color)
+        VOLUME_RECT = VOLUME_TEXT.get_rect(
+            topleft=(self.frame_position[0] + self.frame_dims[0] * 0.125, self.frame_position[1] + self.frame_dims[1] * 0.3025)
+        )
+        VOLUME_SLIDER = Slider(
+            position=(self.frame_position[0] + self.frame_dims[0] * 0.35, self.frame_position[1] + self.frame_dims[1] * 0.31),
+            # dimensions=(160, 40),
+            scroll=self.SETTINGS_SCROLL_BAR,
+            scroll_marker=self.SETTINGS_SCROLL_MARKER,
+            color=self.text_color,
+            font_size=self.font_size[1],
+            selected_value="20",  # change it later
+        )
+        VOLUME_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.3725)
+
+        POINTS_TRESHOLD_TEXT = render_small_caps("Points treshold:", self.font_size[0], self.text_color)
+        POINTS_TRESHOLD_RECT = POINTS_TRESHOLD_TEXT.get_rect(
+            topleft=(self.frame_position[0] + self.frame_dims[0] * 0.125, self.frame_position[1] + self.frame_dims[1] * 0.395)
+        )
+        POINTS_CHOICES = OptionBox(
+            position=(self.frame_position[0] + self.frame_dims[0] * 0.675, self.frame_position[1] + self.frame_dims[1] * 0.42),
+            dimensions=self.option_box_dims,
+            arrow_left=self.ARROW_LEFT,
+            arrow_left_highlighted=self.ARROW_LEFT_HIGHLIGHTED,
+            arrow_right=self.ARROW_RIGHT,
+            arrow_right_highlighted=self.ARROW_RIGHT_HIGHLIGHTED,
+            color=self.text_color,
+            highlight_color=self.hovering_color,
+            font_size=self.font_size[1],
+            option_list=points_choices,
+            selected=0,
+        )
+        POINTS_HOVER_BOX = HoverBox(
+            image=self.QUESTION_MARK,
+            image_highlited=self.QUESTION_MARK_HIGHLIGHTED,
+            position=(self.frame_position[0] + self.frame_dims[0] * 0.85, self.frame_position[1] + self.frame_dims[1] * 0.42),
+        )
+        POINTS_TRESHOLD_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.465)
+
+        RANKED_TEXT = render_small_caps("Toggle ranked:", self.font_size[0], self.text_color)
+        RANKED_RECT = RANKED_TEXT.get_rect(
+            topleft=(self.frame_position[0] + self.frame_dims[0] * 0.125, self.frame_position[1] + self.frame_dims[1] * 0.4875)
+        )
         CHECKBOX_RANKED = CheckBox(
-            position=(dims[0] + overlay_width * 0.7, dims[1] + overlay_height * 0.4),
-            image=self.CHECKBOX,
-            image_checked=self.CHECKBOX_CHECKED,
+            position=(self.frame_position[0] + self.frame_dims[0] * 0.7, self.frame_position[1] + self.frame_dims[1] * 0.515),
+            image=self.CHECKBOX_SETTINGS,
+            image_checked=self.CHECKBOX_SETTINGS_CHECKED,
             checked=self.client_config["remember_password"],  # change this
         )
+        RANKED_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.5575)
 
         CLOSE_BUTTON = Button(
             image=self.QUIT_FRAME,
@@ -1135,11 +1246,25 @@ class H5_Lobby(BasicWindow):
         )
 
         return (
+            SETTINGS_TEXT,
+            SETTINGS_RECT,
+            SETTINGS_LINE,
             RESOLUTION_TEXT,
             RESOLUTION_RECT,
             RESOLUTION_CHOICES,
+            RESOLUTION_LINE,
+            VOLUME_TEXT,
+            VOLUME_RECT,
+            VOLUME_SLIDER,
+            VOLUME_LINE,
+            POINTS_TRESHOLD_TEXT,
+            POINTS_TRESHOLD_RECT,
+            POINTS_CHOICES,
+            POINTS_HOVER_BOX,
+            POINTS_TRESHOLD_LINE,
             RANKED_TEXT,
             RANKED_RECT,
+            RANKED_LINE,
             CHECKBOX_RANKED,
             CLOSE_BUTTON,
         )

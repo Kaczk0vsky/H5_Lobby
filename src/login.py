@@ -587,23 +587,23 @@ class LoginWindow(BasicWindow):
     @run_in_thread
     def login_player(self, inputs: list):
         url = f"https://{env_dict['SERVER_URL']}/db/{env_dict['PATH_LOGIN']}/"
-        self.client_config = {
+        user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
             "remember_password": self.client_config["remember_password"],
         }
 
-        if not self.client_config["nickname"] or not self.client_config["password"]:
+        if not user_data["nickname"] or not user_data["password"]:
             self.__window_overlay = True
             return "Fields cannot be empty!"
 
-        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", self.client_config["nickname"]):
+        if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", user_data["nickname"]):
             self.__window_overlay = True
             return "Nickname has incorrect format!"
 
         if not re.match(
             r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^+=!]{8,}$",
-            self.client_config["password"],
+            user_data["password"],
         ):
             self.__window_overlay = True
             return "Passowrd has incorrect format!"
@@ -622,13 +622,13 @@ class LoginWindow(BasicWindow):
         }
         self.session.cookies.set("csrftoken", self.csrf_token)
         try:
-            response = self.session.post(url, json=self.client_config, headers=headers)
+            response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
-                save_login_information(self.client_config)
+                save_login_information(user_data)
                 if self.vpn_client is None:
                     self.vpn_client = SoftEtherClient(
-                        self.client_config["nickname"],
-                        self.client_config["password"],
+                        user_data["nickname"],
+                        user_data["password"],
                     )
                     self.vpn_client.create_new_client()
                 self.vpn_client.set_vpn_state(state=True)
