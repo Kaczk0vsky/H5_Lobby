@@ -1181,7 +1181,7 @@ class H5_Lobby(BasicWindow):
             highlight_color=self.hovering_color,
             font_size=self.font_size[1],
             option_list=resolution_choices,
-            selected=resolution_choices.index(self.transformation_option),
+            selected=self.transformation_option,
         )
         RESOLUTION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.28)
 
@@ -1191,12 +1191,11 @@ class H5_Lobby(BasicWindow):
         )
         VOLUME_SLIDER = Slider(
             position=(self.frame_position[0] + self.frame_dims[0] * 0.35, self.frame_position[1] + self.frame_dims[1] * 0.31),
-            # dimensions=(160, 40),
             scroll=self.SETTINGS_SCROLL_BAR,
             scroll_marker=self.SETTINGS_SCROLL_MARKER,
             color=self.text_color,
             font_size=self.font_size[1],
-            selected_value="20",  # change it later
+            selected_value=self.client_config["volume"],
         )
         VOLUME_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.3725)
 
@@ -1215,7 +1214,7 @@ class H5_Lobby(BasicWindow):
             highlight_color=self.hovering_color,
             font_size=self.font_size[1],
             option_list=points_choices,
-            selected=0,
+            selected=self.client_config["points_treshold"],
         )
         POINTS_HOVER_BOX = HoverBox(
             image=self.QUESTION_MARK,
@@ -1232,7 +1231,7 @@ class H5_Lobby(BasicWindow):
             position=(self.frame_position[0] + self.frame_dims[0] * 0.7, self.frame_position[1] + self.frame_dims[1] * 0.515),
             image=self.CHECKBOX_SETTINGS,
             image_checked=self.CHECKBOX_SETTINGS_CHECKED,
-            checked=self.client_config["remember_password"],  # change this
+            checked=self.client_config["is_ranked"],
         )
         RANKED_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.5575)
 

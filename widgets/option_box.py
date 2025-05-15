@@ -55,7 +55,7 @@ class OptionBox:
         self.highlight_color = highlight_color
         self.font_size = font_size
         self.option_list = option_list
-        self.selected = selected
+        self.selected = self.option_list.index(selected)
 
         self.text = render_small_caps(self.option_list[self.selected], self.font_size, self.color)
         self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
