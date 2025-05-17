@@ -135,13 +135,13 @@ class H5_Lobby(BasicWindow):
             520 * (transformation_factors[self.transformation_option][0]),
             800 * (transformation_factors[self.transformation_option][1]),
         )
+        self.frame_position = (
+            15 * (transformation_factors[self.transformation_option][0]),
+            240 * (transformation_factors[self.transformation_option][1]),
+        )
         self.option_box_dims = (
             160 * (transformation_factors[self.transformation_option][0]),
             40 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.frame_position = (
-            (self.SCREEN.get_width() - self.frame_dims[0]) * 0.01 * (transformation_factors[self.transformation_option][0]),
-            (self.SCREEN.get_height() - self.frame_dims[1]) * 0.85 * (transformation_factors[self.transformation_option][1]),
         )
         self.quit_frame_dims = (
             60 * (transformation_factors[self.transformation_option][0]),
@@ -773,12 +773,6 @@ class H5_Lobby(BasicWindow):
                         #     (self.config["screen_width"], self.config["screen_hight"]),
                         # )
 
-                        # with open(os.path.join(os.getcwd(), "settings.toml"), "r") as f:
-                        #     data = toml.load(f)
-                        #     data["resolution"] = self.config
-
-                        # with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
-                        #     toml.dump(data, f)
                         if RESOLUTION_CHOICES.check_for_input(MENU_MOUSE_POS):
                             self.config["resolution"] = str(RESOLUTION_CHOICES.get_selected_option())
                         if POINTS_CHOICES.check_for_input(MENU_MOUSE_POS):
