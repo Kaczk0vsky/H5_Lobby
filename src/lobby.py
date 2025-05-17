@@ -1284,8 +1284,8 @@ class H5_Lobby(BasicWindow):
 
         user_data = {
             "nickname": self.user["nickname"],
-            "is_searching_ranked": self.user["is_ranked"],
-            "min_opponent_points": self.user["points_treshold"],
+            "is_searching_ranked": self.config["is_ranked"],
+            "min_opponent_points": self.config["points_treshold"],
         }
         headers = {
             "Referer": "https://h5-tavern.pl/",
@@ -1573,4 +1573,5 @@ class H5_Lobby(BasicWindow):
 
     def run_arena(self):
         game = AschanArena3Game(self)
+        time.sleep(2)
         game.run_processes()

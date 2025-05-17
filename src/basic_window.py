@@ -80,7 +80,12 @@ class BasicWindow:
                     "X-CSRFToken": crsf_token,
                     "Content-Type": "application/json",
                 }
-                user_data = {"nickname": self.vpn_client.user_name}
+                # FIXME: separate those requests, self.config data is not needed here
+                user_data = {
+                    "nickname": self.vpn_client.user_name,
+                    "is_searching_ranked": self.config["is_ranked"],
+                    "min_opponent_points": self.config["points_treshold"],
+                }
                 session.cookies.set("csrftoken", crsf_token)
                 session.post(url, json=user_data, headers=headers)
         pygame.quit()
