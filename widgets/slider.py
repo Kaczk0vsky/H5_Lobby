@@ -35,7 +35,7 @@ class Slider:
         effective_left = self.scroll_rect.left + self.scroll_rect.width * 0.1
         self.scroll_marker_rect.center = (marker_x, self.scroll_rect.centery)
 
-    def update(self, screen: pygame.Surface, position: tuple[int, int]) -> int:
+    def update_slider(self, position: tuple[int, int]) -> int:
         mouse_x, mouse_y = position
         mouse_pressed = pygame.mouse.get_pressed()[0]
 
@@ -50,6 +50,7 @@ class Slider:
             self.scroll_marker_rect.centerx = new_x
             self.scroll_marker_rect.centery = self.scroll_rect.centery
 
+    def draw(self, screen: pygame.Surface) -> int:
         self.scroll_rect.topleft = (self.x_pos, self.y_pos)
         screen.blit(self.scroll, self.scroll_rect)
         screen.blit(self.scroll_marker, self.scroll_marker_rect)
@@ -59,9 +60,12 @@ class Slider:
         effective_width = effective_right - effective_left
 
         relative_pos = self.scroll_marker_rect.centerx - effective_left
-        selected_value = int((relative_pos / effective_width) * 100)
+        self.selected_value = int((relative_pos / effective_width) * 100)
 
-        text_surface = render_small_caps(str(selected_value), self.font_size, self.color)
+        text_surface = render_small_caps(str(self.selected_value), self.font_size, self.color)
         text_rect = text_surface.get_rect()
         text_rect.midleft = (self.scroll_rect.right + self.scroll_rect.width * 0.025, self.scroll_rect.centery)
         screen.blit(text_surface, text_rect)
+
+    def get_slider_value(self):
+        return self.selected_value

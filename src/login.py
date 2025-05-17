@@ -15,7 +15,7 @@ from src.helpers import (
     render_small_caps,
 )
 from src.vpn_handling import SoftEtherClient
-from src.settings_reader import load_client_settings
+from src.settings_reader import load_user
 from src.settings_writer import save_login_information
 from src.decorators import run_in_thread
 from widgets.text_input import TextInput
@@ -74,7 +74,7 @@ class LoginWindow(BasicWindow):
             self.__window_overlay = True
             self.__error_msg = "Server unreachable. Visit ToA Discord for more information."
 
-        self.client_config = load_client_settings()
+        self.user = load_user()
         self.set_window_caption(title="Login")
         self.play_background_music(music_path="resources/H5_login_menu_theme.mp3")
         self.create_login_elements()
@@ -152,7 +152,7 @@ class LoginWindow(BasicWindow):
             position=(self.checkbox_pos[0], self.checkbox_pos[1]),
             image=self.CHECKBOX,
             image_checked=self.CHECKBOX_CHECKED,
-            checked=self.client_config["remember_password"],
+            checked=self.user["remember_password"],
         )
         LOGIN_INPUT = TextInput(
             position=(self.input_pos[0], self.input_pos[1]),
@@ -162,7 +162,7 @@ class LoginWindow(BasicWindow):
             text_color=self.text_color,
             font_size=self.font_size[0],
             font_title_size=self.font_size[1],
-            text=(self.client_config["nickname"] if self.client_config["remember_password"] else ""),
+            text=(self.user["nickname"] if self.user["remember_password"] else ""),
             is_active=True,
         )
         PASSWORD_INPUT = TextInput(
@@ -173,7 +173,7 @@ class LoginWindow(BasicWindow):
             text_color=self.text_color,
             font_size=self.font_size[0],
             font_title_size=self.font_size[1],
-            text=(self.client_config["password"] if self.client_config["remember_password"] else ""),
+            text=(self.user["password"] if self.user["remember_password"] else ""),
             hide_text=True,
         )
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
@@ -208,7 +208,7 @@ class LoginWindow(BasicWindow):
                         if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.quit_game_handling()
                         if CHECK_BOX_PASSWORD.check_for_input(MENU_MOUSE_POS):
-                            self.client_config["remember_password"] = not self.client_config["remember_password"]
+                            self.user["remember_password"] = not self.user["remember_password"]
                     else:
                         if self.__error_msg:
                             if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -590,7 +590,7 @@ class LoginWindow(BasicWindow):
         user_data = {
             "nickname": inputs[0].get_string(),
             "password": inputs[1].get_string(),
-            "remember_password": self.client_config["remember_password"],
+            "remember_password": self.user["remember_password"],
         }
 
         if not user_data["nickname"] or not user_data["password"]:
@@ -691,7 +691,7 @@ class LoginWindow(BasicWindow):
             self.__window_overlay = True
             return "Server error!"
 
-        self.client_config = {
+        self.user = {
             "nickname": user_data["nickname"],
             "password": user_data["password"],
             "remember_password": False,
@@ -707,8 +707,8 @@ class LoginWindow(BasicWindow):
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 self.vpn_client = SoftEtherClient(
-                    self.client_config["nickname"],
-                    self.client_config["password"],
+                    self.user["nickname"],
+                    self.user["password"],
                 )
                 self.vpn_client.create_new_client()
                 self.__remove_all_widgets = True
@@ -806,7 +806,7 @@ class LoginWindow(BasicWindow):
         self.stop_background_music()
         lobby = H5_Lobby(
             vpn_client=self.vpn_client,
-            client_config=self.client_config,
+            user=self.user,
             crsf_token=self.csrf_token,
             session=self.session,
         )

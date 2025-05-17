@@ -14,7 +14,6 @@ from src.global_vars import (
     points_choices,
     transformation_factors,
     fonts_sizes,
-    bg_sound_volume,
     env_dict,
     discord_invite,
 )
@@ -23,6 +22,7 @@ from src.run_ashan_arena import AschanArena3Game
 from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state, render_small_caps
 from src.custom_thread import CustomThread
 from src.decorators import run_in_thread
+from src.settings_writer import save_client_settings
 from widgets.button import Button
 from widgets.option_box import OptionBox
 from widgets.progress_bar import ProgressBar
@@ -79,24 +79,25 @@ class H5_Lobby(BasicWindow):
     def __init__(
         self,
         vpn_client: object,
-        client_config: dict,
+        user: dict,
         crsf_token: str,
         session: requests.Session,
     ):
         BasicWindow.__init__(self)
 
         self.vpn_client = vpn_client
-        self.client_config = client_config
+        self.user = user
         self.crsf_token = crsf_token
         self.session = session
-        self.transformation_option = f"{self.config["screen_width"]}x{self.config["screen_hight"]}"
+        self.transformation_option = self.config["resolution"]
+        self.resolution = (int(self.config["resolution"].split("x")[0]), int(self.config["resolution"].split("x")[1]))
         self.font_size = fonts_sizes[self.transformation_option]
 
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.create_lobby_elements()
 
-        self.SCREEN = pygame.display.set_mode((self.config["screen_width"], self.config["screen_hight"]))
+        self.SCREEN = pygame.display.set_mode(self.resolution)
 
     def main_menu(self):
         def set_queue_vars(state: bool = False) -> None:
@@ -165,11 +166,11 @@ class H5_Lobby(BasicWindow):
 
         self.BG = pygame.transform.scale(
             self.BG,
-            (self.config["screen_width"], self.config["screen_hight"]),
+            self.resolution,
         )
         self.TOP_BAR = pygame.transform.scale(
             self.TOP_BAR,
-            (self.config["screen_width"] / 1.5, self.config["screen_hight"] / 10),
+            (self.resolution[0] / 1.5, self.resolution[1] / 10),
         )
         self.PLAYER_LIST = pygame.transform.scale(
             self.PLAYER_LIST,
@@ -516,7 +517,7 @@ class H5_Lobby(BasicWindow):
                     if cancel_bar:
                         self.__window_overlay = True
                         self.__error_msg = "Queue has been declined"
-                        pygame.mixer.Channel(0).set_volume(bg_sound_volume)
+                        pygame.mixer.Channel(0).set_volume(self.config["volume"])
                         pygame.mixer.Channel(self.__queue_channel).stop()
                         set_queue_vars(state=False)
                         set_all_buttons_active(is_active=True)
@@ -672,7 +673,8 @@ class H5_Lobby(BasicWindow):
                 CLOSE_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 RESOLUTION_CHOICES.update(self.SCREEN, MENU_MOUSE_POS)
                 POINTS_CHOICES.update(self.SCREEN, MENU_MOUSE_POS)
-                VOLUME_SLIDER.update(self.SCREEN, MENU_MOUSE_POS)
+                VOLUME_SLIDER.draw(self.SCREEN)
+                VOLUME_SLIDER.update_slider(MENU_MOUSE_POS)
 
             for event in pygame.event.get():
                 USERS_LIST.event(event)
@@ -714,7 +716,7 @@ class H5_Lobby(BasicWindow):
                     if self.__queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
                             set_all_buttons_active(is_active=True)
-                            pygame.mixer.Channel(0).set_volume(bg_sound_volume)
+                            pygame.mixer.Channel(0).set_volume(self.config["volume"])
                             if self.__queue_channel:
                                 pygame.mixer.Channel(self.__queue_channel).stop()
                             set_queue_vars(state=False)
@@ -778,15 +780,24 @@ class H5_Lobby(BasicWindow):
                         # with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
                         #     toml.dump(data, f)
                         if RESOLUTION_CHOICES.check_for_input(MENU_MOUSE_POS):
-                            pass
+                            self.config["resolution"] = str(RESOLUTION_CHOICES.get_selected_option())
                         if POINTS_CHOICES.check_for_input(MENU_MOUSE_POS):
-                            pass
+                            self.config["points_treshold"] = str(POINTS_CHOICES.get_selected_option())
                         if POINTS_HOVER_BOX.check_for_input(MENU_MOUSE_POS):
                             pass
                         if CHECKBOX_RANKED.check_for_input(MENU_MOUSE_POS):
-                            pass
+                            self.config["is_ranked"] = not self.config["is_ranked"]
                         if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
+                            save_client_settings(self.config)
                             self.__options_status = False
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if self.__options_status:
+                        self.config["volume"] = VOLUME_SLIDER.get_slider_value() / 100
+                        if self.__found_game:
+                            pygame.mixer.Channel(self.__queue_channel).set_volume(self.config["volume"])
+                        else:
+                            pygame.mixer.Channel(0).set_volume(self.config["volume"])
 
             if self.__opponent_accepted and self.__player_accepted:
                 pygame.mixer.Channel(self.__queue_channel).stop()
@@ -801,7 +812,7 @@ class H5_Lobby(BasicWindow):
                 self.__player_accepted = False
                 self.__game_found_music = False
                 self.__elapsed_time = None
-                pygame.mixer.Channel(0).set_volume(bg_sound_volume)
+                pygame.mixer.Channel(0).set_volume(self.config["volume"])
                 if self.__queue_channel:
                     pygame.mixer.Channel(self.__queue_channel).stop()
                 self.__error_msg = self.add_to_queue()
@@ -816,8 +827,8 @@ class H5_Lobby(BasicWindow):
                 (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
                     text=self.__error_msg,
                     dimensions=(
-                        self.config["screen_width"] // 3,
-                        self.config["screen_hight"] // 3,
+                        self.resolution[0] // 3,
+                        self.resolution[1] // 3,
                     ),
                 )
                 screen_width, screen_height = (
@@ -840,10 +851,7 @@ class H5_Lobby(BasicWindow):
             pygame.display.update()
 
     def queue_window(self):
-        overlay_width, overlay_height = (
-            self.config["screen_width"] // 3,
-            self.config["screen_hight"] // 3,
-        )
+        overlay_width, overlay_height = (self.resolution[0] // 3, self.resolution[1] // 3)
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
 
         if not self.__get_time:
@@ -869,7 +877,7 @@ class H5_Lobby(BasicWindow):
             if not self.__elapsed_time:
                 self.__elapsed_time = time.time()
             if not self.__game_found_music:
-                self.__queue_channel = play_on_empty("resources/match_found.wav", volume=bg_sound_volume)
+                self.__queue_channel = play_on_empty("resources/match_found.wav", volume=self.config["volume"])
                 pygame.mixer.Channel(0).set_volume(0.0)
                 self.__game_found_music = True
 
@@ -919,7 +927,7 @@ class H5_Lobby(BasicWindow):
         )
 
     def profile_window(self):
-        NICKNAME_TEXT = render_small_caps(self.client_config["nickname"], int(self.font_size[0] * 1.75), self.hovering_color)
+        NICKNAME_TEXT = render_small_caps(self.user["nickname"], int(self.font_size[0] * 1.75), self.hovering_color)
         NICKNAME_RECT = NICKNAME_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.15)
         )
@@ -969,7 +977,7 @@ class H5_Lobby(BasicWindow):
         except ZeroDivisionError:
             winrate = 0
 
-        RANKED_WINARTIO_TEXT = render_small_caps(f"Win rate: {winrate} %", int(self.font_size[1]), self.text_color)
+        RANKED_WINARTIO_TEXT = render_small_caps(f"Win rate: {round(winrate, 2)} %", int(self.font_size[1]), self.text_color)
         RANKED_WINRATIO_RECT = RANKED_WINARTIO_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.47)
         )
@@ -1004,7 +1012,7 @@ class H5_Lobby(BasicWindow):
             ) * 100
         except ZeroDivisionError:
             winrate = 0
-        UNRANKED_WINARTIO_TEXT = render_small_caps(f"Win rate: {winrate} %", int(self.font_size[1]), self.text_color)
+        UNRANKED_WINARTIO_TEXT = render_small_caps(f"Win rate: {round(winrate, 2)} %", int(self.font_size[1]), self.text_color)
         UNRANKED_WINRATIO_RECT = UNRANKED_WINARTIO_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.6425)
         )
@@ -1031,7 +1039,7 @@ class H5_Lobby(BasicWindow):
             winrate = (total_wins / (total_wins + total_loses)) * 100
         except ZeroDivisionError:
             winrate = 0
-        TOTAL_WINARTIO_TEXT = render_small_caps(f"Win rate: {winrate} %", int(self.font_size[1]), self.text_color)
+        TOTAL_WINARTIO_TEXT = render_small_caps(f"Win rate: {round(winrate, 2)} %", int(self.font_size[1]), self.text_color)
         TOTAL_WINRATIO_RECT = TOTAL_WINARTIO_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.815)
         )
@@ -1086,8 +1094,8 @@ class H5_Lobby(BasicWindow):
 
     def report_window(self):
         overlay_width, overlay_height = (
-            self.config["screen_width"] // 3.75,
-            self.config["screen_hight"] // 2.75,
+            self.resolution[0] // 3.75,
+            self.resolution[1] // 2.75,
         )
         dims = (
             640 * transformation_factors[self.transformation_option][0],
@@ -1117,7 +1125,7 @@ class H5_Lobby(BasicWindow):
         RESULT_TEXT = render_small_caps(result_text, int(self.font_size[0] * 1.5), result_color)
         RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.2))
 
-        MYSELF_TEXT = render_small_caps(f"{self.client_config["nickname"]}: ", self.font_size[0], self.text_color)
+        MYSELF_TEXT = render_small_caps(f"{self.user["nickname"]}: ", self.font_size[0], self.text_color)
         MYSELF_POINTS = render_small_caps(f"{player_points} {player_points_change}", self.font_size[0], result_color)
         total_width = MYSELF_TEXT.get_width() + MYSELF_POINTS.get_width()
         start_x = (dims[0] + overlay_width * 0.5) - (total_width / 2)
@@ -1181,7 +1189,7 @@ class H5_Lobby(BasicWindow):
             highlight_color=self.hovering_color,
             font_size=self.font_size[1],
             option_list=resolution_choices,
-            selected=self.transformation_option,
+            selected=self.config["resolution"],
         )
         RESOLUTION_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.28)
 
@@ -1195,7 +1203,7 @@ class H5_Lobby(BasicWindow):
             scroll_marker=self.SETTINGS_SCROLL_MARKER,
             color=self.text_color,
             font_size=self.font_size[1],
-            selected_value=self.client_config["volume"],
+            selected_value=self.config["volume"] * 100,
         )
         VOLUME_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.3725)
 
@@ -1214,7 +1222,7 @@ class H5_Lobby(BasicWindow):
             highlight_color=self.hovering_color,
             font_size=self.font_size[1],
             option_list=points_choices,
-            selected=self.client_config["points_treshold"],
+            selected=self.config["points_treshold"],
         )
         POINTS_HOVER_BOX = HoverBox(
             image=self.QUESTION_MARK,
@@ -1231,7 +1239,7 @@ class H5_Lobby(BasicWindow):
             position=(self.frame_position[0] + self.frame_dims[0] * 0.7, self.frame_position[1] + self.frame_dims[1] * 0.515),
             image=self.CHECKBOX_SETTINGS,
             image_checked=self.CHECKBOX_SETTINGS_CHECKED,
-            checked=self.client_config["is_ranked"],
+            checked=self.config["is_ranked"],
         )
         RANKED_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.5575)
 
@@ -1274,7 +1282,7 @@ class H5_Lobby(BasicWindow):
             self.__window_overlay = True
             return "CRSF Token is not valid"
 
-        user_data = {"nickname": self.client_config["nickname"]}
+        user_data = {"nickname": self.user["nickname"]}
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,
@@ -1313,7 +1321,7 @@ class H5_Lobby(BasicWindow):
             return "CRSF Token is not valid"
 
         user_data = {
-            "nickname": self.client_config["nickname"],
+            "nickname": self.user["nickname"],
             "is_accepted": is_accepted,
         }
         headers = {
@@ -1356,7 +1364,7 @@ class H5_Lobby(BasicWindow):
             self.__window_overlay = True
             "CRSF Token is not valid"
 
-        user_data = {"nickname": self.client_config["nickname"]}
+        user_data = {"nickname": self.user["nickname"]}
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,
@@ -1390,7 +1398,7 @@ class H5_Lobby(BasicWindow):
             self.__window_overlay = True
             return "CRSF Token is not valid"
 
-        user_data = {"nickname": self.client_config["nickname"]}
+        user_data = {"nickname": self.user["nickname"]}
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,
@@ -1421,7 +1429,7 @@ class H5_Lobby(BasicWindow):
             self.__window_overlay = True
             return "CRSF Token is not valid"
 
-        user_data = {"nickname": self.client_config["nickname"]}
+        user_data = {"nickname": self.user["nickname"]}
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,
@@ -1456,7 +1464,7 @@ class H5_Lobby(BasicWindow):
             return "CRSF Token is not valid"
 
         user_data = {
-            "nickname": self.client_config["nickname"],
+            "nickname": self.user["nickname"],
             "is_won": is_won,
             "castle": castle,
         }
@@ -1500,7 +1508,7 @@ class H5_Lobby(BasicWindow):
             self.__window_overlay = True
             return "CRSF Token is not valid"
 
-        user_data = {"nickname": self.client_config["nickname"]}
+        user_data = {"nickname": self.user["nickname"]}
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,

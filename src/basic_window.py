@@ -3,8 +3,8 @@ import os
 import requests
 import sys
 
-from src.settings_reader import load_resolution_settings
-from src.global_vars import bg_sound_volume, env_dict
+from src.settings_reader import load_client_settings
+from src.global_vars import env_dict
 from src.helpers import render_small_caps
 from widgets.button import Button
 from widgets.cursor import Cursor
@@ -50,7 +50,7 @@ class BasicWindow:
         self.text_color = "#c6c4c3"
         self.hovering_color = "#fefac9"
         self.inactive_color = "#A9A9A9"
-        self.config = load_resolution_settings()
+        self.config = load_client_settings()
         self.cursor = Cursor()
 
     def set_window_caption(self, title: str) -> None:
@@ -64,7 +64,7 @@ class BasicWindow:
             -1,
             0,
         )
-        pygame.mixer.Channel(0).set_volume(bg_sound_volume)
+        pygame.mixer.Channel(0).set_volume(self.config["volume"])
 
     def stop_background_music(self) -> None:
         pygame.mixer.fadeout(5000)

@@ -1,17 +1,16 @@
-[resolution]
-screen_width = 1920
-screen_hight = 1080
-
 [game]
 game_path = ""
 
 [soft_ether]
 vpn_path = ""
 
-[client_settings]
+[user]
 nickname = ""
 password = ""
 remember_password = false
+
+[client_settings]
+resolution = "1920x1080"
 volume = 0.2
 points_treshold = 1000
 is_ranked = true

@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-bg_sound_volume = 0.2
 discord_invite = "https://discord.gg/rdNaEYSJ"
 resolution_choices = [
     "1280x720",
@@ -12,7 +11,7 @@ resolution_choices = [
     "2560x1440",
     "Fullscreen",
 ]
-points_choices = [str(val) for val in range(1000, 2050, 50)]
+points_choices = [str(val) for val in range(0, 2050, 100)]
 transformation_factors = {
     "800x600": (0.4167, 0.5556),
     "1280x720": (0.6667, 0.6667),

@@ -103,3 +103,6 @@ class OptionBox:
             return True
 
         return False
+
+    def get_selected_option(self):
+        return self.option_list[self.selected]
