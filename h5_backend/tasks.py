@@ -37,27 +37,37 @@ def add_new_user_to_vpn_server(vpn_server_ip: str, vpn_admin_password: str, vpnc
 
 @shared_task
 def check_queue():
-    players_in_queue = list(Player.objects.filter(player_state=Player.IN_QUEUE))
-    # TODO: add enlarging mmr range dependant on time passed
+    queues = [
+        {"players": list(Player.objects.filter(player_state=Player.IN_QUEUE, is_searching_ranked=True)), "is_ranked": True},
+        {"players": list(Player.objects.filter(player_state=Player.IN_QUEUE, is_searching_ranked=False)), "is_ranked": False},
+    ]
 
-    if len(players_in_queue) >= 2:
-        player1 = players_in_queue[0]
-        player2 = players_in_queue[1]
+    for queue in queues:
+        players = queue["players"]
+        is_ranked = queue["is_ranked"]
 
-        with transaction.atomic():
-            player1 = Player.objects.select_for_update().get(id=player1.id)
-            player2 = Player.objects.select_for_update().get(id=player2.id)
-            existing_games = Game.objects.filter(
-                Q(player_1=player1, player_2=player2, is_new=True) | Q(player_1=player2, player_2=player1, is_new=True)
-            )
-            print("Found games:", existing_games)
-            if not Game.objects.filter(
-                Q(player_1=player1, player_2=player2, is_new=True) | Q(player_1=player2, player_2=player1, is_new=True)
-            ).exists():
-                print("przeszlo")
-                Game.objects.create(player_1=player1, player_2=player2, is_new=True)
+        if len(players) < 2:
+            continue
 
-            player1.player_state = Player.WAITING_ACCEPTANCE
-            player2.player_state = Player.WAITING_ACCEPTANCE
-            player1.save()
-            player2.save()
+        for player1 in players:
+            for player2 in players:
+                if player1 == player2:
+                    continue
+
+                if player1.ranking_points > player2.min_opponent_points and player2.ranking_points > player1.min_opponent_points:
+                    with transaction.atomic():
+                        player1_locked = Player.objects.select_for_update().get(id=player1.id)
+                        player2_locked = Player.objects.select_for_update().get(id=player2.id)
+
+                        existing_game = Game.objects.filter(
+                            Q(player_1=player1_locked, player_2=player2_locked, is_new=True)
+                            | Q(player_1=player2_locked, player_2=player1_locked, is_new=True)
+                        )
+
+                        if not existing_game.exists():
+                            Game.objects.create(player_1=player1_locked, player_2=player2_locked, is_new=True, is_ranked=is_ranked)
+
+                            player1_locked.player_state = Player.WAITING_ACCEPTANCE
+                            player2_locked.player_state = Player.WAITING_ACCEPTANCE
+                            player1_locked.save()
+                            player2_locked.save()

@@ -557,9 +557,11 @@ class HandleMatchReport(View):
 
             player_won = game.who_won
             player_lost = game.player_2 if game.who_won == game.player_1 else game.player_1
-
-            if not game.points_change_winner and not game.points_change_loser:
-                game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
+            if game.is_ranked:
+                if not game.points_change_winner and not game.points_change_loser:
+                    game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
+            else:
+                game.points_change_winner, game.points_change_loser = 0, 0
             game.save()
 
             game_data = {

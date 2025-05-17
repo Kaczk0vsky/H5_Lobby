@@ -12,7 +12,7 @@ class Player(models.Model):
     ranking_points = models.IntegerField(editable=True, default=1000)
     # leaderboard position
     ranking_position = models.IntegerField(editable=False, unique=True, null=True)
-
+    # player state
     OFFLINE = "offline"
     ONLINE = "online"
     IN_QUEUE = "in_queue"
@@ -28,8 +28,11 @@ class Player(models.Model):
         (ACCEPTED, "accepted"),
         (PLAYING, "playing"),
     ]
-    # player state
     player_state = models.CharField(max_length=30, choices=PLAYER_STATE_CHOICES, default="offline", editable=True)
+    # if player is looking to play ranked game
+    is_searching_ranked = models.BooleanField(editable=True, default=True)
+    # minimal opponent points in searching
+    min_opponent_points = models.IntegerField(editable=True, default=0)
 
     def __str__(self):
         return f"{self.nickname} - {self.ranking_points} ({self.player_state})"
