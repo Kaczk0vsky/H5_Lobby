@@ -221,19 +221,23 @@ class SetPlayerStateView(View):
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            serializer = UserSerializer(data=data, required_fields=["nickname"])
+            serializer = UserSerializer(data=data, required_fields=["nickname", "is_searching_ranked", "min_opponent_points"])
             if not serializer.is_valid():
-                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+                return None, None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
 
             nickname = serializer.validated_data["nickname"]
+            is_searching_ranked = serializer.validated_data["is_searching_ranked"]
+            min_opponent_points = serializer.validated_data["min_opponent_points"]
 
-            return nickname, None
+            return nickname, is_searching_ranked, min_opponent_points, None
 
         except json.JSONDecodeError:
-            return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+            return None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _update_player_state(self, player):
+    def _update_player_state(self, player, is_searching_ranked, min_opponent_points):
         player.player_state = self.state
+        player.is_searching_ranked = is_searching_ranked
+        player.min_opponent_points = min_opponent_points
         player.save()
 
     def post(self, request, *args, **kwargs):
@@ -244,7 +248,7 @@ class SetPlayerStateView(View):
                     status=500,
                 )
 
-            nickname, parse_error = self._parse_request_data(request)
+            nickname, is_searching_ranked, min_opponent_points, parse_error = self._parse_request_data(request)
             if parse_error:
                 return parse_error
 
@@ -253,7 +257,7 @@ class SetPlayerStateView(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
 
-            self._update_player_state(player)
+            self._update_player_state(player, is_searching_ranked, min_opponent_points)
             return JsonResponse({"success": True})
 
         except Exception as e:

@@ -1282,7 +1282,11 @@ class H5_Lobby(BasicWindow):
             self.__window_overlay = True
             return "CRSF Token is not valid"
 
-        user_data = {"nickname": self.user["nickname"]}
+        user_data = {
+            "nickname": self.user["nickname"],
+            "is_searching_ranked": self.user["is_ranked"],
+            "min_opponent_points": self.user["points_treshold"],
+        }
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,

@@ -12,6 +12,8 @@ class UserSerializer(serializers.Serializer):
     is_accepted = serializers.BooleanField(required=False)
     is_won = serializers.BooleanField(required=False)
     castle = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    is_searching_ranked = serializers.BooleanField(required=False)
+    min_opponent_points = serializers.IntegerField(required=False)
 
     def __init__(self, *args, required_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
