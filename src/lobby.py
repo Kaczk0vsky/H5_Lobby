@@ -697,6 +697,7 @@ class H5_Lobby(BasicWindow):
                         self.__update_profile_status = True
                         self.__profile_status = True
                         if self.__options_status:
+                            save_client_settings(self.config)
                             self.__options_status = False
                         continue
                     if DISCORD.check_for_input(MENU_MOUSE_POS):

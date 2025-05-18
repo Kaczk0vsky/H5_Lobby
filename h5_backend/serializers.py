@@ -4,16 +4,16 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
+from h5_backend.models import Game
+
 
 class UserSerializer(serializers.Serializer):
-    nickname = serializers.CharField(max_length=16, required=False)
+    nickname = serializers.CharField(max_length=16, required=True)
     email = serializers.EmailField(required=False)
     password = serializers.CharField(write_only=True, required=False)
-    is_accepted = serializers.BooleanField(required=False)
-    is_won = serializers.BooleanField(required=False)
-    castle = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    is_searching_ranked = serializers.BooleanField(required=False)
     min_opponent_points = serializers.IntegerField(required=False)
+    is_searching_ranked = serializers.BooleanField(required=False)
+    is_accepted = serializers.BooleanField(required=False)
 
     def __init__(self, *args, required_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -37,3 +37,14 @@ class UserSerializer(serializers.Serializer):
         except ValidationError:
             raise serializers.ValidationError("Invalid email format")
         return value
+
+
+class GameSerializer(serializers.Serializer):
+    castle = serializers.ChoiceField(choices=Game.CASTLE_TYPE_CHOICES, required=False, allow_null=True, allow_blank=True)
+    is_won = serializers.BooleanField(required=False)
+
+    def __init__(self, *args, required_fields=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if required_fields:
+            for field_name in required_fields:
+                self.fields[field_name].required = True

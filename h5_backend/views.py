@@ -21,7 +21,7 @@ from django.urls import reverse
 
 from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player, Ban, Game
-from h5_backend.serializers import UserSerializer
+from h5_backend.serializers import UserSerializer, GameSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -516,18 +516,23 @@ class HandleMatchReport(View):
     def _parse_post_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            serializer = UserSerializer(data=data, required_fields=["nickname", "is_won", "castle"])
-            if not serializer.is_valid():
-                return None, None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+            player_serializer = UserSerializer(data=data, required_fields=["nickname"])
+            game_serializer = GameSerializer(data=data, required_fields=["is_won", "castle"])
 
-            nickname = serializer.validated_data["nickname"]
-            game_won = serializer.validated_data["is_won"]
-            castle = serializer.validated_data["castle"]
+            if not player_serializer.is_valid() or not game_serializer.is_valid():
+                errors = {}
+                errors.update(player_serializer.errors)
+                errors.update(game_serializer.errors)
+                return None, None, None, JsonResponse({"success": False, "errors": errors}, status=400)
+
+            nickname = player_serializer.validated_data["nickname"]
+            game_won = game_serializer.validated_data["is_won"]
+            castle = game_serializer.validated_data["castle"]
 
             return nickname, game_won, castle, None
 
         except json.JSONDecodeError:
-            return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+            return None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
     def _parse_get_data(self, request):
         try:
