@@ -17,7 +17,7 @@ from src.global_vars import (
     env_dict,
     discord_invite,
 )
-from src.basic_window import BasicWindow
+from src.basic_window import GameWindowsBase
 from src.run_ashan_arena import AschanArena3Game
 from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state, render_small_caps
 from src.custom_thread import CustomThread
@@ -32,7 +32,7 @@ from widgets.hover_box import HoverBox
 from widgets.slider import Slider
 
 
-class H5_Lobby(BasicWindow):
+class H5_Lobby(GameWindowsBase):
     """
     The H5_Lobby class represents the main menu and lobby system for the game.
     It provides a graphical user interface (GUI) for players to navigate
@@ -83,24 +83,24 @@ class H5_Lobby(BasicWindow):
         crsf_token: str,
         session: requests.Session,
     ):
-        BasicWindow.__init__(self)
+        GameWindowsBase.__init__(self)
 
         self.vpn_client = vpn_client
         self.user = user
         self.crsf_token = crsf_token
         self.session = session
         self.transformation_option = self.config["resolution"]
-        self.resolution = (int(self.config["resolution"].split("x")[0]), int(self.config["resolution"].split("x")[1]))
         self.font_size = fonts_sizes[self.transformation_option]
 
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.create_lobby_elements()
 
+        self.resolution = (int(self.config["resolution"].split("x")[0]), int(self.config["resolution"].split("x")[1]))
         self.SCREEN = pygame.display.set_mode(self.resolution)
 
     def main_menu(self):
-        def set_queue_vars(state: bool = False) -> None:
+        def __set_queue_variables(state: bool = False) -> None:
             self.__game_found_music = state
             self.__get_time = state
             self.__found_game = state
@@ -111,218 +111,7 @@ class H5_Lobby(BasicWindow):
             self.__queue_channel = None
             self.__connection_timer = None
 
-        def set_all_buttons_active(is_active: bool = False) -> None:
-            FIND_GAME_BUTTON.set_active(is_active)
-            RANKING.set_active(is_active)
-            NEWS.set_active(is_active)
-            MY_PROFILE.set_active(is_active)
-            PLAYER_PROFILE.set_active(is_active)
-            OPTIONS_BUTTON.set_active(is_active)
-
-        self.button_dims = (
-            200 * (transformation_factors[self.transformation_option][0]),
-            60 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.top_elements_dims = (
-            50 * (transformation_factors[self.transformation_option][0]),
-            50 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.player_list_dims = (
-            400 * (transformation_factors[self.transformation_option][0]),
-            1000 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.frame_dims = (
-            520 * (transformation_factors[self.transformation_option][0]),
-            800 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.frame_position = (
-            15 * (transformation_factors[self.transformation_option][0]),
-            240 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.option_box_dims = (
-            160 * (transformation_factors[self.transformation_option][0]),
-            40 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.quit_frame_dims = (
-            60 * (transformation_factors[self.transformation_option][0]),
-            60 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.checkbox_dims = (
-            40 * (transformation_factors[self.transformation_option][0]),
-            40 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.settings_checkbox_dims = (
-            50 * (transformation_factors[self.transformation_option][0]),
-            50 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.hoverbox_dims = (
-            40 * (transformation_factors[self.transformation_option][0]),
-            60 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.arrows_dims = (
-            30 * (transformation_factors[self.transformation_option][0]),
-            30 * (transformation_factors[self.transformation_option][1]),
-        )
-
-        self.BG = pygame.transform.scale(
-            self.BG,
-            self.resolution,
-        )
-        self.TOP_BAR = pygame.transform.scale(
-            self.TOP_BAR,
-            (self.resolution[0] / 1.5, self.resolution[1] / 10),
-        )
-        self.PLAYER_LIST = pygame.transform.scale(
-            self.PLAYER_LIST,
-            self.player_list_dims,
-        )
-        self.PLAYER_LIST_BG = pygame.Surface(
-            self.player_list_dims,
-            pygame.SRCALPHA,
-        )
-
-        self.PLAYER_LIST_FRAME = pygame.transform.scale(
-            self.LEFT_FRAME,
-            (
-                300 * (transformation_factors[self.transformation_option][0]),
-                80 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.OPTIONS = pygame.transform.scale(
-            self.OPTIONS,
-            self.top_elements_dims,
-        )
-        self.OPTIONS_HIGHLIGHTED = pygame.transform.scale(
-            self.OPTIONS_HIGHLIGHTED,
-            self.top_elements_dims,
-        )
-        self.ICON_SQUARE = pygame.transform.scale(
-            self.ICON_SQUARE,
-            self.top_elements_dims,
-        )
-        self.ICON_SQUARE_HIGHLIGHTED = pygame.transform.scale(
-            self.ICON_SQUARE_HIGHLIGHTED,
-            self.top_elements_dims,
-        )
-        self.QUIT_LOBBY = pygame.transform.scale(
-            self.QUIT,
-            self.top_elements_dims,
-        )
-        self.QUIT_LOBBY_HIGHLIGHTED = pygame.transform.scale(
-            self.QUIT_HIGHLIGHTED,
-            self.top_elements_dims,
-        )
-        self.QUIT_FRAME = pygame.transform.scale(
-            self.QUIT,
-            self.quit_frame_dims,
-        )
-        self.QUIT_FRAME_HIGHLIGHTED = pygame.transform.scale(
-            self.QUIT_HIGHLIGHTED,
-            self.quit_frame_dims,
-        )
-        self.BUTTON = pygame.transform.scale(
-            self.BUTTON,
-            self.button_dims,
-        )
-        self.BUTTON_HIGHLIGHTED = pygame.transform.scale(
-            self.BUTTON_HIGHLIGHTED,
-            self.button_dims,
-        )
-        self.ACCEPT_BUTTON = pygame.transform.scale(
-            self.ACCEPT_BUTTON,
-            self.button_dims,
-        )
-        self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.transform.scale(
-            self.ACCEPT_BUTTON_HIGHLIGHTED,
-            self.button_dims,
-        )
-        self.ACCEPT_BUTTON_INACTIVE = pygame.transform.scale(
-            self.ACCEPT_BUTTON_INACTIVE,
-            self.button_dims,
-        )
-        self.CANCEL_BUTTON = pygame.transform.scale(
-            self.CANCEL_BUTTON,
-            self.button_dims,
-        )
-        self.CANCEL_BUTTON_HIGHLIGHTED = pygame.transform.scale(
-            self.CANCEL_BUTTON_HIGHLIGHTED,
-            self.button_dims,
-        )
-        self.CANCEL_BUTTON_INACTIVE = pygame.transform.scale(
-            self.CANCEL_BUTTON_INACTIVE,
-            self.button_dims,
-        )
-        self.PROGRESS_BAR_FRAME = pygame.transform.scale(
-            self.PROGRESS_BAR_FRAME,
-            (
-                580 * (transformation_factors[self.transformation_option][0]),
-                60 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.PROGRESS_BAR_BG = pygame.transform.scale(
-            self.PROGRESS_BAR_BG,
-            (
-                500 * (transformation_factors[self.transformation_option][0]),
-                30 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.PROGRESS_BAR_EDGE = pygame.transform.scale(
-            self.PROGRESS_BAR_EDGE,
-            (
-                60 * (transformation_factors[self.transformation_option][0]),
-                80 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.SCROLL = pygame.transform.scale(
-            self.SCROLL,
-            (
-                30 * (transformation_factors[self.transformation_option][0]),
-                100 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.SCROLL_BAR = pygame.transform.scale(
-            self.SCROLL_BAR,
-            (
-                50 * (transformation_factors[self.transformation_option][0]),
-                900 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.LINE = pygame.transform.scale(
-            self.LINE,
-            (
-                330 * (transformation_factors[self.transformation_option][0]),
-                5 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.CHECKBOX = pygame.transform.scale(self.CHECKBOX, self.checkbox_dims)
-        self.CHECKBOX_CHECKED = pygame.transform.scale(self.CHECKBOX_CHECKED, self.checkbox_dims)
-        self.CHECKBOX_SETTINGS = pygame.transform.scale(self.CHECKBOX, self.settings_checkbox_dims)
-        self.CHECKBOX_SETTINGS_CHECKED = pygame.transform.scale(self.CHECKBOX_CHECKED, self.settings_checkbox_dims)
-        self.QUESTION_MARK = pygame.transform.scale(self.QUESTION_MARK, self.hoverbox_dims)
-        self.QUESTION_MARK_HIGHLIGHTED = pygame.transform.scale(self.QUESTION_MARK_HIGHLIGHTED, self.hoverbox_dims)
-        self.LEFT_FRAME = pygame.transform.scale(self.LEFT_FRAME, self.frame_dims)
-        self.DISCORD_LOGO = pygame.transform.scale(self.DISCORD_LOGO, self.quit_frame_dims)
-        self.DISCORD_LOGO_HIGHLIGHTED = pygame.transform.scale(self.DISCORD_LOGO_HIGHLIGHTED, self.quit_frame_dims)
-        self.NARROW_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 3))
-        self.WIDE_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 5))
-        self.ARROW_LEFT = pygame.transform.scale(self.ARROW_LEFT, self.arrows_dims)
-        self.ARROW_LEFT_HIGHLIGHTED = pygame.transform.scale(self.ARROW_LEFT_HIGHLIGHTED, self.arrows_dims)
-        self.ARROW_RIGHT = pygame.transform.scale(self.ARROW_RIGHT, self.arrows_dims)
-        self.ARROW_RIGHT_HIGHLIGHTED = pygame.transform.scale(self.ARROW_RIGHT_HIGHLIGHTED, self.arrows_dims)
-        self.SETTINGS_SCROLL_BAR = pygame.transform.scale(
-            self.SETTINGS_SCROLL_BAR,
-            (
-                250 * (transformation_factors[self.transformation_option][0]),
-                30 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.SETTINGS_SCROLL_MARKER = pygame.transform.scale(
-            self.SETTINGS_SCROLL_MARKER,
-            (
-                30 * (transformation_factors[self.transformation_option][0]),
-                30 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
+        self.rescale_lobby_elements()
 
         FIND_GAME_BUTTON = Button(
             image=self.BUTTON,
@@ -439,6 +228,9 @@ class H5_Lobby(BasicWindow):
         self.refresh_friends_list(USERS_LIST)
         self.get_user_profile()
 
+        buttons = [FIND_GAME_BUTTON, RANKING, NEWS, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
+        widgets = buttons + [USERS_LIST]
+
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
             self.cursor.update()
@@ -452,16 +244,7 @@ class H5_Lobby(BasicWindow):
                 ),
             )
 
-            for button in [
-                FIND_GAME_BUTTON,
-                RANKING,
-                NEWS,
-                MY_PROFILE,
-                DISCORD,
-                PLAYER_PROFILE,
-                OPTIONS_BUTTON,
-                QUIT_BUTTON,
-            ]:
+            for button in buttons:
                 button.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             try:
@@ -519,14 +302,14 @@ class H5_Lobby(BasicWindow):
                         self.__error_msg = "Queue has been declined"
                         pygame.mixer.Channel(0).set_volume(self.config["volume"])
                         pygame.mixer.Channel(self.__queue_channel).stop()
-                        set_queue_vars(state=False)
-                        set_all_buttons_active(is_active=True)
+                        __set_queue_variables(state=False)
+                        FIND_GAME_BUTTON.set_active(is_active=True)
                         self.remove_from_queue(is_accepted=False)
                         continue
 
             if self.__game_data:
                 if self.__update_game_data:
-                    set_all_buttons_active(is_active=False)
+                    FIND_GAME_BUTTON.set_active(is_active=False)
                     (
                         RESULT_TEXT,
                         RESULT_RECT,
@@ -686,7 +469,7 @@ class H5_Lobby(BasicWindow):
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.__update_queue_status = True
                         self.__queue_status = True
-                        set_all_buttons_active(is_active=False)
+                        FIND_GAME_BUTTON.set_active(is_active=False)
                         self.__error_msg = self.add_to_queue()
                         continue
                     if RANKING.check_for_input(MENU_MOUSE_POS):
@@ -716,24 +499,24 @@ class H5_Lobby(BasicWindow):
                         self.quit_game_handling(self.crsf_token, self.session)
                     if self.__queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
-                            set_all_buttons_active(is_active=True)
+                            FIND_GAME_BUTTON.set_active(is_active=True)
                             pygame.mixer.Channel(0).set_volume(self.config["volume"])
                             if self.__queue_channel:
                                 pygame.mixer.Channel(self.__queue_channel).stop()
-                            set_queue_vars(state=False)
+                            __set_queue_variables(state=False)
                             self.__error_msg = self.remove_from_queue(is_accepted=False)
                             continue
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
                                 self.__update_queue_status = True
                                 self.__player_accepted = True
-                                set_all_buttons_active(is_active=False)
+                                FIND_GAME_BUTTON.set_active(is_active=False)
                                 self.__error_msg = self.remove_from_queue(is_accepted=True)
                                 self.check_if_oponnent_accepted()
 
                     if self.__game_data:
                         if SUBMIT_REPORT.check_for_input(MENU_MOUSE_POS):
-                            set_all_buttons_active(is_active=True)
+                            FIND_GAME_BUTTON.set_active(is_active=True)
                             self.__update_game_data = False
                             self.__game_data = None
 
@@ -751,31 +534,18 @@ class H5_Lobby(BasicWindow):
                     if self.__options_status:
                         if self.__profile_status:
                             self.__profile_status = False
-                        # selected_option = RESOLUTION_CHOICES.update(self.SCREEN, MENU_MOUSE_POS)
-                        # if selected_option != -1:
-                        #     resolution = resolution_choices[selected_option]
-                        #     if "fullscreen" in resolution.lower():
-                        #         monitor_resolution = pygame.display.Info()
-                        #         self.SCREEN = pygame.display.set_mode(
-                        #             (monitor_resolution.current_w, monitor_resolution.current_h),
-                        #             pygame.FULLSCREEN,
-                        #         )
-                        #     else:
-                        #         self.transformation_option = resolution
-                        #         resolutions = resolution.split("x")
-                        #         self.config["screen_width"] = int(resolutions[0])
-                        #         self.config["screen_hight"] = int(resolutions[1])
-                        # TODO: add rescale function
-                        # break
-                        # self.SCREEN = pygame.display.set_mode((self.config["screen_width"], self.config["screen_hight"]))
-                        # self.BG = pygame.image.load(os.path.join(os.getcwd(), "resources/background/background.png"))
-                        # self.BG = pygame.transform.scale(
-                        #     self.BG,
-                        #     (self.config["screen_width"], self.config["screen_hight"]),
-                        # )
-
                         if RESOLUTION_CHOICES.check_for_input(MENU_MOUSE_POS):
                             self.config["resolution"] = str(RESOLUTION_CHOICES.get_selected_option())
+                            self.transformation_option = self.config["resolution"]
+                            self.resolution = (int(self.config["resolution"].split("x")[0]), int(self.config["resolution"].split("x")[1]))
+                            self.SCREEN = pygame.display.set_mode(self.resolution)
+                            self.BG = pygame.transform.scale(
+                                self.BG,
+                                self.resolution,
+                            )
+                            self.rescale_lobby_elements(reload=True)
+                            for button in buttons:
+                                button.rescale(fonts_sizes[self.config["resolution"]][0], transformation_factors[self.config["resolution"]])
                         if POINTS_CHOICES.check_for_input(MENU_MOUSE_POS):
                             self.config["points_treshold"] = str(POINTS_CHOICES.get_selected_option())
                         if POINTS_HOVER_BOX.check_for_input(MENU_MOUSE_POS):
@@ -796,7 +566,7 @@ class H5_Lobby(BasicWindow):
 
             if self.__opponent_accepted and self.__player_accepted:
                 pygame.mixer.Channel(self.__queue_channel).stop()
-                set_queue_vars(state=False)
+                __set_queue_variables(state=False)
                 self.run_arena()
                 continue
 
@@ -846,8 +616,11 @@ class H5_Lobby(BasicWindow):
             pygame.display.update()
 
     def queue_window(self):
-        overlay_width, overlay_height = (self.resolution[0] // 3, self.resolution[1] // 3)
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
+        dims = (
+            640 * transformation_factors[self.transformation_option][0],
+            360 * transformation_factors[self.transformation_option][1],
+        )
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, dims)
 
         if not self.__get_time:
             self.start_time = time.time()
@@ -856,7 +629,7 @@ class H5_Lobby(BasicWindow):
         CANCEL_BUTTON = Button(
             image=self.CANCEL_BUTTON,
             image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
-            position=(overlay_width * 1.5, overlay_height * 1.8),
+            position=(dims[0] * 1.5, dims[1] * 1.8),
             text_input="Cancel",
             font_size=self.font_size[1],
             base_color=self.text_color,
@@ -886,7 +659,7 @@ class H5_Lobby(BasicWindow):
                 image=self.ACCEPT_BUTTON,
                 image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
                 image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-                position=(overlay_width * 1.3, overlay_height * 1.8),
+                position=(dims[0] * 1.3, dims[1] * 1.8),
                 text_input="Accept",
                 font_size=self.font_size[1],
                 base_color=self.text_color,
@@ -897,7 +670,7 @@ class H5_Lobby(BasicWindow):
                 image=self.CANCEL_BUTTON,
                 image_highlited=self.CANCEL_BUTTON_HIGHLIGHTED,
                 image_inactive=self.CANCEL_BUTTON_INACTIVE,
-                position=(overlay_width * 1.7, overlay_height * 1.8),
+                position=(dims[0] * 1.7, dims[1] * 1.8),
                 text_input="Cancel",
                 font_size=self.font_size[1],
                 base_color=self.text_color,
@@ -906,8 +679,8 @@ class H5_Lobby(BasicWindow):
             )
             if not self.__player_accepted:
                 PROGRESS_BAR = ProgressBar(
-                    position=(overlay_width * 1.5, overlay_height * 1.6),
-                    dimensions=(overlay_width * 0.9, overlay_height * 0.175),
+                    position=(dims[0] * 1.5, dims[1] * 1.6),
+                    dimensions=(dims[0] * 0.9, dims[1] * 0.175),
                     image_frame=self.PROGRESS_BAR_FRAME,
                     image_bg=self.PROGRESS_BAR_BG,
                     image_edge=self.PROGRESS_BAR_EDGE,
@@ -1088,15 +861,15 @@ class H5_Lobby(BasicWindow):
         )
 
     def report_window(self):
-        overlay_width, overlay_height = (
-            self.resolution[0] // 3.75,
-            self.resolution[1] // 2.75,
-        )
         dims = (
             640 * transformation_factors[self.transformation_option][0],
             360 * transformation_factors[self.transformation_option][1],
         )
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
+        overlay_dims = (
+            510 * transformation_factors[self.transformation_option][0],
+            390 * transformation_factors[self.transformation_option][1],
+        )
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
 
         if self.__game_data["is_won"]:
             result_text = "VICTORY"
@@ -1118,21 +891,21 @@ class H5_Lobby(BasicWindow):
         opponent_color = "#02ba09" if result_color == "#db1102" else "#db1102"
 
         RESULT_TEXT = render_small_caps(result_text, int(self.font_size[0] * 1.5), result_color)
-        RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.2))
+        RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.2))
 
         MYSELF_TEXT = render_small_caps(f"{self.user["nickname"]}: ", self.font_size[0], self.text_color)
         MYSELF_POINTS = render_small_caps(f"{player_points} {player_points_change}", self.font_size[0], result_color)
         total_width = MYSELF_TEXT.get_width() + MYSELF_POINTS.get_width()
-        start_x = (dims[0] + overlay_width * 0.5) - (total_width / 2)
-        start_y = dims[1] + overlay_height * 0.375
+        start_x = (dims[0] + overlay_dims[0] * 0.5) - (total_width / 2)
+        start_y = dims[1] + overlay_dims[1] * 0.375
         MYSELF_RECT = MYSELF_TEXT.get_rect(topleft=(start_x, start_y))
         MYSELF_POINTS_RECT = MYSELF_POINTS.get_rect(topleft=(MYSELF_RECT.right, start_y))
 
         OPPONENT_TEXT = render_small_caps(f"{opponent_nickname}: ", self.font_size[0], self.text_color)
         OPPONENT_POINTS = render_small_caps(f"{opponent_points} {opponent_points_change}", self.font_size[0], opponent_color)
         total_width = OPPONENT_TEXT.get_width() + OPPONENT_POINTS.get_width()
-        start_x = (dims[0] + overlay_width * 0.5) - (total_width / 2)
-        start_y = dims[1] + overlay_height * 0.5
+        start_x = (dims[0] + overlay_dims[0] * 0.5) - (total_width / 2)
+        start_y = dims[1] + overlay_dims[1] * 0.5
         OPPONENT_RECT = OPPONENT_TEXT.get_rect(topleft=(start_x, start_y))
         OPPONENT_POINTS_RECT = OPPONENT_POINTS.get_rect(topleft=(OPPONENT_RECT.right, start_y))
 
@@ -1140,7 +913,7 @@ class H5_Lobby(BasicWindow):
             image=self.ACCEPT_BUTTON,
             image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
             image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-            position=(dims[0] + overlay_width * 0.5, dims[1] + overlay_height * 0.8),
+            position=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.8),
             text_input="Confirm",
             font_size=self.font_size[1],
             base_color=self.text_color,

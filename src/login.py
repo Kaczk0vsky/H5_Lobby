@@ -4,7 +4,7 @@ import time
 import re
 
 from src.global_vars import fonts_sizes, env_dict
-from src.basic_window import BasicWindow
+from src.basic_window import GameWindowsBase
 from src.lobby import H5_Lobby
 from src.helpers import (
     delete_objects,
@@ -24,7 +24,7 @@ from widgets.check_box import CheckBox
 from widgets.hover_box import HoverBox
 
 
-class LoginWindow(BasicWindow):
+class LoginWindow(GameWindowsBase):
     """Represents the login window for user authentication.
 
     This class handles the user login process, registration, and password recovery.
@@ -53,7 +53,7 @@ class LoginWindow(BasicWindow):
     __error_msg = None
 
     def __init__(self):
-        BasicWindow.__init__(self)
+        GameWindowsBase.__init__(self)
 
         self.text_pos = [370, 275]
         self.buttons_pos = [400, 340]

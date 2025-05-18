@@ -4,13 +4,13 @@ import requests
 import sys
 
 from src.settings_reader import load_client_settings
-from src.global_vars import env_dict
+from src.global_vars import env_dict, transformation_factors
 from src.helpers import render_small_caps
 from widgets.button import Button
 from widgets.cursor import Cursor
 
 
-class BasicWindow:
+class GameWindowsBase:
     """
     A base class for creating a Pygame window with UI elements and pygame music handling.
 
@@ -59,11 +59,7 @@ class BasicWindow:
     def play_background_music(self, music_path: str) -> None:
         pygame.init()
         pygame.mixer.init()
-        pygame.mixer.Channel(0).play(
-            pygame.mixer.Sound(os.path.join(os.getcwd(), music_path)),
-            -1,
-            0,
-        )
+        pygame.mixer.Channel(0).play(pygame.mixer.Sound(os.path.join(os.getcwd(), music_path)), -1, 0)
         pygame.mixer.Channel(0).set_volume(self.config["volume"])
 
     def stop_background_music(self) -> None:
@@ -142,6 +138,159 @@ class BasicWindow:
         self.ARROW_RIGHT_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/settings_arrow_right_light.png"))
         self.SETTINGS_SCROLL_BAR = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/sound_settings_scroll_bar.png"))
         self.SETTINGS_SCROLL_MARKER = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/sound_settings_scroll.png"))
+
+    def rescale_lobby_elements(self, reload: bool = False):
+        if reload:
+            self.create_lobby_elements()
+
+        self.button_dims = (
+            200 * (transformation_factors[self.transformation_option][0]),
+            60 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.top_elements_dims = (
+            50 * (transformation_factors[self.transformation_option][0]),
+            50 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.player_list_dims = (
+            400 * (transformation_factors[self.transformation_option][0]),
+            1000 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.frame_dims = (
+            520 * (transformation_factors[self.transformation_option][0]),
+            800 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.frame_position = (
+            15 * (transformation_factors[self.transformation_option][0]),
+            240 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.option_box_dims = (
+            160 * (transformation_factors[self.transformation_option][0]),
+            40 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.quit_frame_dims = (
+            60 * (transformation_factors[self.transformation_option][0]),
+            60 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.checkbox_dims = (
+            40 * (transformation_factors[self.transformation_option][0]),
+            40 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.settings_checkbox_dims = (
+            50 * (transformation_factors[self.transformation_option][0]),
+            50 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.hoverbox_dims = (
+            40 * (transformation_factors[self.transformation_option][0]),
+            60 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.arrows_dims = (
+            30 * (transformation_factors[self.transformation_option][0]),
+            30 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.BG = pygame.transform.scale(self.BG, self.resolution)
+        self.PLAYER_LIST = pygame.transform.scale(self.PLAYER_LIST, self.player_list_dims)
+        self.PLAYER_LIST_BG = pygame.Surface(self.player_list_dims, pygame.SRCALPHA)
+        self.OPTIONS = pygame.transform.scale(self.OPTIONS, self.top_elements_dims)
+        self.OPTIONS_HIGHLIGHTED = pygame.transform.scale(self.OPTIONS_HIGHLIGHTED, self.top_elements_dims)
+        self.ICON_SQUARE = pygame.transform.scale(self.ICON_SQUARE, self.top_elements_dims)
+        self.ICON_SQUARE_HIGHLIGHTED = pygame.transform.scale(self.ICON_SQUARE_HIGHLIGHTED, self.top_elements_dims)
+        self.QUIT_LOBBY = pygame.transform.scale(self.QUIT, self.top_elements_dims)
+        self.QUIT_LOBBY_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.top_elements_dims)
+        self.QUIT_FRAME = pygame.transform.scale(self.QUIT, self.quit_frame_dims)
+        self.QUIT_FRAME_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.quit_frame_dims)
+        self.BUTTON = pygame.transform.scale(self.BUTTON, self.button_dims)
+        self.BUTTON_HIGHLIGHTED = pygame.transform.scale(self.BUTTON_HIGHLIGHTED, self.button_dims)
+        self.ACCEPT_BUTTON = pygame.transform.scale(self.ACCEPT_BUTTON, self.button_dims)
+        self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.transform.scale(self.ACCEPT_BUTTON_HIGHLIGHTED, self.button_dims)
+        self.ACCEPT_BUTTON_INACTIVE = pygame.transform.scale(self.ACCEPT_BUTTON_INACTIVE, self.button_dims)
+        self.CANCEL_BUTTON = pygame.transform.scale(self.CANCEL_BUTTON, self.button_dims)
+        self.CANCEL_BUTTON_HIGHLIGHTED = pygame.transform.scale(self.CANCEL_BUTTON_HIGHLIGHTED, self.button_dims)
+        self.CANCEL_BUTTON_INACTIVE = pygame.transform.scale(self.CANCEL_BUTTON_INACTIVE, self.button_dims)
+        self.PLAYER_LIST_FRAME = pygame.transform.scale(
+            self.LEFT_FRAME,
+            (
+                300 * (transformation_factors[self.transformation_option][0]),
+                80 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.TOP_BAR = pygame.transform.scale(
+            self.TOP_BAR,
+            (
+                1280 * (transformation_factors[self.transformation_option][0]),
+                110 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.PROGRESS_BAR_FRAME = pygame.transform.scale(
+            self.PROGRESS_BAR_FRAME,
+            (
+                580 * (transformation_factors[self.transformation_option][0]),
+                60 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.PROGRESS_BAR_BG = pygame.transform.scale(
+            self.PROGRESS_BAR_BG,
+            (
+                500 * (transformation_factors[self.transformation_option][0]),
+                30 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.PROGRESS_BAR_EDGE = pygame.transform.scale(
+            self.PROGRESS_BAR_EDGE,
+            (
+                60 * (transformation_factors[self.transformation_option][0]),
+                80 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.SCROLL = pygame.transform.scale(
+            self.SCROLL,
+            (
+                30 * (transformation_factors[self.transformation_option][0]),
+                100 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.SCROLL_BAR = pygame.transform.scale(
+            self.SCROLL_BAR,
+            (
+                50 * (transformation_factors[self.transformation_option][0]),
+                900 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.LINE = pygame.transform.scale(
+            self.LINE,
+            (
+                330 * (transformation_factors[self.transformation_option][0]),
+                5 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.SETTINGS_SCROLL_BAR = pygame.transform.scale(
+            self.SETTINGS_SCROLL_BAR,
+            (
+                250 * (transformation_factors[self.transformation_option][0]),
+                30 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.SETTINGS_SCROLL_MARKER = pygame.transform.scale(
+            self.SETTINGS_SCROLL_MARKER,
+            (
+                30 * (transformation_factors[self.transformation_option][0]),
+                30 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.CHECKBOX = pygame.transform.scale(self.CHECKBOX, self.checkbox_dims)
+        self.CHECKBOX_CHECKED = pygame.transform.scale(self.CHECKBOX_CHECKED, self.checkbox_dims)
+        self.CHECKBOX_SETTINGS = pygame.transform.scale(self.CHECKBOX, self.settings_checkbox_dims)
+        self.CHECKBOX_SETTINGS_CHECKED = pygame.transform.scale(self.CHECKBOX_CHECKED, self.settings_checkbox_dims)
+        self.QUESTION_MARK = pygame.transform.scale(self.QUESTION_MARK, self.hoverbox_dims)
+        self.QUESTION_MARK_HIGHLIGHTED = pygame.transform.scale(self.QUESTION_MARK_HIGHLIGHTED, self.hoverbox_dims)
+        self.LEFT_FRAME = pygame.transform.scale(self.LEFT_FRAME, self.frame_dims)
+        self.DISCORD_LOGO = pygame.transform.scale(self.DISCORD_LOGO, self.quit_frame_dims)
+        self.DISCORD_LOGO_HIGHLIGHTED = pygame.transform.scale(self.DISCORD_LOGO_HIGHLIGHTED, self.quit_frame_dims)
+        self.NARROW_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 3))
+        self.WIDE_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 5))
+        self.ARROW_LEFT = pygame.transform.scale(self.ARROW_LEFT, self.arrows_dims)
+        self.ARROW_LEFT_HIGHLIGHTED = pygame.transform.scale(self.ARROW_LEFT_HIGHLIGHTED, self.arrows_dims)
+        self.ARROW_RIGHT = pygame.transform.scale(self.ARROW_RIGHT, self.arrows_dims)
+        self.ARROW_RIGHT_HIGHLIGHTED = pygame.transform.scale(self.ARROW_RIGHT_HIGHLIGHTED, self.arrows_dims)
 
     def error_window(self, text: str, dimensions: tuple[int, int]) -> tuple:
         overlay_width, overlay_height = dimensions
