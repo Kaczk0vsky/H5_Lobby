@@ -453,7 +453,7 @@ class CheckIfOpponentAccepted(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
             try:
-                game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
+                game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).first()
             except Game.DoesNotExist:
                 print(f"No game found for player {player.nickname}")
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
