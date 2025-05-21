@@ -1,19 +1,42 @@
-# H5 Lobby Client and Server
+# H5 Lobby - Client/Server
 ![H5 Lobby Logo](https://raw.githubusercontent.com/Kaczk0vsky/H5_Lobby/main/resources/logo.png?raw=true)
+There are three versions different versions of repository installation covered.
+- 1) Installation from the player side,
+- 2) Installation to ONLY generate .exe launcher file,
+- 3) Installation and full setup guide for the server on Linux machine.
+For running the Lobby SoftEtherVPN Client is needed.
+## Key features
+### Login Window
 
-There are two versions that will be covered in this file. First one will be installation for a developer from the player side aswell as covering the most important features. The second one will be installation and full setup guide for the server on Linux machine.
-## Player side
-This is simply what the player will see after downloading the installator and running the .exe file.
-### Key features
-- logging into the game and starting the game search through **Find game** button,
-- after finding the game showing the window with opponnent found and options to **Accept** or **Decline** this matchup,
-- after accepting launching the game .exe file for both players that agreed to play,
-- after declining removing the player from the queue, while leaving the other one in queue,
-- **Registration** option for the new players,
-- after registration creating VPN connection and adding player to the ranked system, that collects points for winning the games and callculates the overall points gains and loses,
-- **Forgot password** option,
-- set of security measures that do not allow any unwanted operation.
-- **Options** button for changing the resolution and in the future also other things,
+When running H5_Lobby.exe the **Login Window** opens. There are fields to enter nickname and password, checkbox to remember login information and buttons for **Sign In**, **Sign Up** and **Forgot Password?**:
+- 1) **Sign In** - check for correctness of inputs, then connects to server and checks if user exists. If everything is fine it opens **Lobby Window**,
+- 2) **Sign Up** - window with fields Username, Password, Repeat Password and Email for entering user information. Hover Boxes guide user through registration requirements. After everything is set, we can check with Hover Boxes if requirements were met. If **Submit** is clicked the the request is sent to server and if everything is correct, new user is created. Then the application returns to **Login Window**. **Back** for leaving this view.
+- 3) **Forgot Password?** - window with fields Username and Email for entering user information. If erything is correct, request is beeing sent to server. Server responds with sending email with one-time link to change the password. After clicking in the link the password can be changed. If the Username and Email do not match then information is displayed for the user.
+
+Additionally SoftEtherVPN connection is beeing established if not existing. If it is existing the Client simply connects to the Server on Loging in.
+
+### Lobby
+
+Lobby window covers **Find Game**, **Ranking**, **News**, **My Profile**, **Tavern Icon**, **User Icon**, **Settings** and **Quit** buttons and **Players Online**.
+- 1) **Find Game** - opens additional window in the middle of the screen. It has a timer for how long player is looking for a game. If match is found then it shows the oponnent nickname, his ranking points, progress bar with time left to accept the game and buttons to accept or cancel:
+	- After canceling player is removed from queue and oponnent is thrown back into queue,
+	- After time runs out on progress bar player is removed from queue and a message is displayed and oponnent is thrown back into queue,
+	- After accepting the player needs to wait for oponnet to accept the game. If oponnent didnt accept the game then player is back in the queue waiting. If both players accepted the game, then the H5_Game.exe opens, Lobby minimalizes and game starts.
+
+When both players are finished they can leave the game. Lobby maximalizes from tray and shows the results. Results window contains infromation about who won, and how much points both player lost/gained.
+Every action described here sends a request to the server. Additionally protection from intentional leaving the H5_Game.exe was implemented and wont be cover here.
+- 2) **Ranking** - not implemented right now.
+- 3) **News** - not implemented right now.
+- 4) **My Profile** - opens additional window on the left side (if Settings are opened it closes it and opens in the same place) with curent User statistics (ranking position, ranking points, games played),
+- 5) **Tavern Icon** - opens browerser with discord invitation link,
+- 6) **User Icon** - not implemented right now.
+- 7) **Settings** - opens additional window on the left side (if My Profile is opened it closes it and opens in the same place) with Resolution, Volume, Point Treshold and Toggle Ranked options:
+	- a) Resolution - option box, allows user to change window size,
+	- b) Volume - slider with value selection from 0 to 100,
+	- c) Points Treshold - option box, points from which upwards ranking game oponnent will be searched,
+	 d) Toggle Ranked - check box, if checked ranked games will be searched.
+- 8) **Quit** - logs out user and quits all processes,
+- 9) **Players Online** - list on the right side of the screen with slider. Each box represents player logged in and contains Nickname, Ranking Points and Status of the player. It automatically updates and sorts from the most ranking points to the least.
 
 ### Installation guide
 1. Clone the repository.
