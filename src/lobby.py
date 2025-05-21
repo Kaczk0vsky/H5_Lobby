@@ -19,7 +19,7 @@ from src.global_vars import (
 )
 from src.basic_window import GameWindowsBase
 from src.run_ashan_arena import AschanArena3Game
-from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state, render_small_caps
+from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state, render_small_caps, check_server_connection
 from src.custom_thread import CustomThread
 from src.decorators import run_in_thread
 from src.settings_writer import save_client_settings
@@ -70,6 +70,8 @@ class H5_Lobby(GameWindowsBase):
     __update_profile_status = False
     __options_status = False
     __update_options_status = False
+    __is_connected = True
+    __has_disconnected = False
     __elapsed_time = None
     __queue_channel = None
     __error_msg = None
@@ -459,6 +461,31 @@ class H5_Lobby(GameWindowsBase):
                 VOLUME_SLIDER.draw(self.SCREEN)
                 VOLUME_SLIDER.update_slider(MENU_MOUSE_POS)
 
+            if self.__error_msg:
+                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                    text=self.__error_msg,
+                    dimensions=(
+                        640 * transformation_factors[self.transformation_option][0],
+                        360 * transformation_factors[self.transformation_option][1],
+                    ),
+                )
+                screen_width, screen_height = (
+                    self.SCREEN.get_width(),
+                    self.SCREEN.get_height(),
+                )
+                window_width, window_height = (
+                    self.SMALLER_WINDOWS_BG.get_width(),
+                    self.SMALLER_WINDOWS_BG.get_height(),
+                )
+
+                x_position = (screen_width - window_width) // 2
+                y_position = (screen_height - window_height) // 2
+
+                self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (x_position, y_position))
+                self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
+                if not self.__connection_timer:
+                    RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+
             for event in pygame.event.get():
                 USERS_LIST.event(event)
                 if event.type == pygame.QUIT:
@@ -470,7 +497,7 @@ class H5_Lobby(GameWindowsBase):
                         self.__update_queue_status = True
                         self.__queue_status = True
                         FIND_GAME_BUTTON.set_active(is_active=False)
-                        self.__error_msg = self.add_to_queue()
+                        self.add_to_queue()
                         continue
                     if RANKING.check_for_input(MENU_MOUSE_POS):
                         pass
@@ -504,14 +531,14 @@ class H5_Lobby(GameWindowsBase):
                             if self.__queue_channel:
                                 pygame.mixer.Channel(self.__queue_channel).stop()
                             __set_queue_variables(state=False)
-                            self.__error_msg = self.remove_from_queue(is_accepted=False)
+                            self.remove_from_queue(is_accepted=False)
                             continue
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
                                 self.__update_queue_status = True
                                 self.__player_accepted = True
                                 FIND_GAME_BUTTON.set_active(is_active=False)
-                                self.__error_msg = self.remove_from_queue(is_accepted=True)
+                                self.remove_from_queue(is_accepted=True)
                                 self.check_if_oponnent_accepted()
 
                     if self.__game_data:
@@ -580,38 +607,31 @@ class H5_Lobby(GameWindowsBase):
                 pygame.mixer.Channel(0).set_volume(self.config["volume"])
                 if self.__queue_channel:
                     pygame.mixer.Channel(self.__queue_channel).stop()
-                self.__error_msg = self.add_to_queue()
+                self.add_to_queue()
 
             if self.__connection_timer:
                 time_passed = calculate_time_passed(start_time=self.__connection_timer)
-                if time_passed[1] >= 3:
+                if time_passed[0] >= 1:
+                    self.__window_overlay = True
+                    self.__error_msg = f"Connecting for {time_passed[0]}:{time_passed[1]} minutes..."
+                elif time_passed[1] >= 3:
                     self.__window_overlay = True
                     self.__error_msg = f"Connecting for {time_passed[1]} seconds..."
 
-            if self.__error_msg:
-                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
-                    text=self.__error_msg,
-                    dimensions=(
-                        self.resolution[0] // 3,
-                        self.resolution[1] // 3,
-                    ),
-                )
-                screen_width, screen_height = (
-                    self.SCREEN.get_width(),
-                    self.SCREEN.get_height(),
-                )
-                window_width, window_height = (
-                    self.SMALLER_WINDOWS_BG.get_width(),
-                    self.SMALLER_WINDOWS_BG.get_height(),
-                )
+                if self.__is_connected:
+                    self.__connection_timer = None
+                    self.__error_msg = None
+                    FIND_GAME_BUTTON.set_active(True)
+                    RANKING.set_active(True)
+                    NEWS.set_active(True)
 
-                x_position = (screen_width - window_width) // 2
-                y_position = (screen_height - window_height) // 2
-
-                self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (x_position, y_position))
-                self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                if not self.__connection_timer:
-                    RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+            if self.__has_disconnected:
+                # TODO: add something that disables the buttons to not let the player click to much
+                FIND_GAME_BUTTON.set_active(False)
+                RANKING.set_active(False)
+                NEWS.set_active(False)
+                self.check_connection_state()
+                self.__has_disconnected = False
 
             pygame.display.update()
 
@@ -1044,11 +1064,13 @@ class H5_Lobby(GameWindowsBase):
             CLOSE_BUTTON,
         )
 
+    @run_in_thread
     def add_to_queue(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_ADD"]}/"
         if not self.crsf_token:
             self.__window_overlay = True
-            return "CRSF Token is not valid"
+            self.__error_msg = "Please login again."
+            return
 
         user_data = {
             "nickname": self.user["nickname"],
@@ -1065,32 +1087,36 @@ class H5_Lobby(GameWindowsBase):
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 self.__connection_timer = None
-                self.check_queue = CustomThread(target=self.scan_for_players, daemon=True)
-                self.check_queue.start()
-                return None
+                self.scan_for_players()
+                self.__error_msg = None
 
-            elif response.status_code == 400:
+            else:
                 self.__window_overlay = True
                 self.__connection_timer = None
-                return response.json().get("error", "Unknown error occurred")
+                self.__error_msg = response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
+            self.__has_disconnected = True
             self.__window_overlay = True
-            return "Error occured while trying to connect to server!"
+            self.__error_msg = "Error while trying to connect to server!"
 
         except requests.exceptions.ConnectionError:
+            self.__has_disconnected = True
             self.__window_overlay = True
-            return "To many tries, try again later!"
+            self.__error_msg = "Error! Check your internet connection..."
 
         except:
+            self.__has_disconnected = True
             self.__window_overlay = True
-            return "Unknown error occured..."
+            self.__error_msg = "Error! Server/Player offline, check discord..."
 
+    @run_in_thread
     def remove_from_queue(self, is_accepted: bool):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_REMOVE"]}/"
         if not self.crsf_token:
             self.__window_overlay = True
-            return "CRSF Token is not valid"
+            self.__error_msg = "Please login again."
+            return
 
         user_data = {
             "nickname": self.user["nickname"],
@@ -1106,35 +1132,35 @@ class H5_Lobby(GameWindowsBase):
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 self.__connection_timer = None
-                return None
+                self.__error_msg = None
 
-            elif response.status_code == 400:
+            else:
                 self.__window_overlay = True
                 self.__connection_timer = None
-                return response.json().get("error", "Unknown error occurred")
-
-            elif response.status_code == 404:
-                self.__window_overlay = True
-                self.__connection_timer = None
-                return None
+                self.__error_msg = response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
+            self.__has_disconnected = True
             self.__window_overlay = True
-            return "Error occured while trying to connect to server!"
+            self.__error_msg = "Error while trying to connect to server!"
 
         except requests.exceptions.ConnectionError:
+            self.__has_disconnected = True
             self.__window_overlay = True
-            return "To many tries, try again later!"
+            self.__error_msg = "Error! Check your internet connection..."
 
         except:
+            self.__has_disconnected = True
             self.__window_overlay = True
-            return "Unknown error occured..."
+            self.__error_msg = "Error! Server/Player offline, check discord..."
 
+    @run_in_thread
     def scan_for_players(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_GET_PLAYERS"]}/"
         if not self.crsf_token:
             self.__window_overlay = True
-            "CRSF Token is not valid"
+            self.__error_msg = "Please login again."
+            return
 
         user_data = {"nickname": self.user["nickname"]}
         headers = {
@@ -1147,9 +1173,10 @@ class H5_Lobby(GameWindowsBase):
             try:
                 if not self.__queue_status:
                     break
-
+                self.__connection_timer = time.time()
                 response = self.session.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
+                    self.__connection_timer = None
                     json_response = response.json()
                     if json_response.get("game_found"):
                         self.__update_queue_status = True
@@ -1158,8 +1185,20 @@ class H5_Lobby(GameWindowsBase):
                         self.__oponnent_ranking_points = json_response.get("opponent")[1]
                         break
 
-            except Exception as e:
-                pass
+            except requests.exceptions.ConnectTimeout:
+                self.__has_disconnected = True
+                self.__error_msg = "Error while trying to connect to server!"
+                return
+
+            except requests.exceptions.ConnectionError:
+                self.__has_disconnected = True
+                self.__error_msg = "Error! Check your internet connection..."
+                return
+
+            except:
+                self.__has_disconnected = True
+                self.__error_msg = "Error! Server/Player offline, check discord..."
+                return
 
             time.sleep(random.randint(1, 5))
 
@@ -1168,7 +1207,8 @@ class H5_Lobby(GameWindowsBase):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_CHECK_OPONNENT']}/"
         if not self.crsf_token:
             self.__window_overlay = True
-            return "CRSF Token is not valid"
+            self.__error_msg = "Please login again."
+            return
 
         user_data = {"nickname": self.user["nickname"]}
         headers = {
@@ -1178,9 +1218,11 @@ class H5_Lobby(GameWindowsBase):
         }
 
         while True:
+            self.__connection_timer = time.time()
             try:
                 response = self.session.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
+                    self.__connection_timer = None
                     json_response = response.json()
                     if json_response.get("oponnent_accepted"):
                         self.__opponent_accepted = True
@@ -1189,8 +1231,20 @@ class H5_Lobby(GameWindowsBase):
                         self.__opponent_declined = True
                         break
 
-            except Exception as e:
-                pass
+            except requests.exceptions.ConnectTimeout:
+                self.__has_disconnected = True
+                self.__error_msg = "Error while trying to connect to server!"
+                return
+
+            except requests.exceptions.ConnectionError:
+                self.__has_disconnected = True
+                self.__error_msg = "Error! Check your internet connection..."
+                return
+
+            except:
+                self.__has_disconnected = True
+                self.__error_msg = "Error! Server/Player offline, check discord..."
+                return
 
             time.sleep(1)
 
@@ -1199,7 +1253,8 @@ class H5_Lobby(GameWindowsBase):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_USERS_LIST']}/"
         if not self.crsf_token:
             self.__window_overlay = True
-            return "CRSF Token is not valid"
+            self.__error_msg = "Please login again."
+            return
 
         user_data = {"nickname": self.user["nickname"]}
         headers = {
@@ -1233,7 +1288,8 @@ class H5_Lobby(GameWindowsBase):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_REPORT']}/"
         if not self.crsf_token:
             self.__window_overlay = True
-            return "CRSF Token is not valid"
+            self.__error_msg = "Please login again."
+            return
 
         user_data = {
             "nickname": self.user["nickname"],
@@ -1262,23 +1318,27 @@ class H5_Lobby(GameWindowsBase):
                 return response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
+            self.__has_disconnected = True
             self.__window_overlay = True
-            return "Error occured while trying to connect to server!"
+            return "Error while trying to connect to server!"
 
         except requests.exceptions.ConnectionError:
+            self.__has_disconnected = True
             self.__window_overlay = True
-            return "To many tries, try again later!"
+            return "Error while trying to connect to server!"
 
         except:
+            self.__has_disconnected = True
             self.__window_overlay = True
-            return "Unknown error occured..."
+            return "Error! Server/Player offline, check discord..."
 
     @run_in_thread
     def get_user_profile(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_PROFILE']}/"
         if not self.crsf_token:
             self.__window_overlay = True
-            return "CRSF Token is not valid"
+            self.__error_msg = "Please login again."
+            return
 
         user_data = {"nickname": self.user["nickname"]}
         headers = {
@@ -1287,30 +1347,43 @@ class H5_Lobby(GameWindowsBase):
             "Content-Type": "application/json",
         }
 
-        self.__connection_timer = time.time()
         try:
             response = self.session.get(url, params=user_data, headers=headers)
             if response.status_code == 200:
                 self.__profile_data = response.json().get("player_information")
-                self.__connection_timer = None
                 return True
 
             elif response.status_code == 400:
                 self.__window_overlay = True
-                self.__connection_timer = None
                 return response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
             self.__window_overlay = True
-            return "Error occured while trying to connect to server!"
+            return "Error while trying to connect to server!"
 
         except requests.exceptions.ConnectionError:
             self.__window_overlay = True
-            return "To many tries, try again later!"
+            return "Error while trying to connect to server!"
 
         except:
             self.__window_overlay = True
-            return "Unknown error occured..."
+            return "Error! Server/Player offline, check discord..."
+
+    @run_in_thread
+    def check_connection_state(self):
+        self.__connection_timer = time.time()
+        self.__window_overlay = True
+        self.__queue_status = False
+        self.__is_connected = False
+        self.__elapsed_time = None
+
+        while not self.__is_connected:
+            if check_server_connection():
+                self.__is_connected = True
+                return
+            else:
+                pass
+            time.sleep(5)
 
     def minimize_to_tray(self):
         time.sleep(0.1)

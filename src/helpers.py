@@ -120,15 +120,16 @@ def get_window() -> list:
     return gw.getWindowsWithTitle("Heroes V of Might and Magic Ashan Arena 3 - Menu")[0]
 
 
-def is_server_reachable(
+def check_server_connection(
     host: str = env_dict["SERVER_URL"].replace("https://", "").replace("http://", ""),
     port: int = 443,
     timeout: float = 5.0,
-) -> bool:
+):
     try:
-        with socket.create_connection((host, port), timeout=timeout):
-            return True
-    except (socket.timeout, socket.error):
+        socket.setdefaulttimeout(timeout)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        return True
+    except socket.error:
         return False
 
 

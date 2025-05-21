@@ -82,9 +82,22 @@ class GameWindowsBase:
                     "is_searching_ranked": self.config["is_ranked"],
                     "min_opponent_points": self.config["points_treshold"],
                 }
+                pygame.quit()
                 session.cookies.set("csrftoken", crsf_token)
-                session.post(url, json=user_data, headers=headers)
-        pygame.quit()
+                try:
+                    session.post(url, json=user_data, headers=headers)
+                except requests.exceptions.ConnectTimeout:
+                    pass
+                    # return "Error while trying to connect to server!"
+
+                except requests.exceptions.ConnectionError:
+                    pass
+                    # self.__has_disconnected = True
+                    # self.__window_overlay = True
+                    # return "Error! Check your internet connection..."
+                except:
+                    pass
+                    # return "Error! Server/Player offline, check discord..."
         sys.exit()
 
     def create_universal_elements(self) -> None:
@@ -299,7 +312,7 @@ class GameWindowsBase:
 
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
 
-        WRONG_PASSWORD_TEXT = render_small_caps(text, int(self.font_size[0] * 1.5), self.text_color)
+        WRONG_PASSWORD_TEXT = render_small_caps(text, int(self.font_size[0]), self.text_color)
         WRONG_PASSOWRD_RECT = WRONG_PASSWORD_TEXT.get_rect(center=(screen_width // 2, overlay_y + overlay_height // 3))
 
         BACK_BUTTON = Button(

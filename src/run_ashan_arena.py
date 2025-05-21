@@ -7,12 +7,14 @@ import json
 
 from src.settings_reader import load_game_settings
 from src.decorators import run_in_thread
+from src.helpers import check_server_connection
 
 
 class AschanArena3Game:
     __is_running = True
     __closed_unintentionally = False
     __closed_intentionally = False
+    __has_disconnected = False
     __key_pressed = None
     __prev_key_pressed = None
 
@@ -117,10 +119,11 @@ class AschanArena3Game:
         self.check_if_crashed()
         self.check_if_disconnected()
 
-        while True:
-            self.__is_running = self.check_game_process()
-            time.sleep(2)
-            if not self.__is_running:
+        while not self.__is_running:
+            try:
+                self.__is_running = self.check_game_process()
+                time.sleep(2)
+            except:
                 break
 
         self.lobby.maximize_from_tray()

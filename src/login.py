@@ -11,7 +11,7 @@ from src.helpers import (
     send_email,
     calculate_time_passed,
     check_input_correctnes,
-    is_server_reachable,
+    check_server_connection,
     render_small_caps,
 )
 from src.vpn_handling import SoftEtherClient
@@ -69,7 +69,7 @@ class LoginWindow(GameWindowsBase):
         self.transformation_option = "800x600"
         self.font_size = fonts_sizes[self.transformation_option]
 
-        if not is_server_reachable():
+        if not check_server_connection():
             self.__server_unreachable = True
             self.__window_overlay = True
             self.__error_msg = "Server unreachable. Visit ToA Discord for more information."
@@ -608,12 +608,12 @@ class LoginWindow(GameWindowsBase):
             self.__window_overlay = True
             return "Passowrd has incorrect format!"
 
-        if not self.csrf_token:
+        if not self.csrf_token or "Error" in self.csrf_token:
             self.csrf_token = self.get_csrf_token()
 
-        if not self.csrf_token:
+        if "Error" in self.csrf_token:
             self.__window_overlay = True
-            return "Server error!"
+            return self.csrf_token
 
         headers = {
             "Referer": "https://h5-tavern.pl/",
@@ -645,11 +645,11 @@ class LoginWindow(GameWindowsBase):
 
         except requests.exceptions.ConnectionError:
             self.__window_overlay = True
-            return "To many tries, try again later!"
+            return "Error! Check your internet connection..."
 
         except:
             self.__window_overlay = True
-            return "Server/Player offline. Check discord..."
+            return "Error! Server/Player offline, check discord..."
 
     @run_in_thread
     def register_new_player(self, inputs: list):
@@ -684,12 +684,12 @@ class LoginWindow(GameWindowsBase):
             self.__window_overlay = True
             return "Email has incorrect format!"
 
-        if not self.csrf_token:
+        if not self.csrf_token or "Error" in self.csrf_token:
             self.csrf_token = self.get_csrf_token()
 
-        if not self.csrf_token:
+        if "Error" in self.csrf_token:
             self.__window_overlay = True
-            return "Server error!"
+            return self.csrf_token
 
         self.user = {
             "nickname": user_data["nickname"],
@@ -724,11 +724,11 @@ class LoginWindow(GameWindowsBase):
 
         except requests.exceptions.ConnectionError:
             self.__window_overlay = True
-            return "To many tries, try again later!"
+            return "Error! Check your internet connection..."
 
         except:
             self.__window_overlay = True
-            return "Server/Player offline. Check discord..."
+            return "Error! Server/Player offline, check discord..."
 
     @run_in_thread
     def set_new_password(self, inputs: list):
@@ -750,12 +750,12 @@ class LoginWindow(GameWindowsBase):
             self.__window_overlay = True
             return "Email has incorrect format!"
 
-        if not self.csrf_token:
+        if not self.csrf_token or "Error" in self.csrf_token:
             self.csrf_token = self.get_csrf_token()
 
-        if not self.csrf_token:
+        if "Error" in self.csrf_token:
             self.__window_overlay = True
-            return "Server error!"
+            return self.csrf_token
 
         headers = {
             "Referer": "https://h5-tavern.pl/",
@@ -786,18 +786,35 @@ class LoginWindow(GameWindowsBase):
 
         except requests.exceptions.ConnectionError:
             self.__window_overlay = True
-            return "To many tries, try again later!"
+            return "Error! Check your internet connection..."
 
         except:
             self.__window_overlay = True
-            return "Server/Player offline. Check discord..."
+            return "Error! Server/Player offline, check discord..."
 
     def get_csrf_token(self):
         url = f"https://{env_dict['SERVER_URL']}/db/{env_dict['PATH_TOKEN']}/"
-        response = self.session.get(url)
-        if "csrftoken" in response.cookies:
-            return response.cookies["csrftoken"]
-        return None
+        try:
+            self.__connection_timer = time.time()
+            self.__getting_token = True
+            response = self.session.get(url)
+            if response.status_code == 200:
+                self.__getting_token = False
+                self.__connection_timer = None
+            if "csrftoken" in response.cookies:
+                return response.cookies["csrftoken"]
+            return None
+        except requests.exceptions.ConnectTimeout:
+            self.__window_overlay = True
+            self.__error_msg = "Error occured while trying to connect to server!"
+
+        except requests.exceptions.ConnectionError:
+            self.__window_overlay = True
+            self.__error_msg = "Error! Check your internet connection..."
+
+        except:
+            self.__window_overlay = True
+            self.__error_msg = "Error! Server/Player offline, check discord..."
 
     def run_login(self):
         self.login_window()
