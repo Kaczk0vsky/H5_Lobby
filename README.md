@@ -1,5 +1,6 @@
 # H5 Lobby - Client/Server
 ![H5 Lobby Logo](https://raw.githubusercontent.com/Kaczk0vsky/H5_Lobby/main/resources/logo.png?raw=true)
+
 There are three versions different versions of repository installation covered.
 - 1) Installation from the player side,
 - 2) Installation to ONLY generate .exe launcher file,
