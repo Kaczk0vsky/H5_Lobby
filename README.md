@@ -40,6 +40,7 @@ Every action described here sends a request to the server. Additionally protecti
 - 8) **Quit** - logs out user and quits all processes,
 - 9) **Players Online** - list on the right side of the screen with slider. Each box represents player logged in and contains Nickname, Ranking Points and Status of the player. It automatically updates and sorts from the most ranking points to the least.
 
+Whenever a player is diconnected due to his internet connection or server problems the information is beeing displayed about what is happening. Also when its player internet connection the auto reconnecting mechanism was implemented, even when the disconnect happens during playing the game.
 ### Installation guide
 1. Clone the repository.
 2. Install poetry:
