@@ -70,6 +70,7 @@ class H5_Lobby(GameWindowsBase):
     __update_profile_status = False
     __options_status = False
     __update_options_status = False
+    __queue_canceled = False
     __is_connected = True
     __has_disconnected = False
     __elapsed_time = None
@@ -301,6 +302,7 @@ class H5_Lobby(GameWindowsBase):
                     cancel_bar = PROGRESS_BAR.draw(self.SCREEN, self.__elapsed_time)
                     if cancel_bar:
                         self.__window_overlay = True
+                        self.__queue_canceled = True
                         self.__error_msg = "Queue has been declined"
                         pygame.mixer.Channel(0).set_volume(self.config["volume"])
                         pygame.mixer.Channel(self.__queue_channel).stop()
@@ -555,6 +557,8 @@ class H5_Lobby(GameWindowsBase):
                     if self.__window_overlay:
                         if self.__error_msg:
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
+                                if self.__queue_canceled:
+                                    self.__queue_canceled = False
                                 self.__window_overlay = False
                                 self.__error_msg = None
 
@@ -618,7 +622,7 @@ class H5_Lobby(GameWindowsBase):
                     self.__window_overlay = True
                     self.__error_msg = f"Connecting for {time_passed[1]} seconds..."
 
-                if self.__is_connected:
+                if self.__is_connected and not self.__queue_canceled:
                     self.__connection_timer = None
                     self.__error_msg = None
                     FIND_GAME_BUTTON.set_active(True)
@@ -1088,7 +1092,6 @@ class H5_Lobby(GameWindowsBase):
             if response.status_code == 200:
                 self.__connection_timer = None
                 self.scan_for_players()
-                self.__error_msg = None
 
             else:
                 self.__window_overlay = True
@@ -1132,7 +1135,6 @@ class H5_Lobby(GameWindowsBase):
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 self.__connection_timer = None
-                self.__error_msg = None
 
             else:
                 self.__window_overlay = True
