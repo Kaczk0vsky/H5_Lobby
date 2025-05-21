@@ -71,6 +71,7 @@ class H5_Lobby(GameWindowsBase):
     __options_status = False
     __update_options_status = False
     __queue_canceled = False
+    __reconnect_back_to_game = False
     __is_connected = True
     __has_disconnected = False
     __elapsed_time = None
@@ -102,18 +103,18 @@ class H5_Lobby(GameWindowsBase):
         self.resolution = (int(self.config["resolution"].split("x")[0]), int(self.config["resolution"].split("x")[1]))
         self.SCREEN = pygame.display.set_mode(self.resolution)
 
-    def main_menu(self):
-        def __set_queue_variables(state: bool = False) -> None:
-            self.__game_found_music = state
-            self.__get_time = state
-            self.__found_game = state
-            self.__opponent_accepted = state
-            self.__player_accepted = state
-            self.__queue_status = state
-            self.__elapsed_time = None
-            self.__queue_channel = None
-            self.__connection_timer = None
+    def __set_queue_variables(self, state: bool = False) -> None:
+        self.__game_found_music = state
+        self.__get_time = state
+        self.__found_game = state
+        self.__opponent_accepted = state
+        self.__player_accepted = state
+        self.__queue_status = state
+        self.__elapsed_time = None
+        self.__queue_channel = None
+        self.__connection_timer = None
 
+    def main_menu(self):
         self.rescale_lobby_elements()
 
         FIND_GAME_BUTTON = Button(
@@ -306,8 +307,8 @@ class H5_Lobby(GameWindowsBase):
                         self.__error_msg = "Queue has been declined"
                         pygame.mixer.Channel(0).set_volume(self.config["volume"])
                         pygame.mixer.Channel(self.__queue_channel).stop()
-                        __set_queue_variables(state=False)
                         FIND_GAME_BUTTON.set_active(is_active=True)
+                        self.__set_queue_variables(state=False)
                         self.remove_from_queue(is_accepted=False)
                         continue
 
@@ -528,11 +529,11 @@ class H5_Lobby(GameWindowsBase):
                         self.quit_game_handling(self.crsf_token, self.session)
                     if self.__queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
-                            FIND_GAME_BUTTON.set_active(is_active=True)
                             pygame.mixer.Channel(0).set_volume(self.config["volume"])
                             if self.__queue_channel:
                                 pygame.mixer.Channel(self.__queue_channel).stop()
-                            __set_queue_variables(state=False)
+                            FIND_GAME_BUTTON.set_active(is_active=True)
+                            self.__set_queue_variables(state=False)
                             self.remove_from_queue(is_accepted=False)
                             continue
                         if ACCEPT_QUEUE is not None:
@@ -595,9 +596,11 @@ class H5_Lobby(GameWindowsBase):
                         else:
                             pygame.mixer.Channel(0).set_volume(self.config["volume"])
 
-            if self.__opponent_accepted and self.__player_accepted:
-                pygame.mixer.Channel(self.__queue_channel).stop()
-                __set_queue_variables(state=False)
+            if (self.__opponent_accepted and self.__player_accepted) or (self.__reconnect_back_to_game and self.__is_connected):
+                if self.__queue_channel:
+                    pygame.mixer.Channel(self.__queue_channel).stop()
+                pygame.mixer.Channel(0).set_volume(0.0)
+                self.__set_queue_variables(state=False)
                 self.run_arena()
                 continue
 
@@ -1418,3 +1421,9 @@ class H5_Lobby(GameWindowsBase):
         game = AschanArena3Game(self)
         time.sleep(2)
         game.run_processes()
+
+        self.__reconnect_back_to_game = game._reconnect_back_to_game
+        self.__has_disconnected = game._has_disconnected
+        if self.__has_disconnected:
+            self.__connection_timer = time.time()
+            self.__is_connected = False

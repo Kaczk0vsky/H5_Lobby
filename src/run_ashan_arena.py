@@ -14,9 +14,10 @@ class AschanArena3Game:
     __is_running = True
     __closed_unintentionally = False
     __closed_intentionally = False
-    __has_disconnected = False
     __key_pressed = None
     __prev_key_pressed = None
+    _has_disconnected = False
+    _reconnect_back_to_game = False
 
     def __init__(self, lobby: object):
         self.game_settings = load_game_settings()
@@ -84,6 +85,8 @@ class AschanArena3Game:
                 if last_packets == packets:
                     print("Disconnect due to lost connection.")
                     self.__closed_unintentionally = True
+                    self._reconnect_back_to_game = True
+                    self._has_disconnected = True
                     self.__is_running = False
 
                 time.sleep(2)
@@ -93,6 +96,10 @@ class AschanArena3Game:
                 print("Parsing error - check permissions")
 
     def load_console_file(self):
+        if self.__closed_unintentionally:
+            self.__closed_unintentionally = False
+            return
+
         path = os.path.join(self.game_settings["game_path"], "console.txt")
 
         if os.path.exists(path):
@@ -105,8 +112,6 @@ class AschanArena3Game:
             if self.__closed_intentionally:
                 self.lobby.handle_match_report(is_won=False, castle=None)
                 self.__closed_intentionally = False
-            elif self.__closed_unintentionally:
-                self.__closed_unintentionally = False
             elif data["player_won"] == "true":
                 self.lobby.handle_match_report(is_won=True, castle=data["castle"])
             elif data["player_won"] == "false":
@@ -118,8 +123,7 @@ class AschanArena3Game:
         self.check_keys_pressed()
         self.check_if_crashed()
         self.check_if_disconnected()
-
-        while not self.__is_running:
+        while self.__is_running:
             try:
                 self.__is_running = self.check_game_process()
                 time.sleep(2)
