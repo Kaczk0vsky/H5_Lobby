@@ -384,8 +384,11 @@ class CheckIfOpponentAccepted(View):
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
+            print(data)
             serializer = UserSerializer(data=data, required_fields=["nickname"])
+            print(serializer)
             if not serializer.is_valid():
+                print("Serializer nto valid")
                 return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
 
             nickname = serializer.validated_data["nickname"]
@@ -411,8 +414,8 @@ class CheckIfOpponentAccepted(View):
                 return JsonResponse(
                     {
                         "success": True,
-                        "oponnent_accepted": True,
-                        "oponnent_declined": False,
+                        "opponent_accepted": True,
+                        "opponent_declined": False,
                     }
                 )
 
@@ -425,12 +428,18 @@ class CheckIfOpponentAccepted(View):
                 return JsonResponse(
                     {
                         "success": True,
-                        "oponnent_accepted": False,
-                        "oponnent_declined": True,
+                        "opponent_accepted": False,
+                        "opponent_declined": True,
                     }
                 )
 
-        return JsonResponse({"success": True, "oponnent_accepted": False})
+        return JsonResponse(
+            {
+                "success": True,
+                "opponent_accepted": False,
+                "opponent_declined": False,
+            }
+        )
 
     def post(self, request, *args, **kwargs):
         try:
@@ -440,15 +449,19 @@ class CheckIfOpponentAccepted(View):
 
             try:
                 player = Player.objects.get(nickname=nickname)
+                print(player)
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
             try:
                 game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
             except Game.DoesNotExist:
+                print(f"No game found for player {player.nickname}")
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
             opponent = game.player_2 if player == game.player_1 else game.player_1
+            print(opponent.nickname)
             response = self._handle_opponent_state(opponent, player, game)
+            print(response)
             return response
 
         except Exception as e:

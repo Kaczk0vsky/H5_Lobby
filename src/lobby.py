@@ -1229,10 +1229,10 @@ class H5_Lobby(GameWindowsBase):
                 if response.status_code == 200:
                     self.__connection_timer = None
                     json_response = response.json()
-                    if json_response.get("oponnent_accepted"):
+                    if json_response.get("opponent_accepted"):
                         self.__opponent_accepted = True
                         break
-                    elif json_response.get("oponnent_declined"):
+                    elif json_response.get("opponent_declined"):
                         self.__opponent_declined = True
                         break
 

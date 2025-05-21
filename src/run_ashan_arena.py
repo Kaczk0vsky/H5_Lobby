@@ -63,6 +63,8 @@ class AschanArena3Game:
                 if returncode != 0:
                     print(f"Game crashed: {returncode}.")
                     self.__closed_unintentionally = True
+                    self._reconnect_back_to_game = True
+                    self._has_disconnected = True
                     self.__is_running = False
                 break
             time.sleep(2)

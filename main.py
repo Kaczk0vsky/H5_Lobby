@@ -12,12 +12,12 @@ USER_DIR.mkdir(exist_ok=True)
 
 BASE_PATH = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 
-ENV_SRC = Path(BASE_PATH) / ".env"
-ENV_DEST = USER_DIR / ".env"
+# ENV_SRC = Path(BASE_PATH) / ".env"
+# ENV_DEST = USER_DIR / ".env"
 
-if not ENV_DEST.exists():
-    shutil.copy(ENV_SRC, ENV_DEST)
-    ENV_DEST.chmod(0o444)
+# if not ENV_DEST.exists():
+#     shutil.copy(ENV_SRC, ENV_DEST)
+#     ENV_DEST.chmod(0o444)
 
 
 def run_lobby():

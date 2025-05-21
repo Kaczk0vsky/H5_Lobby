@@ -22,18 +22,17 @@ def run_command(command):
 
 def create_exe_file():
     # Run PyArmor to obfuscate all the needed files
-    run_command(f"pyarmor gen -O {OBFUSCATED_DIR} {SOURCE_PATH_SRC}")
-    run_command(f"pyarmor gen -O {OBFUSCATED_DIR} {SOURCE_PATH_WIDGETS}")
-    run_command(f"pyarmor gen -O {OBFUSCATED_DIR} {SOURCE_FILE}")
+    # run_command(f"pyarmor gen -O {OBFUSCATED_DIR} {SOURCE_PATH_SRC}")
+    # run_command(f"pyarmor gen -O {OBFUSCATED_DIR} {SOURCE_PATH_WIDGETS}")
+    # run_command(f"pyarmor gen -O {OBFUSCATED_DIR} {SOURCE_FILE}")
 
     # Run pyinstaller to create an .exe file
     run_command(
         f'pyinstaller --onefile --clean \
             --icon=resources/icon.ico \
             --version-file=version.txt \
-            --add-data="{OBFUSCATED_DIR}/src:{DEST_PATH_SRC}" \
-            --add-data="{OBFUSCATED_DIR}/widgets:{DEST_PATH_WIDGETS}" \
-            --add-data="{OBFUSCATED_DIR}:{DEST_PATH_SETTINGS}" \
+            --add-data="src:{DEST_PATH_SRC}" \
+            --add-data="widgets:{DEST_PATH_WIDGETS}" \
             --hidden-import=pygame \
             --collect-submodules=pygame \
             --hidden-import=toml \
@@ -56,11 +55,11 @@ def create_exe_file():
             --collect-submodules=_tkinter \
             --hidden-import=easygui \
             --collect-submodules=easygui \
-            --name={EXE_NAME} {OBFUSCATED_DIR}/main.py'
+            --name={EXE_NAME} main.py'
     )
 
     # Remove the obfuscated directory
-    run_command(f"rmdir /S /Q {OBFUSCATED_DIR}")
+    # run_command(f"rmdir /S /Q {OBFUSCATED_DIR}")
 
     # Remove spec file
     os.remove(os.path.join(os.getcwd(), f"{EXE_NAME}.spec"))
