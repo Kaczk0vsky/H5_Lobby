@@ -25,7 +25,8 @@ Lobby window covers **Find Game**, **Ranking**, **News**, **My Profile**, **Tave
 	- After accepting the player needs to wait for oponnet to accept the game. If oponnent didnt accept the game then player is back in the queue waiting. If both players accepted the game, then the H5_Game.exe opens, Lobby minimalizes and game starts.
 
 When both players are finished they can leave the game. Lobby maximalizes from tray and shows the results. Results window contains infromation about who won, and how much points both player lost/gained.
-Every action described here sends a request to the server. Additionally protection from intentional leaving the H5_Game.exe was implemented and wont be cover here.
+
+Every action described here sends a request to the server. Additionally protection from intentional leaving the H5_Game.exe was implemented and wont be cover here. Matchmaking mechanism is working on the server site and wont be covered too.
 - 2) **Ranking** - not implemented right now.
 - 3) **News** - not implemented right now.
 - 4) **My Profile** - opens additional window on the left side (if Settings are opened it closes it and opens in the same place) with curent User statistics (ranking position, ranking points, games played),
