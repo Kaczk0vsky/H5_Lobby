@@ -384,11 +384,8 @@ class CheckIfOpponentAccepted(View):
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            print(data)
             serializer = UserSerializer(data=data, required_fields=["nickname"])
-            print(serializer)
             if not serializer.is_valid():
-                print("Serializer nto valid")
                 return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
 
             nickname = serializer.validated_data["nickname"]
@@ -406,10 +403,6 @@ class CheckIfOpponentAccepted(View):
             with transaction.atomic():
                 opponent.save()
                 player.save()
-
-                if game.is_new:
-                    game.is_new = False
-                    game.save()
 
                 return JsonResponse(
                     {
@@ -449,19 +442,16 @@ class CheckIfOpponentAccepted(View):
 
             try:
                 player = Player.objects.get(nickname=nickname)
-                print(player)
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
             try:
-                game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).first()
+                game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
             except Game.DoesNotExist:
                 print(f"No game found for player {player.nickname}")
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
             opponent = game.player_2 if player == game.player_1 else game.player_1
-            print(opponent.nickname)
             response = self._handle_opponent_state(opponent, player, game)
-            print(response)
             return response
 
         except Exception as e:
@@ -568,6 +558,7 @@ class HandleMatchReport(View):
                     game.castle_1 = castle
                     if game_won:
                         game.who_won = player
+                        game.is_new = False
                     else:
                         game.who_won = game.player_2
                 else:
