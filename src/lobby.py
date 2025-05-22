@@ -1002,7 +1002,7 @@ class H5_Lobby(GameWindowsBase):
         )
         VOLUME_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.3725)
 
-        POINTS_TRESHOLD_TEXT = render_small_caps("Points treshold:", self.font_size[0], self.text_color)
+        POINTS_TRESHOLD_TEXT = render_small_caps("Rating Floor:", self.font_size[0], self.text_color)
         POINTS_TRESHOLD_RECT = POINTS_TRESHOLD_TEXT.get_rect(
             topleft=(self.frame_position[0] + self.frame_dims[0] * 0.125, self.frame_position[1] + self.frame_dims[1] * 0.395)
         )
@@ -1026,7 +1026,7 @@ class H5_Lobby(GameWindowsBase):
         )
         POINTS_TRESHOLD_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.465)
 
-        RANKED_TEXT = render_small_caps("Toggle ranked:", self.font_size[0], self.text_color)
+        RANKED_TEXT = render_small_caps("Ranked games:", self.font_size[0], self.text_color)
         RANKED_RECT = RANKED_TEXT.get_rect(
             topleft=(self.frame_position[0] + self.frame_dims[0] * 0.125, self.frame_position[1] + self.frame_dims[1] * 0.4875)
         )

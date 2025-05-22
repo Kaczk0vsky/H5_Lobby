@@ -71,9 +71,23 @@ class AschanArena3Game:
 
     @run_in_thread
     def check_if_disconnected(self):
-        # Get-NetAdapter -Name 'VPN - VPN Client' | ConvertTo-Json
-        # Get-NetAdapterStatistics -Name 'Wi-Fi' | ConvertTo-Json
-        command = ["powershell", "-Command", f"Get-NetAdapterStatistics -Name 'Wi-Fi' | ConvertTo-Json"]
+        # Get correct name of Wi-Fi adapter
+        command = ["powershell", "-Command", "Get-NetAdapterStatistics | Select-Object Name | ConvertTo-Json -Depth 3"]
+        result = subprocess.run(command, capture_output=True, text=True, check=True, encoding="utf-8")
+        net_adapters = json.loads(result.stdout)
+        adapter_name = None
+        for adapter in net_adapters:
+            for value in adapter.values():
+                if "wi-fi" in value.lower():
+                    adapter_name = value
+                    print("Wi-Fi adapter found:", value)
+                    break
+
+        if adapter_name is None:
+            print("Wi-Fi adapter not found. Checking if disconnected to possible...")
+            return
+
+        command = ["powershell", "-Command", f"Get-NetAdapterStatistics -Name '{adapter_name}' | ConvertTo-Json"]
         packets = [None, None]
 
         while self.__is_running:
