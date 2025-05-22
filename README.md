@@ -260,6 +260,11 @@ sudo ufw allow 1194/udp
 sudo ufw allow 22/tcp
 ```
 28) `sudo systemctl restart vpnserver-service`
+29) `sudo ip tuntap add dev tap_vpn mode tap`
+30) `sudo ip link set tap_vpn up`
+31) In vpncmd - `BridgeCreate VPN /DEVICE:tap_vpn /TAP:yes`
+32) `sudo sysctl -w net.ipv4.ip_forward=1`
+33) `sudo iptables -t nat -A POSTROUTING -o <interface> -j MASQUERADE`
 
 ##### 9. (OPTIONAL - for cloud solutions) Set inbound rules for Ports
 Only needed if you use some clound hostef Virtual Machine. Open all ports that were described before.
