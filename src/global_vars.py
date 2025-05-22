@@ -39,6 +39,7 @@ env_dict = {
     "PATH_LOGIN": os.getenv("PATH_LOGIN"),
     "PATH_CHANGE_PASSWORD": os.getenv("PATH_CHANGE_PASSWORD"),
     "PATH_PLAYER_OFFLINE": os.getenv("PATH_PLAYER_OFFLINE"),
+    "PATH_PLAYER_ONLINE": os.getenv("PATH_PLAYER_ONLINE"),
     "PATH_ADD": os.getenv("PATH_ADD"),
     "PATH_REMOVE": os.getenv("PATH_REMOVE"),
     "PATH_GET_PLAYERS": os.getenv("PATH_GET_PLAYERS"),

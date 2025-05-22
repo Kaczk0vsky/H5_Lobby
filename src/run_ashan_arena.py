@@ -132,5 +132,8 @@ class AschanArena3Game:
             except:
                 break
 
+        if not self._reconnect_back_to_game:
+            self.lobby.set_player_online()
+
         self.lobby.maximize_from_tray()
         self.load_console_file()

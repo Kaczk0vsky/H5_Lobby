@@ -1375,6 +1375,50 @@ class H5_Lobby(GameWindowsBase):
             return "Error! Server/Player offline, check discord..."
 
     @run_in_thread
+    def set_player_online(self):
+        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_PLAYER_ONLINE"]}/"
+        if not self.crsf_token:
+            self.__window_overlay = True
+            self.__error_msg = "Please login again."
+            return
+
+        user_data = {
+            "nickname": self.vpn_client.user_name,
+            "is_searching_ranked": self.config["is_ranked"],
+            "min_opponent_points": self.config["points_treshold"],
+        }
+        headers = {
+            "Referer": "https://h5-tavern.pl/",
+            "X-CSRFToken": self.crsf_token,
+            "Content-Type": "application/json",
+        }
+        self.__connection_timer = time.time()
+        try:
+            response = self.session.post(url, json=user_data, headers=headers)
+            if response.status_code == 200:
+                self.__connection_timer = None
+                return
+
+            elif response.status_code == 400:
+                self.__window_overlay = True
+                self.__connection_timer = None
+
+        except requests.exceptions.ConnectTimeout:
+            self.__has_disconnected = True
+            self.__window_overlay = True
+            return "Error while trying to connect to server!"
+
+        except requests.exceptions.ConnectionError:
+            self.__has_disconnected = True
+            self.__window_overlay = True
+            return "Error while trying to connect to server!"
+
+        except:
+            self.__has_disconnected = True
+            self.__window_overlay = True
+            return "Error! Server/Player offline, check discord..."
+
+    @run_in_thread
     def check_connection_state(self):
         self.__connection_timer = time.time()
         self.__window_overlay = True

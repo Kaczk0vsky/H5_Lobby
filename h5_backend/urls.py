@@ -7,6 +7,10 @@ class SetPlayerOffline(views.SetPlayerStateView):
     state = "offline"
 
 
+class SetPlayerOnline(views.SetPlayerStateView):
+    state = "online"
+
+
 class AddPlayerToQueue(views.SetPlayerStateView):
     state = "in_queue"
 
@@ -17,6 +21,7 @@ urlpatterns = [
     path("login/", views.LoginPlayer.as_view(), name="login_player"),
     path("change_password/", views.GeneratePasswordResetLinkView.as_view(), name="change_password"),
     path("set_player_offline/", SetPlayerOffline.as_view(), name="set_player_offline"),
+    path("set_player_online/", SetPlayerOnline.as_view(), name="set_player_online"),
     path("add_to_queue/", AddPlayerToQueue.as_view(), name="add_to_queue"),
     path("remove_from_queue/", views.RemovePlayerFromQueue.as_view(), name="remove_from_queue"),
     path("get_players_matched/", views.GetPlayersMatched.as_view(), name="get_players_matched"),
