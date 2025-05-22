@@ -260,7 +260,7 @@ class LoginWindow(GameWindowsBase):
             0: [False, "Password requirements:"],
             1: [False, "Must be longer than 8 characters"],
             2: [False, "Must contain one small and big letter"],
-            3: [False, "Must contain one special character"],
+            3: [False, "Must contain one of special characters: !^#+$=%"],
             4: [False, "Passwords must be the same"],
         }
 
@@ -602,7 +602,7 @@ class LoginWindow(GameWindowsBase):
             return "Nickname has incorrect format!"
 
         if not re.match(
-            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^+=!]{8,}$",
+            r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d#$%^+=!]{8,}$",
             user_data["password"],
         ):
             self.__window_overlay = True
@@ -670,7 +670,7 @@ class LoginWindow(GameWindowsBase):
             return "Nickname has incorrect format!"
 
         if not re.match(
-            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@#$%^&+=!])[A-Za-z\d@#$%^+=!]{8,}$",
+            r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d#$%^+=!]{8,}$",
             user_data["password"],
         ):
             self.__window_overlay = True

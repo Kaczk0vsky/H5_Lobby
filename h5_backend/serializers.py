@@ -27,7 +27,7 @@ class UserSerializer(serializers.Serializer):
         return value
 
     def validate_password(self, value):
-        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^+=!]{8,}$", value):
+        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d#$%^+=!]{8,}$", value):
             raise serializers.ValidationError("Password must be at least 8 characters and include letters and numbers and one special character")
         return value
 
