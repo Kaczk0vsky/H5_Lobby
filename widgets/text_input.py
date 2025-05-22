@@ -124,7 +124,7 @@ class TextInput:
                     self.active = False
                 elif event.key in [pygame.K_LSHIFT, pygame.K_RSHIFT, pygame.K_CAPSLOCK]:
                     pass
-                elif len(self.text) < 24:
+                else:
                     if self.hide_text:
                         self.text += "*"
                         self.hidden_text += event.unicode
@@ -140,8 +140,6 @@ class TextInput:
                 for instance in self._instances:
                     instance._tab_pressed = False
                     self._enter_pressed = False
-
-        self.txt_surface = render_small_caps(len(self.text) * "*" if self.hide_text else self.text, self.font_size, self.text_color)
 
     def get_string(self) -> str:
         if len(self.text) == len(self.hidden_text):
@@ -165,19 +163,24 @@ class TextInput:
 
     def draw(self, screen: pygame.Surface) -> None:
         screen.blit(self.image, self.rect)
+
         if self.active:
             pygame.draw.rect(screen, self.text_bg_color, self.rect_bg)
 
-        text_width = self.txt_surface.get_width()
-        text_x = self.rect_bg.x + (self.rect_bg.width - text_width) / 2
-
         text_surface_clipped = pygame.Surface((self.rect_bg.width, self.rect_bg.height), pygame.SRCALPHA)
 
-        text_surface_clipped.blit(self.txt_surface, (0, 0))
+        text_width = self.txt_surface.get_width()
+        box_width = self.rect_bg.width
+        if text_width <= box_width:
+            text_x = (box_width - text_width) // 2
+        else:
+            text_x = -self._scroll_offset
 
         title_rect = self.title_surface.get_rect(center=(self.rect.x + self.rect.w / 2, self.rect.y - self.rect.h / 10))
+
+        text_surface_clipped.blit(self.txt_surface, (text_x, 0))
         screen.blit(self.title_surface, title_rect.topleft)
-        screen.blit(text_surface_clipped, (text_x, self.rect.y + 12.5))
+        screen.blit(text_surface_clipped, (self.rect_bg.x, self.rect_bg.y))
 
     def set_active(self, screen: pygame.Surface) -> None:
         self.active = True
@@ -200,8 +203,12 @@ class TextInput:
         next_instance._tab_pressed = True
 
     def __update_text_surface(self) -> None:
+        self.txt_surface = render_small_caps(len(self.text) * "*" if self.hide_text else self.text, self.font_size, self.text_color)
+
         text_width = self.txt_surface.get_width()
-        if text_width > self.rect.width - 10:
-            self._scroll_offset = text_width - (self.rect.width - 10)
+        box_width = self.rect_bg.width
+
+        if text_width > box_width:
+            self._scroll_offset = text_width - box_width
         else:
             self._scroll_offset = 0
