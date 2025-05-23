@@ -19,12 +19,12 @@ VSVersionInfo(
           [
             StringStruct('CompanyName', 'Kaczk0vsky Corporation'),
             StringStruct('FileDescription', 'Lobby for Heroes of Might and Magic V'),
-            StringStruct('FileVersion', '1.0.1 Alpha Release'),
-            StringStruct('InternalName', 'AshanArena3.exe'),
+            StringStruct('FileVersion', '1.1.0 Alpha Release'),
+            StringStruct('InternalName', 'H5_Lobby.exe'),
             StringStruct('LegalCopyright', '© 2025 Kaczk0vsky Corporation'),
-            StringStruct('OriginalFilename', 'AshanArena3.exe'),
+            StringStruct('OriginalFilename', 'H5_Lobby.exe'),
             StringStruct('ProductName', 'H5 Lobby'),
-            StringStruct('ProductVersion', '1.0.1 Alpha Release')
+            StringStruct('ProductVersion', '1.1.0 Alpha Release')
           ]
         )
       ]

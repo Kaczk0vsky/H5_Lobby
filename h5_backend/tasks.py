@@ -54,7 +54,7 @@ def check_queue():
                 if player1 == player2:
                     continue
 
-                if player1.ranking_points > player2.min_opponent_points and player2.ranking_points > player1.min_opponent_points:
+                if (player1.ranking_points > player2.min_opponent_points and player2.ranking_points > player1.min_opponent_points) or not is_ranked:
                     with transaction.atomic():
                         player1_locked = Player.objects.select_for_update().get(id=player1.id)
                         player2_locked = Player.objects.select_for_update().get(id=player2.id)
