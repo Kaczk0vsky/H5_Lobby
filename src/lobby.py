@@ -1315,6 +1315,8 @@ class H5_Lobby(GameWindowsBase):
                 self.__game_data["is_won"] = is_won
                 self.__update_game_data = True
                 self.__connection_timer = None
+                # Reload profile information
+                self.get_user_profile()
                 return True
 
             elif response.status_code == 400:
@@ -1455,8 +1457,6 @@ class H5_Lobby(GameWindowsBase):
         if foreground_thread_id != current_thread_id:
             ctypes.windll.user32.AttachThreadInput(current_thread_id, foreground_thread_id, False)
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
-        # Reload profile information
-        self.get_user_profile()
 
     def run_game(self):
         self.main_menu()
