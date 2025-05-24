@@ -71,41 +71,50 @@ class AschanArena3Game:
 
     @run_in_thread
     def check_if_disconnected(self):
-        # Get correct name of Wi-Fi adapter
+        # Get list of network adapters
         command = ["powershell", "-Command", "Get-NetAdapterStatistics | Select-Object Name | ConvertTo-Json -Depth 3"]
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding="utf-8")
         net_adapters = json.loads(result.stdout)
-        adapter_name = None
+        adapter_names = {}
         for adapter in net_adapters:
             for value in adapter.values():
-                if "wi-fi" in value.lower():
-                    adapter_name = value
-                    print("Wi-Fi adapter found:", value)
-                    break
+                adapter_names[value] = {
+                    "ReceivedUnicastBytes": None,
+                    "SentUnicastBytes": None,
+                    "PreviousReceivedUnicastBytes": None,
+                    "PreviousSentUnicastBytes": None,
+                }
 
-        if adapter_name is None:
-            print("Wi-Fi adapter not found. Checking if disconnected to possible...")
+        if adapter_names is None:
+            print("Network adapters not found...")
             return
-
-        command = ["powershell", "-Command", f"Get-NetAdapterStatistics -Name '{adapter_name}' | ConvertTo-Json"]
-        packets = [None, None]
 
         while self.__is_running:
             try:
-                # Check if player has disconnected
-                result = subprocess.run(command, capture_output=True, text=True, check=True)
-                stats = json.loads(result.stdout)
-                last_packets = packets
-                packets = [stats["ReceivedUnicastBytes"], stats["SentUnicastBytes"]]
+                player_connected = False
+                for key, value in adapter_names.items():
+                    command = ["powershell", "-Command", f"Get-NetAdapterStatistics -Name '{key}' | ConvertTo-Json"]
+                    result = subprocess.run(command, capture_output=True, text=True, check=True)
+                    stats = json.loads(result.stdout)
+                    value["PreviousReceivedUnicastBytes"] = value["ReceivedUnicastBytes"]
+                    value["PreviousSentUnicastBytes"] = value["SentUnicastBytes"]
+                    value["ReceivedUnicastBytes"] = stats["ReceivedUnicastBytes"]
+                    value["SentUnicastBytes"] = stats["SentUnicastBytes"]
+                    if (
+                        value["PreviousReceivedUnicastBytes"] != value["ReceivedUnicastBytes"]
+                        and value["PreviousSentUnicastBytes"] != value["SentUnicastBytes"]
+                    ):
+                        player_connected = True
 
-                if last_packets == packets:
+                # Check if player has disconnected
+                if not player_connected:
                     print("Disconnect due to lost connection.")
                     self.__closed_unintentionally = True
                     self._reconnect_back_to_game = True
                     self._has_disconnected = True
                     self.__is_running = False
 
-                time.sleep(2)
+                time.sleep(10)
             except subprocess.CalledProcessError as e:
                 print("PowerShell Error:", e)
             except json.JSONDecodeError:
@@ -136,6 +145,7 @@ class AschanArena3Game:
 
     def run_processes(self):
         self.lobby.minimize_to_tray()
+        time.sleep(5)  # Wait for game to open
         self.check_keys_pressed()
         self.check_if_crashed()
         self.check_if_disconnected()
