@@ -17,9 +17,6 @@ class UserSerializer(serializers.Serializer):
 
     def __init__(self, *args, required_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
-        if required_fields:
-            for field_name in required_fields:
-                self.fields[field_name].required = True
 
     def validate_nickname(self, value):
         if not re.match(r"^[a-zA-Z0-9_-]{3,16}$", value):

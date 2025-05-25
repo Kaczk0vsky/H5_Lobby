@@ -20,7 +20,7 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse
 
 from h5_backend.tasks import add_new_user_to_vpn_server
-from h5_backend.models import Player, Ban, Game
+from h5_backend.models import Player, PlayerState, Ban, Game, CastleType
 from h5_backend.serializers import UserSerializer, GameSerializer
 
 logger = logging.getLogger(__name__)
@@ -221,23 +221,26 @@ class SetPlayerStateView(View):
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            serializer = UserSerializer(data=data, required_fields=["nickname", "is_searching_ranked", "min_opponent_points"])
+            serializer = UserSerializer(data=data, required_fields=["nickname"])
             if not serializer.is_valid():
-                return None, None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
 
-            nickname = serializer.validated_data["nickname"]
-            is_searching_ranked = serializer.validated_data["is_searching_ranked"]
-            min_opponent_points = serializer.validated_data["min_opponent_points"]
+            request_data = {}
+            request_data["nickname"] = serializer.validated_data["nickname"]
+            if self.state == "in_queue":
+                request_data["is_searching_ranked"] = serializer.validated_data["is_searching_ranked"]
+                request_data["min_opponent_points"] = serializer.validated_data["min_opponent_points"]
 
-            return nickname, is_searching_ranked, min_opponent_points, None
+            return request_data, None
 
         except json.JSONDecodeError:
-            return None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+            return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _update_player_state(self, player, is_searching_ranked, min_opponent_points):
+    def _update_player_state(self, player, request_data):
         player.player_state = self.state
-        player.is_searching_ranked = is_searching_ranked
-        player.min_opponent_points = min_opponent_points
+        if self.state == "in_queue":
+            player.is_searching_ranked = request_data["is_searching_ranked"]
+            player.min_opponent_points = request_data["min_opponent_points"]
         player.save()
 
     def post(self, request, *args, **kwargs):
@@ -248,16 +251,16 @@ class SetPlayerStateView(View):
                     status=500,
                 )
 
-            nickname, is_searching_ranked, min_opponent_points, parse_error = self._parse_request_data(request)
+            request_data, parse_error = self._parse_request_data(request)
             if parse_error:
                 return parse_error
 
             try:
-                player = Player.objects.get(nickname=nickname)
+                player = Player.objects.get(nickname=request_data["nickname"])
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
 
-            self._update_player_state(player, is_searching_ranked, min_opponent_points)
+            self._update_player_state(player, request_data)
             return JsonResponse({"success": True})
 
         except Exception as e:
@@ -266,202 +269,113 @@ class SetPlayerStateView(View):
 
 
 @method_decorator(csrf_protect, name="dispatch")
-@method_decorator(ratelimit(key="user_or_ip", rate="5/m", method="POST", block=True), name="dispatch")
-class RemovePlayerFromQueue(View):
+@method_decorator(ratelimit(key="user_or_ip", rate="15/m", method="POST", block=True), name="dispatch")
+class QueueHandlerView(View):
+    action = None  # remove_player | match_players | check_opponent_state
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            serializer = UserSerializer(data=data, required_fields=["nickname", "is_accepted"])
+            required_fields = ["nickname"]
+            if self.action == "remove_player":
+                required_fields.append("is_accepted")
+
+            serializer = UserSerializer(data=data, required_fields=required_fields)
             if not serializer.is_valid():
-                return (None, None, JsonResponse({"success": False, "errors": serializer.errors}, status=400))
+                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
 
-            nickname = serializer.validated_data["nickname"]
-            queue_accepted = serializer.validated_data["is_accepted"]
-
-            return nickname, queue_accepted, None
+            return serializer.validated_data, None
 
         except json.JSONDecodeError:
-            return (None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400))
+            return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _update_player_state(self, player, player_state):
-        player.player_state = player_state
+    def _get_player_object(self, nickname):
+        try:
+            return Player.objects.get(nickname=nickname)
+        except Player.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
+
+    def _get_game_object(self, player):
+        try:
+            return Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
+        except Game.DoesNotExist:
+            return JsonResponse({"success": False, "game_found": False, "opponent_accepted": False, "opponent_declined": True})
+
+    def _remove_player_from_queue(self, player, is_accepted):
+        player.player_state = PlayerState.ACCEPTED if is_accepted else PlayerState.ONLINE
         player.save()
-
-    def _handle_queue_state(self, player):
-        with transaction.atomic():
-            try:
-                game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
-            except Game.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Match not found"}, status=404)
-
-            oponnent = game.player_2 if player == game.player_1 else game.player_1
-            oponnent.player_state = "in_queue"
-            oponnent.save()
-            game.delete()
-
-    def post(self, request, *args, **kwargs):
-        try:
-            nickname, queue_accepted, parse_error = self._parse_request_data(request)
-            if parse_error:
-                return parse_error
-
-            player_state = "accepted" if queue_accepted else "online"
-
-            try:
-                player = Player.objects.get(nickname=nickname)
-            except Player.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
-
-            self._update_player_state(player, player_state)
-            if not queue_accepted:
-                self._handle_queue_state(player)
-
-            return JsonResponse({"success": True})
-
-        except Exception as e:
-            logger.error(f"Removing from queue error: {e}")
-            return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
-
-
-@method_decorator(csrf_protect, name="dispatch")
-@method_decorator(ratelimit(key="user_or_ip", rate="60/m", method="POST", block=True), name="dispatch")
-class GetPlayersMatched(View):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def _parse_request_data(self, request):
-        try:
-            data = json.loads(request.body.decode("utf-8"))
-            serializer = UserSerializer(data=data, required_fields=["nickname"])
-            if not serializer.is_valid():
-                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-
-            nickname = serializer.validated_data["nickname"]
-
-            return nickname, None
-
-        except json.JSONDecodeError:
-            return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
-
-    def post(self, request, *args, **kwargs):
-        try:
-            nickname, parse_error = self._parse_request_data(request)
-            if parse_error:
-                return parse_error
-
-            try:
-                player = Player.objects.get(nickname=nickname)
-            except Player.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
-            try:
-                game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
-            except Game.DoesNotExist:
-                return JsonResponse({"success": False, "game_found": False})
-
-            opponent = game.player_2 if player == game.player_1 else game.player_1
-            return JsonResponse(
-                {
-                    "success": True,
-                    "game_found": True,
-                    "opponent": [opponent.nickname, opponent.ranking_points],
-                }
-            )
-
-        except Exception as e:
-            logger.error(f"Getting players matched error: {e}")
-            return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
-
-
-@method_decorator(csrf_protect, name="dispatch")
-@method_decorator(ratelimit(key="user_or_ip", rate="60/m", method="POST", block=True), name="dispatch")
-class CheckIfOpponentAccepted(View):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def _parse_request_data(self, request):
-        try:
-            data = json.loads(request.body.decode("utf-8"))
-            serializer = UserSerializer(data=data, required_fields=["nickname"])
-            if not serializer.is_valid():
-                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-
-            nickname = serializer.validated_data["nickname"]
-
-            return nickname, None
-
-        except json.JSONDecodeError:
-            return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
-
-    def _handle_opponent_state(self, opponent, player, game):
-        if opponent.player_state == "accepted" or opponent.player_state == "playing":
-            opponent.player_state = "playing"
-            player.player_state = "playing"
-
+        if not is_accepted:
             with transaction.atomic():
+                try:
+                    game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
+                except Game.DoesNotExist:
+                    return JsonResponse({"success": False, "error": "Match not found"}, status=404)
+
+                opponent = game.player_2 if player == game.player_1 else game.player_1
+                opponent.player_state = PlayerState.IN_QUEUE
+                opponent.save()
+                game.delete()
+
+        return JsonResponse({"success": True})
+
+    def _match_players(self, player, game):
+        opponent = game.player_2 if player == game.player_1 else game.player_1
+        return JsonResponse({"success": True, "game_found": True, "opponent": [opponent.nickname, opponent.ranking_points]})
+
+    def _check_opponent_state(self, player, game):
+        opponent = game.player_2 if player == game.player_1 else game.player_1
+
+        if opponent.player_state in [PlayerState.ACCEPTED, PlayerState.PLAYING]:
+            with transaction.atomic():
+                opponent.player_state = PlayerState.PLAYING
+                player.player_state = PlayerState.PLAYING
                 opponent.save()
                 player.save()
+            return JsonResponse({"success": True, "opponent_accepted": True, "opponent_declined": False})
 
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "opponent_accepted": True,
-                        "opponent_declined": False,
-                    }
-                )
-
-        elif opponent.player_state == "online" or opponent.player_state == "offline":
+        elif opponent.player_state in [PlayerState.ONLINE, PlayerState.OFFLINE]:
             with transaction.atomic():
                 game.delete()
-                player.player_state = "in_queue"
+                player.player_state = PlayerState.IN_QUEUE
                 player.save()
+            return JsonResponse({"success": True, "opponent_accepted": False, "opponent_declined": True})
 
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "opponent_accepted": False,
-                        "opponent_declined": True,
-                    }
-                )
-
-        return JsonResponse(
-            {
-                "success": True,
-                "opponent_accepted": False,
-                "opponent_declined": False,
-            }
-        )
+        return JsonResponse({"success": True, "opponent_accepted": False, "opponent_declined": False})
 
     def post(self, request, *args, **kwargs):
         try:
-            nickname, parse_error = self._parse_request_data(request)
-            if parse_error:
-                return parse_error
+            request_data, error_response = self._parse_request_data(request)
+            if error_response:
+                return error_response
 
-            try:
-                player = Player.objects.get(nickname=nickname)
-            except Player.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Player not found"}, status=400)
-            try:
-                game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
-            except Game.DoesNotExist:
-                print(f"No game found for player {player.nickname}")
-                return JsonResponse(
-                    {
-                        "success": False,
-                        "opponent_accepted": False,
-                        "opponent_declined": True,
-                    }
-                )
+            player = self._get_player_object(request_data)
+            if isinstance(player, JsonResponse):
+                return player
 
-            opponent = game.player_2 if player == game.player_1 else game.player_1
-            response = self._handle_opponent_state(opponent, player, game)
-            return response
+            match self.action:
+                case "remove_player":
+                    return self._remove_player_from_queue(player, request_data["is_accepted"])
+
+                case "match_players":
+                    game = self._get_game_object(player)
+                    if isinstance(game, JsonResponse):
+                        return game
+                    return self._match_players(player, game)
+
+                case "check_opponent_state":
+                    game = self._get_game_object(player)
+                    if isinstance(game, JsonResponse):
+                        return game
+                    return self._check_opponent_state(player, game)
+
+                case _:
+                    return JsonResponse({"success": False, "error": "Invalid action"}, status=400)
 
         except Exception as e:
-            logger.error(f"Check if opponent accepted error: {e}")
+            logger.error(f"Queue handling exception: {e}")
             return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
 
 
@@ -511,6 +425,7 @@ class UpdateUsersList(View):
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+
         except Exception as e:
             logger.error(f"Checking if opponent accepted error: {e}")
             return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
@@ -538,56 +453,45 @@ class HandleMatchReport(View):
             game_won = game_serializer.validated_data["is_won"]
             castle = game_serializer.validated_data["castle"]
 
+            if castle not in CastleType.values:
+                return None, None, None, JsonResponse({"success": False, "error": "Invalid castle type"}, status=400)
+
             return nickname, game_won, castle, None
 
         except json.JSONDecodeError:
             return None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _parse_get_data(self, request):
-        try:
-            serializer = UserSerializer(data=request.GET, required_fields=["nickname"])
-            if not serializer.is_valid():
-                return (None, JsonResponse({"success": False, "errors": serializer.errors}, status=400))
-
-            nickname = serializer.validated_data["nickname"]
-
-            return nickname, None
-
-        except json.JSONDecodeError:
-            return (None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400))
-
     def _create_match_report(self, player, game_won, castle):
         game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").first()
+        if not game:
+            return JsonResponse({"success": False, "error": "No game found"}, status=404)
+
         with transaction.atomic():
             if not game.who_won:
                 if game.player_1 == player:
                     game.castle_1 = castle
+                    game.who_won = player if game_won else game.player_2
                     if game_won:
-                        game.who_won = player
                         game.is_new = False
-                    else:
-                        game.who_won = game.player_2
                 else:
                     game.castle_2 = castle
-                    if game_won:
-                        game.who_won = player
-                    else:
-                        game_won = game.player_1
+                    game.who_won = player if game_won else game.player_1
 
             player_won = game.who_won
-            player_lost = game.player_2 if game.who_won == game.player_1 else game.player_1
+            player_lost = game.player_2 if player_won == game.player_1 else game.player_1
+
             if game.is_ranked:
                 if not game.points_change_winner and not game.points_change_loser:
                     game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
             else:
                 game.points_change_winner, game.points_change_loser = 0, 0
+
             game.save()
 
-            game_data = {
+            return {
                 "winner": [player_won.nickname, player_won.ranking_points, game.points_change_winner],
                 "loser": [player_lost.nickname, player_lost.ranking_points, game.points_change_loser],
             }
-            return game_data
 
     @staticmethod
     def __calculate_points_change(player_won, player_lost):
@@ -615,13 +519,16 @@ class HandleMatchReport(View):
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
             game_data = self._create_match_report(player, game_won, castle)
+            if isinstance(game_data, JsonResponse):
+                return game_data
 
             return JsonResponse({"success": True, "created": True, "game_data": game_data})
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+
         except Exception as e:
-            logger.error(f"Handling creating match report error: {e}")
+            logger.error(f"Creating match report error: {e}")
             return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
 
 

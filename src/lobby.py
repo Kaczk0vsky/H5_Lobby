@@ -1384,11 +1384,7 @@ class H5_Lobby(GameWindowsBase):
             self.__error_msg = "Please login again."
             return
 
-        user_data = {
-            "nickname": self.vpn_client.user_name,
-            "is_searching_ranked": self.config["is_ranked"],
-            "min_opponent_points": self.config["points_treshold"],
-        }
+        user_data = {"nickname": self.vpn_client.user_name}
         headers = {
             "Referer": "https://h5-tavern.pl/",
             "X-CSRFToken": self.crsf_token,

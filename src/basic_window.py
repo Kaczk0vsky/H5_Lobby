@@ -76,28 +76,14 @@ class GameWindowsBase:
                     "X-CSRFToken": crsf_token,
                     "Content-Type": "application/json",
                 }
-                # FIXME: separate those requests, self.config data is not needed here
-                user_data = {
-                    "nickname": self.vpn_client.user_name,
-                    "is_searching_ranked": self.config["is_ranked"],
-                    "min_opponent_points": self.config["points_treshold"],
-                }
+                user_data = {"nickname": self.vpn_client.user_name}
                 pygame.quit()
                 session.cookies.set("csrftoken", crsf_token)
                 try:
                     session.post(url, json=user_data, headers=headers)
-                except requests.exceptions.ConnectTimeout:
-                    pass
-                    # return "Error while trying to connect to server!"
-
-                except requests.exceptions.ConnectionError:
-                    pass
-                    # self.__has_disconnected = True
-                    # self.__window_overlay = True
-                    # return "Error! Check your internet connection..."
                 except:
+                    # FIXME: Does it make any difference to handle it here?
                     pass
-                    # return "Error! Server/Player offline, check discord..."
         sys.exit()
 
     def create_universal_elements(self) -> None:
