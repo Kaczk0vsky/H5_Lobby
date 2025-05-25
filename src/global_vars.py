@@ -6,9 +6,9 @@ load_dotenv()
 
 discord_invite = "https://discord.gg/rdNaEYSJ"
 resolution_choices = [
-    # "1280x720",
+    "1280x720",
     "1920x1080",
-    # "2560x1440",
+    "2560x1440",
 ]
 points_choices = [str(val) for val in range(0, 2050, 100)]
 transformation_factors = {

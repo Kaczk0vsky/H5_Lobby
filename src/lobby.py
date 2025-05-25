@@ -233,7 +233,6 @@ class H5_Lobby(GameWindowsBase):
         self.refresh_friends_list(USERS_LIST)
 
         buttons = [FIND_GAME_BUTTON, RANKING, NEWS, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
-        widgets = buttons + [USERS_LIST]
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -444,6 +443,7 @@ class H5_Lobby(GameWindowsBase):
                         CHECKBOX_RANKED,
                         CLOSE_BUTTON,
                     ) = self.options_window()
+                    FIND_GAME_BUTTON.set_active(False)
                     self.__update_options_status = False
 
                 self.SCREEN.blit(SETTINGS_TEXT, SETTINGS_RECT)
@@ -569,15 +569,37 @@ class H5_Lobby(GameWindowsBase):
                         if RESOLUTION_CHOICES.check_for_input(MENU_MOUSE_POS):
                             self.config["resolution"] = str(RESOLUTION_CHOICES.get_selected_option())
                             self.transformation_option = self.config["resolution"]
+                            self.font_size = fonts_sizes[self.transformation_option]
                             self.resolution = (int(self.config["resolution"].split("x")[0]), int(self.config["resolution"].split("x")[1]))
                             self.SCREEN = pygame.display.set_mode(self.resolution)
                             self.BG = pygame.transform.scale(
                                 self.BG,
                                 self.resolution,
                             )
+                            self.__update_options_status = True
                             self.rescale_lobby_elements(reload=True)
                             for button in buttons:
-                                button.rescale(fonts_sizes[self.config["resolution"]][0], transformation_factors[self.config["resolution"]])
+                                button.rescale(fonts_sizes[self.config["resolution"]][1], transformation_factors[self.config["resolution"]])
+
+                            # FIXME: leave for now - rescaling is to complicated :/
+                            USERS_LIST = UsersList(
+                                position=(
+                                    1710 * (transformation_factors[self.transformation_option][0]),
+                                    590 * (transformation_factors[self.transformation_option][1]),
+                                ),
+                                color=self.text_color,
+                                font_size=self.font_size[0],
+                                title="Players Online",
+                                image=self.PLAYER_LIST,
+                                image_bg=self.PLAYER_LIST_BG,
+                                image_box=self.PLAYER_LIST_FRAME,
+                                scroll=self.SCROLL,
+                                scroll_bar=self.SCROLL_BAR,
+                                line=self.LINE,
+                                box=self.CHECKBOX,
+                            )
+                            self.refresh_friends_list(USERS_LIST)
+
                         if POINTS_CHOICES.check_for_input(MENU_MOUSE_POS):
                             self.config["points_treshold"] = str(POINTS_CHOICES.get_selected_option())
                         if POINTS_HOVER_BOX.check_for_input(MENU_MOUSE_POS):
@@ -585,6 +607,7 @@ class H5_Lobby(GameWindowsBase):
                         if CHECKBOX_RANKED.check_for_input(MENU_MOUSE_POS):
                             self.config["is_ranked"] = not self.config["is_ranked"]
                         if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
+                            FIND_GAME_BUTTON.set_active(True)
                             save_client_settings(self.config)
                             self.__options_status = False
 
