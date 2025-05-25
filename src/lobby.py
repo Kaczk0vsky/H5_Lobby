@@ -1251,7 +1251,7 @@ class H5_Lobby(GameWindowsBase):
                 self.__error_msg = "Error! Server/Player offline, check discord..."
                 return
 
-            time.sleep(1)
+            time.sleep(2)
 
     @run_in_thread
     def refresh_friends_list(self, users_list: UsersList):

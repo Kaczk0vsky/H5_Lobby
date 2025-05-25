@@ -286,7 +286,7 @@ class QueueHandlerView(View):
             serializer = UserSerializer(data=data, required_fields=required_fields)
             if not serializer.is_valid():
                 return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-
+            print(serializer.validated_data)
             return serializer.validated_data, None
 
         except json.JSONDecodeError:
@@ -350,7 +350,7 @@ class QueueHandlerView(View):
             request_data, error_response = self._parse_request_data(request)
             if error_response:
                 return error_response
-
+            print(request_data)
             player = self._get_player_object(request_data)
             if isinstance(player, JsonResponse):
                 return player
