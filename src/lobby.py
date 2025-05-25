@@ -265,6 +265,7 @@ class H5_Lobby(GameWindowsBase):
                         PROGRESS_BAR,
                     ) = self.queue_window()
                     ACCEPT_QUEUE.set_active(False) if self.__player_accepted else None
+                    OPTIONS_BUTTON.set_active(False)
                     self.__update_queue_status = False
 
                 self.SCREEN.blit(
@@ -307,6 +308,7 @@ class H5_Lobby(GameWindowsBase):
                         pygame.mixer.Channel(0).set_volume(self.config["volume"])
                         pygame.mixer.Channel(self.__queue_channel).stop()
                         FIND_GAME_BUTTON.set_active(is_active=True)
+                        OPTIONS_BUTTON.set_active(True)
                         self.__set_queue_variables(state=False)
                         self.remove_from_queue(is_accepted=False)
                         continue
@@ -533,6 +535,7 @@ class H5_Lobby(GameWindowsBase):
                             if self.__queue_channel:
                                 pygame.mixer.Channel(self.__queue_channel).stop()
                             FIND_GAME_BUTTON.set_active(is_active=True)
+                            OPTIONS_BUTTON.set_active(True)
                             self.__set_queue_variables(state=False)
                             self.remove_from_queue(is_accepted=False)
                             continue
@@ -620,6 +623,7 @@ class H5_Lobby(GameWindowsBase):
                             pygame.mixer.Channel(0).set_volume(self.config["volume"])
 
             if (self.__opponent_accepted and self.__player_accepted) or (self.__reconnect_back_to_game and self.__is_connected):
+                OPTIONS_BUTTON.set_active(False)
                 if self.__queue_channel:
                     pygame.mixer.Channel(self.__queue_channel).stop()
                 pygame.mixer.Channel(0).set_volume(0.0)
