@@ -4,7 +4,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
-from h5_backend.models import Game
+from h5_backend.models import Game, CastleType
 
 
 class UserSerializer(serializers.Serializer):
@@ -37,7 +37,7 @@ class UserSerializer(serializers.Serializer):
 
 
 class GameSerializer(serializers.Serializer):
-    castle = serializers.ChoiceField(choices=Game.CASTLE_TYPE_CHOICES, required=False, allow_null=True, allow_blank=True)
+    castle = serializers.ChoiceField(choices=CastleType.choices, required=False, allow_null=True, allow_blank=True)
     is_won = serializers.BooleanField(required=False)
 
     def __init__(self, *args, required_fields=None, **kwargs):
