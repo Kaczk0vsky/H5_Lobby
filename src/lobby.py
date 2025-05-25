@@ -96,6 +96,7 @@ class H5_Lobby(GameWindowsBase):
         self.transformation_option = self.config["resolution"]
         self.font_size = fonts_sizes[self.transformation_option]
 
+        self.get_user_profile()
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.create_lobby_elements()
@@ -230,7 +231,6 @@ class H5_Lobby(GameWindowsBase):
             box=self.CHECKBOX,
         )
         self.refresh_friends_list(USERS_LIST)
-        self.get_user_profile()
 
         buttons = [FIND_GAME_BUTTON, RANKING, NEWS, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
         widgets = buttons + [USERS_LIST]
@@ -1339,7 +1339,6 @@ class H5_Lobby(GameWindowsBase):
             self.__window_overlay = True
             return "Error! Server/Player offline, check discord..."
 
-    @run_in_thread
     def get_user_profile(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_PROFILE']}/"
         if not self.crsf_token:
