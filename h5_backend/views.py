@@ -269,7 +269,7 @@ class SetPlayerStateView(View):
 
 
 @method_decorator(csrf_protect, name="dispatch")
-@method_decorator(ratelimit(key="user_or_ip", rate="15/m", method="POST", block=True), name="dispatch")
+@method_decorator(ratelimit(key="user_or_ip", rate="60/m", method="POST", block=True), name="dispatch")
 class QueueHandlerView(View):
     action = None  # remove_player | match_players | check_opponent_state
 
