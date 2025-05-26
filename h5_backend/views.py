@@ -312,7 +312,7 @@ class QueueHandlerView(View):
                 try:
                     game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
                 except Game.DoesNotExist:
-                    return JsonResponse({"success": False, "error": "Match not found"}, status=404)
+                    return JsonResponse({"success": False, "error": "Queue has been declined"}, status=404)
 
                 opponent = game.player_2 if player == game.player_1 else game.player_1
                 opponent.player_state = PlayerState.IN_QUEUE
