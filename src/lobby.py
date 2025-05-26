@@ -1167,9 +1167,7 @@ class H5_Lobby(GameWindowsBase):
                 self.__connection_timer = None
 
             else:
-                self.__window_overlay = True
                 self.__connection_timer = None
-                self.__error_msg = response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
             self.__has_disconnected = True
