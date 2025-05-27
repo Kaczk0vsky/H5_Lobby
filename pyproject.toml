@@ -20,6 +20,7 @@ pyarmor = "^9.1.1"
 django-oauth-toolkit = "^3.0.1"
 psutil = "^7.0.0"
 pygetwindow = "^0.0.9"
+keyboard = "^0.13.5"
 
 [build-system]
 requires = ["poetry-core"]

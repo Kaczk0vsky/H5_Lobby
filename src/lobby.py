@@ -79,6 +79,7 @@ class H5_Lobby(GameWindowsBase):
     __error_msg = None
     __connection_timer = None
     __game_data = None
+    __profile_data = None
 
     def __init__(
         self,
@@ -96,7 +97,10 @@ class H5_Lobby(GameWindowsBase):
         self.transformation_option = self.config["resolution"]
         self.font_size = fonts_sizes[self.transformation_option]
 
-        self.get_user_profile()
+        while not self.__profile_data:
+            print("Loading profile data...")
+            self.get_user_profile()
+
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.create_lobby_elements()
@@ -392,6 +396,7 @@ class H5_Lobby(GameWindowsBase):
                         TOTAL_WINRATIO_RECT,
                         CLOSE_BUTTON,
                     ) = self.profile_window()
+                    FIND_GAME_BUTTON.set_active(True)
                     self.__update_profile_status = False
 
                 self.SCREEN.blit(
@@ -652,7 +657,7 @@ class H5_Lobby(GameWindowsBase):
                     self.__window_overlay = True
                     self.__error_msg = f"Connecting for {time_passed[1]} seconds..."
 
-                if self.__is_connected and not self.__queue_canceled:
+                if self.__is_connected and not self.__queue_canceled and not self.__queue_status:
                     self.__connection_timer = None
                     self.__error_msg = None
                     FIND_GAME_BUTTON.set_active(True)
@@ -1044,7 +1049,7 @@ class H5_Lobby(GameWindowsBase):
             highlight_color=self.hovering_color,
             font_size=self.font_size[1],
             option_list=points_choices,
-            selected=self.config["points_treshold"],
+            selected=str(self.config["points_treshold"]),
         )
         POINTS_HOVER_BOX = HoverBox(
             image=self.QUESTION_MARK,
