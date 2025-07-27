@@ -100,6 +100,7 @@ class H5_Lobby(GameWindowsBase):
         while not self.__profile_data:
             print("Loading profile data...")
             self.get_user_profile()
+            print("Profile data loaded successfully.")
 
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")

@@ -243,7 +243,7 @@ class LoginWindow(GameWindowsBase):
 
             if self.__allow_login:
                 self.__allow_login = False
-                self.run_lobby()
+                self._event_on_login()
 
             pygame.display.update()
 
@@ -819,8 +819,10 @@ class LoginWindow(GameWindowsBase):
     def run_login(self):
         self.login_window()
 
-    def run_lobby(self):
+    def _event_on_login(self):
         self.stop_background_music()
+        self.disconnect_unused_network_adapters()
+
         lobby = H5_Lobby(
             vpn_client=self.vpn_client,
             user=self.user,
