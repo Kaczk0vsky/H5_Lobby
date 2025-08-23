@@ -71,22 +71,22 @@ class AschanArena3Game:
 
     @run_in_thread
     def check_if_disconnected(self):
-        # Get list of network adapters
-        command = ["powershell", "-Command", "Get-NetAdapterStatistics | Select-Object Name | ConvertTo-Json -Depth 3"]
+        command = ["powershell", "-Command", "Get-NetAdapterStatistics | Select-Object Name, ReceivedBytes, SentBytes | ConvertTo-Json"]
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding="utf-8")
         net_adapters = json.loads(result.stdout)
+
         adapter_names = {}
         for adapter in net_adapters:
             for value in adapter.values():
                 adapter_names[value] = {
-                    "ReceivedUnicastBytes": None,
-                    "SentUnicastBytes": None,
-                    "PreviousReceivedUnicastBytes": None,
-                    "PreviousSentUnicastBytes": None,
+                    "ReceivedBytes": None,
+                    "SentBytes": None,
+                    "PreviousReceivedBytes": None,
+                    "PreviousSentBytes": None,
                 }
 
         if adapter_names is None:
-            print("Network adapters not found...")
+            print("Disconnection check not possible! - no network adapters found.")
             return
 
         while self.__is_running:
@@ -96,19 +96,16 @@ class AschanArena3Game:
                     command = ["powershell", "-Command", f"Get-NetAdapterStatistics -Name '{key}' | ConvertTo-Json"]
                     result = subprocess.run(command, capture_output=True, text=True, check=True)
                     stats = json.loads(result.stdout)
-                    value["PreviousReceivedUnicastBytes"] = value["ReceivedUnicastBytes"]
-                    value["PreviousSentUnicastBytes"] = value["SentUnicastBytes"]
-                    value["ReceivedUnicastBytes"] = stats["ReceivedUnicastBytes"]
-                    value["SentUnicastBytes"] = stats["SentUnicastBytes"]
-                    if (
-                        value["PreviousReceivedUnicastBytes"] != value["ReceivedUnicastBytes"]
-                        and value["PreviousSentUnicastBytes"] != value["SentUnicastBytes"]
-                    ):
+                    value["PreviousReceivedBytes"] = value["ReceivedBytes"]
+                    value["PreviousSentBytes"] = value["SentBytes"]
+                    value["ReceivedBytes"] = stats["ReceivedBytes"]
+                    value["SentBytes"] = stats["SentBytes"]
+                    if value["PreviousReceivedBytes"] != value["ReceivedBytes"] and value["PreviousSentBytes"] != value["SentBytes"]:
                         player_connected = True
 
                 # Check if player has disconnected
                 if not player_connected:
-                    print("Disconnect due to lost connection.")
+                    print("Disconnected due to lost connection.")
                     self.__closed_unintentionally = True
                     self._reconnect_back_to_game = True
                     self._has_disconnected = True
