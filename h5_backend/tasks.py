@@ -4,7 +4,7 @@ from celery import shared_task
 from django.db import transaction
 from django.db.models import Q
 
-from h5_backend.models import Player, Game
+from h5_backend.models import Player, Game, PlayerState
 
 
 @shared_task
@@ -38,8 +38,8 @@ def add_new_user_to_vpn_server(vpn_server_ip: str, vpn_admin_password: str, vpnc
 @shared_task
 def check_queue():
     queues = [
-        {"players": list(Player.objects.filter(player_state=Player.IN_QUEUE, is_searching_ranked=True)), "is_ranked": True},
-        {"players": list(Player.objects.filter(player_state=Player.IN_QUEUE, is_searching_ranked=False)), "is_ranked": False},
+        {"players": list(Player.objects.filter(player_state=PlayerState.IN_QUEUE, is_searching_ranked=True)), "is_ranked": True},
+        {"players": list(Player.objects.filter(player_state=PlayerState.IN_QUEUE, is_searching_ranked=False)), "is_ranked": False},
     ]
 
     for queue in queues:
@@ -67,7 +67,7 @@ def check_queue():
                         if not existing_game.exists():
                             Game.objects.create(player_1=player1_locked, player_2=player2_locked, is_new=True, is_ranked=is_ranked)
 
-                            player1_locked.player_state = Player.WAITING_ACCEPTANCE
-                            player2_locked.player_state = Player.WAITING_ACCEPTANCE
+                            player1_locked.player_state = PlayerState.WAITING_ACCEPTANCE
+                            player2_locked.player_state = PlayerState.WAITING_ACCEPTANCE
                             player1_locked.save()
                             player2_locked.save()
