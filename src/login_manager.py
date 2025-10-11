@@ -4,8 +4,8 @@ import time
 import re
 
 from src.global_vars import fonts_sizes, env_dict
-from src.basic_window import GameWindowsBase
-from src.lobby import H5_Lobby
+from src.base_window import GameWindowsBase
+from src.lobby_manager import H5_Lobby
 from src.helpers import (
     delete_objects,
     send_email,
@@ -13,15 +13,19 @@ from src.helpers import (
     check_input_correctnes,
     check_server_connection,
     render_small_caps,
+    disconnect_unused_network_adapters,
 )
 from src.vpn_handling import SoftEtherClient
 from src.settings_reader import load_user
 from src.settings_writer import save_login_information
-from src.decorators import run_in_thread
+from utils.decorators import run_in_thread
 from widgets.text_input import TextInput
 from widgets.button import Button
 from widgets.check_box import CheckBox
 from widgets.hover_box import HoverBox
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class LoginWindow(GameWindowsBase):
@@ -73,6 +77,8 @@ class LoginWindow(GameWindowsBase):
             self.__server_unreachable = True
             self.__window_overlay = True
             self.__error_msg = "Server unreachable. Visit ToA Discord for more information."
+            logger.error("Server unreachable. Visit ToA Discord for more information.")
+        logger.info("Server reachable, connection has been established.")
 
         self.user = load_user()
         self.set_window_caption(title="Login")
@@ -178,6 +184,7 @@ class LoginWindow(GameWindowsBase):
         )
         INPUT_BOXES = [LOGIN_INPUT, PASSWORD_INPUT]
 
+        logger.debug("Displaying login window.")
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
             self.SCREEN.blit(self.TEXT_BG, (200, 50))
@@ -197,6 +204,7 @@ class LoginWindow(GameWindowsBase):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if not self.__window_overlay:
                         if LOGIN_BUTTON.check_for_input(MENU_MOUSE_POS):
+                            logger.info("Initiating login process...")
                             self.__error_msg = self.login_player(INPUT_BOXES).join()
                         if REGISTER_BUTTON.check_for_input(MENU_MOUSE_POS):
                             delete_objects(INPUT_BOXES)
@@ -337,6 +345,7 @@ class LoginWindow(GameWindowsBase):
             REPEAT_PASSWORD_INPUT,
             EMAIL_INPUT,
         ]
+        logger.debug("Displaying register window.")
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -357,6 +366,7 @@ class LoginWindow(GameWindowsBase):
                     if not self.__window_overlay:
                         if REGISTER_ACCOUNT_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.__error_msg = self.register_new_player(INPUT_BOXES).join()
+                            logger.info("Initiating register process...")
                         elif BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.__remove_all_widgets = True
                         elif HOVER_BOX_NICKNAME.check_for_input(MENU_MOUSE_POS):
@@ -470,6 +480,7 @@ class LoginWindow(GameWindowsBase):
             NICKNAME_INPUT,
             EMAIL_INPUT,
         ]
+        logger.debug("Displaying forgot password window.")
 
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -490,6 +501,7 @@ class LoginWindow(GameWindowsBase):
                     if not self.__window_overlay:
                         if SUBMIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.__error_msg = self.set_new_password(INPUT_BOXES).join()
+                            logger.info("Initiating changing password process...")
                         if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
                             self.__remove_all_widgets = True
                     else:
@@ -621,18 +633,25 @@ class LoginWindow(GameWindowsBase):
             "Content-Type": "application/json",
         }
         self.session.cookies.set("csrftoken", self.csrf_token)
+        logger.debug(f"Sending login request for user: {user_data['nickname']}")
         try:
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 save_login_information(user_data)
+                logger.debug("Saving user information if selected...")
                 if self.vpn_client is None:
                     self.vpn_client = SoftEtherClient(
                         user_data["nickname"],
                         user_data["password"],
                     )
+                    logger.debug("Creating new VPN client...")
                     self.vpn_client.create_new_client()
+                    logger.debug("VPN client created successfully.")
+
                 self.vpn_client.set_vpn_state(state=True)
+                logger.info("VPN connection established.")
                 self.__allow_login = True
+                logger.info(f"User {user_data['nickname']} logged in successfully.")
                 return None
 
             elif response.status_code == 400:
@@ -703,6 +722,7 @@ class LoginWindow(GameWindowsBase):
             "Content-Type": "application/json",
         }
         self.session.cookies.set("csrftoken", self.csrf_token)
+        logger.debug(f"Sending register request for user: {user_data['nickname']}")
         try:
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
@@ -710,7 +730,9 @@ class LoginWindow(GameWindowsBase):
                     self.user["nickname"],
                     self.user["password"],
                 )
+                logger.debug("Creating new VPN client...")
                 self.vpn_client.create_new_client()
+                logger.debug("VPN client created successfully.")
                 self.__remove_all_widgets = True
                 return None
 
@@ -763,16 +785,20 @@ class LoginWindow(GameWindowsBase):
             "Content-Type": "application/json",
         }
         self.session.cookies.set("csrftoken", self.csrf_token)
+        logger.debug(f"Sending forgot password request for user: {user_data['nickname']}")
         try:
             response = self.session.get(url, params=user_data, headers=headers)
             if response.status_code == 200:
                 data = response.json()
                 reset_url = data.get("reset_url")
+                logger.debug(f"Received reset URL: {reset_url}. Sening email...")
                 if send_email(user_data, reset_url):
+                    logger.debug(f"Forgot password email sent to {user_data['email']}.")
                     self.__remove_all_widgets = True
                     self.__window_overlay = False
                     return None
                 else:
+                    logger.error("Failed to send forgot password email.")
                     self.__window_overlay = True
                     return "Error occured during sending email!"
 
@@ -794,16 +820,18 @@ class LoginWindow(GameWindowsBase):
 
     def get_csrf_token(self):
         url = f"https://{env_dict['SERVER_URL']}/db/{env_dict['PATH_TOKEN']}/"
+        logger.debug("Fetching CSRF token from server...")
         try:
             self.__connection_timer = time.time()
-            self.__getting_token = True
             response = self.session.get(url)
             if response.status_code == 200:
-                self.__getting_token = False
+                logger.debug("CSRF token fetched successfully.")
                 self.__connection_timer = None
-            if "csrftoken" in response.cookies:
-                return response.cookies["csrftoken"]
+                if "csrftoken" in response.cookies:
+                    logger.debug("CSRF token found in cookies.")
+                    return response.cookies["csrftoken"]
             return None
+
         except requests.exceptions.ConnectTimeout:
             self.__window_overlay = True
             self.__error_msg = "Error occured while trying to connect to server!"
@@ -821,7 +849,7 @@ class LoginWindow(GameWindowsBase):
 
     def _event_on_login(self):
         self.stop_background_music()
-        self.disconnect_unused_network_adapters()
+        disconnect_unused_network_adapters()
 
         lobby = H5_Lobby(
             vpn_client=self.vpn_client,

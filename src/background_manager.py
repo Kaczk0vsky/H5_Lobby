@@ -6,8 +6,10 @@ import keyboard
 import json
 
 from src.settings_reader import load_game_settings
-from src.decorators import run_in_thread
-from src.helpers import check_server_connection
+from utils.decorators import run_in_thread
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class AschanArena3Game:
@@ -45,7 +47,7 @@ class AschanArena3Game:
             if self.__key_pressed == "f4" and self.__prev_key_pressed == "alt":
                 returncode = self.process.poll()
                 if returncode is not None:
-                    print(f"Game closed: {returncode}.")
+                    logger.warning(f"Game closed: {returncode}.")
                     if returncode == 0:
                         self.__closed_intentionally = True
                         self.__is_running = False
@@ -61,7 +63,7 @@ class AschanArena3Game:
             returncode = self.process.poll()
             if returncode is not None:
                 if returncode != 0:
-                    print(f"Game crashed: {returncode}.")
+                    logger.critical(f"Game crashed: {returncode}.")
                     self.__closed_unintentionally = True
                     self._reconnect_back_to_game = True
                     self._has_disconnected = True
@@ -86,7 +88,7 @@ class AschanArena3Game:
                 }
 
         if adapter_names is None:
-            print("Disconnection check not possible! - no network adapters found.")
+            logger.debug("Disconnection check not possible! - no network adapters found.")
             return
 
         while self.__is_running:
@@ -105,7 +107,7 @@ class AschanArena3Game:
 
                 # Check if player has disconnected
                 if not player_connected:
-                    print("Disconnected due to lost connection.")
+                    logger.critical("Disconnected due to lost connection.")
                     self.__closed_unintentionally = True
                     self._reconnect_back_to_game = True
                     self._has_disconnected = True
@@ -113,9 +115,9 @@ class AschanArena3Game:
 
                 time.sleep(10)
             except subprocess.CalledProcessError as e:
-                print("PowerShell Error:", e)
+                logger.debug("PowerShell Error:", e)
             except json.JSONDecodeError:
-                print("Parsing error - check permissions")
+                logger.debug("Parsing error - check permissions")
 
     def load_console_file(self):
         if self.__closed_unintentionally:
@@ -143,6 +145,7 @@ class AschanArena3Game:
     def run_processes(self):
         self.lobby.minimize_to_tray()
         time.sleep(5)  # Wait for game to open
+        logger.debug("Running background processes...")
         self.check_keys_pressed()
         self.check_if_crashed()
         self.check_if_disconnected()

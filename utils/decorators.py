@@ -1,6 +1,6 @@
 import functools
 
-from src.custom_thread import CustomThread
+from utils.custom_thread import CustomThread
 
 
 def run_in_thread(func):

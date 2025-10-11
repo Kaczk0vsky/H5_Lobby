@@ -5,11 +5,17 @@ import smtplib
 import time
 import re
 import socket
+import subprocess
+import json
+import ctypes
 import pygetwindow as gw
 
 from email.message import EmailMessage
 
 from src.global_vars import env_dict
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def delete_objects(object_list: list):
@@ -177,3 +183,34 @@ def render_small_caps(text: str, font_size: int, color: tuple) -> pygame.Surface
         x_offset += surf.get_width()
 
     return result_surface
+
+
+def disconnect_unused_network_adapters():
+    logger.debug("Checking for unused network adapters to disconnect...")
+    try:
+        command = ["powershell", "-Command", "Get-NetAdapterStatistics | Select Name, ReceivedBytes, SentBytes | ConvertTo-Json"]
+        result = subprocess.run(command, capture_output=True, text=True, check=True, encoding="utf-8")
+        output = result.stdout.strip()
+
+        if not output:
+            logger.debug("No network adapter data returned.")
+            return
+
+        adapters = json.loads(output)
+
+        if isinstance(adapters, dict):
+            adapters = [adapters]
+        elif not isinstance(adapters, list):
+            logger.warning("Unexpected data format for network adapters.")
+            return
+
+        for adapter in adapters:
+            if adapter.get("ReceivedBytes", 1) == 0 and adapter.get("SentBytes", 1) == 0:
+                ps_command = f'-Command "Disable-NetAdapter -Name \\"{adapter["Name"]}\\" -Confirm:$false"'
+                ctypes.windll.shell32.ShellExecuteW(None, "runas", "powershell.exe", ps_command, None, 1)
+                logger.info(f"Disabled unused adapter: {adapter['Name']}")
+
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error executing PowerShell command: {e}")
+    except json.JSONDecodeError:
+        logger.error("Failed to parse JSON from PowerShell output.")

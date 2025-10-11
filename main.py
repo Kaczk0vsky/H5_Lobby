@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 from src.settings_writer import check_for_missing_paths
-from src.login import LoginWindow
+from src.login_manager import LoginWindow
 
 USER_DIR = Path.home() / ".H5_Lobby"
 USER_DIR.mkdir(exist_ok=True)

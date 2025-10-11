@@ -2,15 +2,15 @@ import pygame
 import os
 import requests
 import sys
-import subprocess
-import json
-import ctypes
 
 from src.settings_reader import load_client_settings
 from src.global_vars import env_dict, transformation_factors
 from src.helpers import render_small_caps
 from widgets.button import Button
 from widgets.cursor import Cursor
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class GameWindowsBase:
@@ -69,35 +69,6 @@ class GameWindowsBase:
         pygame.mixer.fadeout(5000)
         pygame.quit()
 
-    def disconnect_unused_network_adapters(self):
-        try:
-            command = ["powershell", "-Command", "Get-NetAdapterStatistics | Select Name, ReceivedBytes, SentBytes | ConvertTo-Json"]
-            result = subprocess.run(command, capture_output=True, text=True, check=True, encoding="utf-8")
-            output = result.stdout.strip()
-
-            if not output:
-                print("No network adapter data returned.")
-                return
-
-            adapters = json.loads(output)
-
-            if isinstance(adapters, dict):
-                adapters = [adapters]
-            elif not isinstance(adapters, list):
-                print("Unexpected data format for network adapters.")
-                return
-
-            for adapter in adapters:
-                if adapter.get("ReceivedBytes", 1) == 0 and adapter.get("SentBytes", 1) == 0:
-                    ps_command = f'-Command "Disable-NetAdapter -Name \\"{adapter["Name"]}\\" -Confirm:$false"'
-                    ctypes.windll.shell32.ShellExecuteW(None, "runas", "powershell.exe", ps_command, None, 1)
-                    print(f"Disabled unused adapter: {adapter['Name']}")
-
-        except subprocess.CalledProcessError as e:
-            print(f"Error executing PowerShell command: {e}")
-        except json.JSONDecodeError:
-            print("Failed to parse JSON from PowerShell output.")
-
     def quit_game_handling(self, crsf_token: str = None, session: requests.Session = None):
         if self.vpn_client is not None:
             self.vpn_client.set_vpn_state(False)
@@ -113,8 +84,9 @@ class GameWindowsBase:
                 session.cookies.set("csrftoken", crsf_token)
                 try:
                     session.post(url, json=user_data, headers=headers)
+                    logger.debug("Notified server about going offline.")
                 except:
-                    # FIXME: Does it make any difference to handle it here?
+                    logger.warning("Failed to notify server about going offline.")
                     pass
         sys.exit()
 

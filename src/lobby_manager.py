@@ -17,11 +17,10 @@ from src.global_vars import (
     env_dict,
     discord_invite,
 )
-from src.basic_window import GameWindowsBase
-from src.run_ashan_arena import AschanArena3Game
+from src.base_window import GameWindowsBase
+from src.background_manager import AschanArena3Game
 from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state, render_small_caps, check_server_connection
-from src.custom_thread import CustomThread
-from src.decorators import run_in_thread
+from utils.decorators import run_in_thread
 from src.settings_writer import save_client_settings
 from widgets.button import Button
 from widgets.option_box import OptionBox
@@ -30,6 +29,9 @@ from widgets.users_list import UsersList
 from widgets.check_box import CheckBox
 from widgets.hover_box import HoverBox
 from widgets.slider import Slider
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class H5_Lobby(GameWindowsBase):
@@ -98,9 +100,9 @@ class H5_Lobby(GameWindowsBase):
         self.font_size = fonts_sizes[self.transformation_option]
 
         while not self.__profile_data:
-            print("Loading profile data...")
+            logger.debug("Loading profile data...")
             self.get_user_profile()
-            print("Profile data loaded successfully.")
+            logger.info("Profile data loaded successfully.")
 
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
@@ -238,7 +240,7 @@ class H5_Lobby(GameWindowsBase):
         self.refresh_friends_list(USERS_LIST)
 
         buttons = [FIND_GAME_BUTTON, RANKING, NEWS, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
-
+        logger.debug("Displaying lobby window.")
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
             self.cursor.update()
@@ -1123,10 +1125,12 @@ class H5_Lobby(GameWindowsBase):
             "Content-Type": "application/json",
         }
         self.__connection_timer = time.time()
+        logger.debug("Adding to queue...")
         try:
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 self.__connection_timer = None
+                logger.info("Added to queue.")
                 self.scan_for_players()
 
             else:
@@ -1167,11 +1171,12 @@ class H5_Lobby(GameWindowsBase):
             "Content-Type": "application/json",
         }
         self.__connection_timer = time.time()
+        logger.debug("Removing from queue...")
         try:
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 self.__connection_timer = None
-
+                logger.info("Removed from queue.")
             else:
                 self.__connection_timer = None
 
@@ -1204,7 +1209,7 @@ class H5_Lobby(GameWindowsBase):
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
-
+        logger.debug("Scanning for players...")
         while True:
             try:
                 if not self.__queue_status:
@@ -1214,6 +1219,7 @@ class H5_Lobby(GameWindowsBase):
                 if response.status_code == 200:
                     self.__connection_timer = None
                     json_response = response.json()
+                    logger.debug(f"Scan for players response: {json_response}")
                     if json_response.get("game_found"):
                         self.__update_queue_status = True
                         self.__found_game = True
@@ -1252,7 +1258,7 @@ class H5_Lobby(GameWindowsBase):
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
-
+        logger.debug("Checking if opponent accepted loop starting...")
         while True:
             self.__connection_timer = time.time()
             try:
@@ -1260,6 +1266,7 @@ class H5_Lobby(GameWindowsBase):
                 if response.status_code == 200:
                     self.__connection_timer = None
                     json_response = response.json()
+                    logger.debug(f"Opponent accepted check response: {json_response}")
                     if json_response.get("opponent_accepted"):
                         self.__opponent_accepted = True
                         break
@@ -1298,6 +1305,7 @@ class H5_Lobby(GameWindowsBase):
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
+        logger.debug("Refreshing friends list...")
         while True:
             try:
                 response = self.session.post(url, json=user_data, headers=headers)
@@ -1313,9 +1321,10 @@ class H5_Lobby(GameWindowsBase):
                         )
                     }
                     users_list.get_players_list(sorted_players)
+                    logger.info("Friends list refreshed succesfully.")
 
             except Exception as e:
-                pass
+                logger.warning(f"Error while refreshing friends list: {e}")
 
             time.sleep(15)
 
@@ -1337,7 +1346,7 @@ class H5_Lobby(GameWindowsBase):
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
-
+        logger.debug("Reporting match result...")
         self.__connection_timer = time.time()
         try:
             response = self.session.post(url, json=user_data, headers=headers)
@@ -1346,6 +1355,7 @@ class H5_Lobby(GameWindowsBase):
                 self.__game_data["is_won"] = is_won
                 self.__update_game_data = True
                 self.__connection_timer = None
+                logger.info("Match result reported succesfully.")
                 # Reload profile information
                 self.get_user_profile()
                 return True
@@ -1353,6 +1363,7 @@ class H5_Lobby(GameWindowsBase):
             elif response.status_code == 400:
                 self.__window_overlay = True
                 self.__connection_timer = None
+                logger.error("Error while reporting match result!")
                 return response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
@@ -1383,15 +1394,17 @@ class H5_Lobby(GameWindowsBase):
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
-
+        logger.debug("Fetching users profile...")
         try:
             response = self.session.get(url, params=user_data, headers=headers)
             if response.status_code == 200:
                 self.__profile_data = response.json().get("player_information")
+                logger.info("Users profile fetched succesfully.")
                 return True
 
             elif response.status_code == 400:
                 self.__window_overlay = True
+                logger.warning("Error while fetching users profile!")
                 return response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
@@ -1421,15 +1434,18 @@ class H5_Lobby(GameWindowsBase):
             "Content-Type": "application/json",
         }
         self.__connection_timer = time.time()
+        logger.debug("Setting player online...")
         try:
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 self.__connection_timer = None
+                logger.info("Player state set to online.")
                 return
 
             elif response.status_code == 400:
                 self.__window_overlay = True
                 self.__connection_timer = None
+                logger.warning("Error while setting player online!")
 
         except requests.exceptions.ConnectTimeout:
             self.__has_disconnected = True
@@ -1463,13 +1479,16 @@ class H5_Lobby(GameWindowsBase):
             time.sleep(5)
 
     def minimize_to_tray(self):
+        logger.debug("Minimizing to tray.")
         time.sleep(0.1)
         self.window = get_window()
         self.window.minimize()
         self.window.hide()
         pygame.display.iconify()
+        logger.debug("Window minimized to tray.")
 
     def maximize_from_tray(self):
+        logger.debug("Maximizing from tray...")
         self.window.restore()
         hwnd = self.window._hWnd
         ctypes.windll.user32.ShowWindow(hwnd, 9)
@@ -1483,12 +1502,15 @@ class H5_Lobby(GameWindowsBase):
         if foreground_thread_id != current_thread_id:
             ctypes.windll.user32.AttachThreadInput(current_thread_id, foreground_thread_id, False)
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
+        logger.debug("Window restored from tray.")
 
     def run_game(self):
         self.main_menu()
 
     def run_arena(self):
+        logger.debug("Starting H5 Game...")
         game = AschanArena3Game(self)
+        logger.info("Started H5 Game.")
         time.sleep(2)
         game.run_processes()
 
