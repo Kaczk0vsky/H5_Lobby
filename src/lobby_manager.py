@@ -65,6 +65,7 @@ class H5_Lobby(GameWindowsBase):
     __opponent_accepted = False
     __opponent_declined = False
     __player_accepted = False
+    __player_declined = False
     __queue_status = False
     __update_queue_status = False
     __update_game_data = False
@@ -315,7 +316,7 @@ class H5_Lobby(GameWindowsBase):
                         pygame.mixer.Channel(0).set_volume(self.config["volume"])
                         pygame.mixer.Channel(self.__queue_channel).stop()
                         FIND_GAME_BUTTON.set_active(is_active=True)
-                        OPTIONS_BUTTON.set_active(True)
+                        OPTIONS_BUTTON.set_active(is_active=True)
                         self.__set_queue_variables(state=False)
                         self.remove_from_queue(is_accepted=False)
                         continue
@@ -509,6 +510,7 @@ class H5_Lobby(GameWindowsBase):
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.__update_queue_status = True
                         self.__queue_status = True
+                        self.__player_declined = False
                         FIND_GAME_BUTTON.set_active(is_active=False)
                         self.add_to_queue()
                         continue
@@ -546,6 +548,7 @@ class H5_Lobby(GameWindowsBase):
                             OPTIONS_BUTTON.set_active(True)
                             self.__set_queue_variables(state=False)
                             self.remove_from_queue(is_accepted=False)
+                            self.__player_declined = True
                             continue
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
@@ -639,7 +642,7 @@ class H5_Lobby(GameWindowsBase):
                 self.run_arena()
                 continue
 
-            if self.__opponent_declined:
+            if self.__opponent_declined and not self.__player_declined:
                 self.__update_queue_status = True
                 self.__opponent_declined = False
                 self.__found_game = False
@@ -1260,6 +1263,9 @@ class H5_Lobby(GameWindowsBase):
         }
         logger.debug("Checking if opponent accepted loop starting...")
         while True:
+            if self.__player_declined:
+                break
+
             self.__connection_timer = time.time()
             try:
                 response = self.session.post(url, json=user_data, headers=headers)

@@ -76,16 +76,25 @@ class AschanArena3Game:
         command = ["powershell", "-Command", "Get-NetAdapterStatistics | Select-Object Name, ReceivedBytes, SentBytes | ConvertTo-Json"]
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding="utf-8")
         net_adapters = json.loads(result.stdout)
+        logger.debug(f"Network adapters found: {net_adapters}")
 
         adapter_names = {}
-        for adapter in net_adapters:
-            for value in adapter.values():
-                adapter_names[value] = {
-                    "ReceivedBytes": None,
-                    "SentBytes": None,
-                    "PreviousReceivedBytes": None,
-                    "PreviousSentBytes": None,
-                }
+        if isinstance(net_adapters, dict):
+            adapter_names[net_adapters["Name"]] = {
+                "ReceivedBytes": None,
+                "SentBytes": None,
+                "PreviousReceivedBytes": None,
+                "PreviousSentBytes": None,
+            }
+        else:
+            for adapter in net_adapters:
+                for value in adapter.values():
+                    adapter_names[value] = {
+                        "ReceivedBytes": None,
+                        "SentBytes": None,
+                        "PreviousReceivedBytes": None,
+                        "PreviousSentBytes": None,
+                    }
 
         if adapter_names is None:
             logger.debug("Disconnection check not possible! - no network adapters found.")
