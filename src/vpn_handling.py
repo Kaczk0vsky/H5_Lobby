@@ -6,6 +6,9 @@ import ctypes
 
 from src.settings_reader import load_vpn_settings
 from src.global_vars import env_dict
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class SoftEtherClient:
@@ -74,7 +77,7 @@ class SoftEtherClient:
                 )
             subprocess.run(command, shell=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
-            print("Error:", e.stderr)
+            logger.debug("VPN Error:", e.stderr)
 
     def create_new_client(self):
         vpn_server_ip = self.server_url
