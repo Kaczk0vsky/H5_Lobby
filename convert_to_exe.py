@@ -55,6 +55,16 @@ def create_exe_file():
             --collect-submodules=_tkinter \
             --hidden-import=easygui \
             --collect-submodules=easygui \
+            --hidden-import=pygetwindow \
+            --collect-submodules=pygetwindow \
+            --hidden-import=psycopg2 \
+            --collect-submodules=psycopg2 \
+            --hidden-import=psutil \
+            --collect-submodules=psutil \
+            --hidden-import=keyboard \
+            --collect-submodules=keyboard \
+            --hidden-import=logging \
+            --collect-submodules=logging \
             --name={EXE_NAME} main.py'
     )
 
