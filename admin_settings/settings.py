@@ -25,7 +25,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # TODO: set False for HTTPS
 DEBUG = False
 
-ALLOWED_HOSTS = ["h5-tavern.pl", "www.h5-tavern.pl"]
+ALLOWED_HOSTS = ["h5-tavern.pl", "www.h5-tavern.pl", "tavernofashan.pl", "www.tavernofashan.pl"]
 
 CELERY_BROKER_URL = f"amqp://h5admin:Sukub0912@localhost:5672/"
 

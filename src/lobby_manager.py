@@ -1137,7 +1137,7 @@ class H5_Lobby(GameWindowsBase):
             "min_opponent_points": self.config["points_treshold"],
         }
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -1183,7 +1183,7 @@ class H5_Lobby(GameWindowsBase):
             "is_accepted": is_accepted,
         }
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -1222,7 +1222,7 @@ class H5_Lobby(GameWindowsBase):
 
         user_data = {"nickname": self.user["nickname"]}
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -1271,7 +1271,7 @@ class H5_Lobby(GameWindowsBase):
 
         user_data = {"nickname": self.user["nickname"]}
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -1321,7 +1321,7 @@ class H5_Lobby(GameWindowsBase):
 
         user_data = {"nickname": self.user["nickname"]}
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -1366,7 +1366,7 @@ class H5_Lobby(GameWindowsBase):
             "castle": castle,
         }
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -1414,7 +1414,7 @@ class H5_Lobby(GameWindowsBase):
 
         user_data = {"nickname": self.user["nickname"]}
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
@@ -1453,7 +1453,7 @@ class H5_Lobby(GameWindowsBase):
 
         user_data = {"nickname": self.vpn_client.user_name}
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }

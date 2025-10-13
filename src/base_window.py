@@ -75,7 +75,7 @@ class GameWindowsBase:
             if crsf_token and session:
                 url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_PLAYER_OFFLINE"]}/"
                 headers = {
-                    "Referer": "https://h5-tavern.pl/",
+                    "Referer": f"https://{env_dict["SERVER_URL"]}/",
                     "X-CSRFToken": crsf_token,
                     "Content-Type": "application/json",
                 }

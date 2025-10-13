@@ -628,7 +628,7 @@ class LoginWindow(GameWindowsBase):
             return self.csrf_token
 
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.csrf_token,
             "Content-Type": "application/json",
         }
@@ -717,7 +717,7 @@ class LoginWindow(GameWindowsBase):
             "crsf_token": self.csrf_token,
         }
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.csrf_token,
             "Content-Type": "application/json",
         }
@@ -780,7 +780,7 @@ class LoginWindow(GameWindowsBase):
             return self.csrf_token
 
         headers = {
-            "Referer": "https://h5-tavern.pl/",
+            "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.csrf_token,
             "Content-Type": "application/json",
         }
