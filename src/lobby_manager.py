@@ -75,6 +75,8 @@ class H5_Lobby(GameWindowsBase):
     __update_options_status = False
     __queue_canceled = False
     __reconnect_back_to_game = False
+    __set_buttons_active = False
+    __stop_refreshing_friends_list = False
     __is_connected = True
     __has_disconnected = False
     __elapsed_time = None
@@ -260,8 +262,19 @@ class H5_Lobby(GameWindowsBase):
 
             try:
                 USERS_LIST.update(self.SCREEN)
-            except pygame.error:
+            except pygame.error as e:
+                logger.warning(f"Users list rendering error: {e}")
                 continue
+
+            if self.__set_buttons_active:
+                FIND_GAME_BUTTON.set_active(is_active=True)
+                RANKING.set_active(is_active=True)
+                NEWS.set_active(is_active=True)
+                MY_PROFILE.set_active(is_active=True)
+                DISCORD.set_active(is_active=True)
+                PLAYER_PROFILE.set_active(is_active=True)
+                OPTIONS_BUTTON.set_active(is_active=True)
+                self.__set_buttons_active = False
 
             if self.__queue_status:
                 if self.__update_queue_status:
@@ -1068,6 +1081,7 @@ class H5_Lobby(GameWindowsBase):
         RANKED_RECT = RANKED_TEXT.get_rect(
             topleft=(self.frame_position[0] + self.frame_dims[0] * 0.125, self.frame_position[1] + self.frame_dims[1] * 0.4875)
         )
+        # TODO: block otpino to select ranked
         CHECKBOX_RANKED = CheckBox(
             position=(self.frame_position[0] + self.frame_dims[0] * 0.7, self.frame_position[1] + self.frame_dims[1] * 0.515),
             image=self.CHECKBOX_SETTINGS,
@@ -1313,6 +1327,10 @@ class H5_Lobby(GameWindowsBase):
         }
         logger.debug("Refreshing friends list...")
         while True:
+            if self.__stop_refreshing_friends_list:
+                time.sleep(30)
+                continue
+
             try:
                 response = self.session.post(url, json=user_data, headers=headers)
                 if response.status_code == 200:
@@ -1486,6 +1504,7 @@ class H5_Lobby(GameWindowsBase):
 
     def minimize_to_tray(self):
         logger.debug("Minimizing to tray.")
+        self.__stop_refreshing_friends_list = True
         time.sleep(0.1)
         self.window = get_window()
         self.window.minimize()
@@ -1508,6 +1527,8 @@ class H5_Lobby(GameWindowsBase):
         if foreground_thread_id != current_thread_id:
             ctypes.windll.user32.AttachThreadInput(current_thread_id, foreground_thread_id, False)
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
+        self.__set_buttons_active = True
+        self.__stop_refreshing_friends_list = False
         logger.debug("Window restored from tray.")
 
     def run_game(self):

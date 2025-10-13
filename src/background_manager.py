@@ -155,9 +155,12 @@ class AschanArena3Game:
         self.lobby.minimize_to_tray()
         time.sleep(5)  # Wait for game to open
         logger.debug("Running background processes...")
+
+        # background loops
         self.check_keys_pressed()
         self.check_if_crashed()
         self.check_if_disconnected()
+
         while self.__is_running:
             try:
                 self.__is_running = self.check_game_process()
@@ -169,4 +172,4 @@ class AschanArena3Game:
             self.lobby.set_player_online()
 
         self.lobby.maximize_from_tray()
-        self.load_console_file()
+        # self.load_console_file()
