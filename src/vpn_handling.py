@@ -77,7 +77,7 @@ class SoftEtherClient:
                 )
             subprocess.run(command, shell=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
-            logger.debug("VPN Error:", e.stderr)
+            logger.debug("Setting VPN state Error:", e.stderr)
 
     def create_new_client(self):
         vpn_server_ip = self.server_url
@@ -86,7 +86,7 @@ class SoftEtherClient:
 
         commands = [
             f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD NicCreate VPN',
-            f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountCreate H5_Lobby_VPN /SERVER:{vpn_server_ip}:{vpn_port} /HUB:{vpn_hub} /USERNAME:{self.user_name} /NICNAME:VPN',
+            f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountCreate H5_Lobby_VPN /SERVER:{vpn_server_ip}:{vpn_port} /HUB:{vpn_hub} /USERNAME:{self.user_name} /NICNAME:{vpn_hub}',
             f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountPasswordSet H5_Lobby_VPN /PASSWORD:{self.password} /TYPE:standard',
         ]
 
@@ -96,5 +96,6 @@ class SoftEtherClient:
                 time.sleep(1)
 
             except subprocess.CalledProcessError as e:
+                logger.warning("Creating new VPN client Error:", e.stderr)
                 return False
         return True
