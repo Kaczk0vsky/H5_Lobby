@@ -87,7 +87,6 @@ class GameWindowsBase:
                     logger.debug("Notified server about going offline.")
                 except:
                     logger.warning("Failed to notify server about going offline.")
-                    pass
         sys.exit()
 
     def create_universal_elements(self) -> None:
@@ -295,7 +294,7 @@ class GameWindowsBase:
         self.ARROW_RIGHT = pygame.transform.scale(self.ARROW_RIGHT, self.arrows_dims)
         self.ARROW_RIGHT_HIGHLIGHTED = pygame.transform.scale(self.ARROW_RIGHT_HIGHLIGHTED, self.arrows_dims)
 
-    def error_window(self, text: str, dimensions: tuple[int, int]) -> tuple:
+    def error_window(self, text: str, dimensions: tuple[int, int], button_text: str = "Back") -> tuple:
         overlay_width, overlay_height = dimensions
         screen_width, screen_height = pygame.display.get_surface().get_size()
         overlay_y = (screen_height - overlay_height) // 2
@@ -309,7 +308,7 @@ class GameWindowsBase:
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(screen_width // 2, overlay_y + overlay_height * 2 // 3),
-            text_input="Back",
+            text_input=button_text,
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,

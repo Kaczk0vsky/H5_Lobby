@@ -342,14 +342,10 @@ class H5_Lobby(GameWindowsBase):
                         RESULT_RECT,
                         MYSELF_TEXT,
                         MYSELF_RECT,
-                        MYSELF_POINTS,
-                        MYSELF_POINTS_RECT,
                         OPPONENT_TEXT,
                         OPPONENT_RECT,
-                        OPPONENT_POINTS,
-                        OPPONENT_POINTS_RECT,
                         SUBMIT_REPORT,
-                    ) = self.report_window()
+                    ) = self.create_report_window()
                     SUBMIT_REPORT.set_active(True)
                     self.__update_game_data = False
 
@@ -362,9 +358,9 @@ class H5_Lobby(GameWindowsBase):
                 )
                 self.SCREEN.blit(RESULT_TEXT, RESULT_RECT)
                 self.SCREEN.blit(MYSELF_TEXT, MYSELF_RECT)
-                self.SCREEN.blit(MYSELF_POINTS, MYSELF_POINTS_RECT)
+                # self.SCREEN.blit(MYSELF_POINTS, MYSELF_POINTS_RECT)
                 self.SCREEN.blit(OPPONENT_TEXT, OPPONENT_RECT)
-                self.SCREEN.blit(OPPONENT_POINTS, OPPONENT_POINTS_RECT)
+                # self.SCREEN.blit(OPPONENT_POINTS, OPPONENT_POINTS_RECT)
                 SUBMIT_REPORT.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self.__profile_status or self.__options_status:
@@ -489,13 +485,23 @@ class H5_Lobby(GameWindowsBase):
                 VOLUME_SLIDER.update_slider(MENU_MOUSE_POS)
 
             if self.__error_msg:
-                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
-                    text=self.__error_msg,
-                    dimensions=(
-                        640 * transformation_factors[self.transformation_option][0],
-                        360 * transformation_factors[self.transformation_option][1],
-                    ),
-                )
+                if self.__connection_timer:
+                    (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                        text=self.__error_msg,
+                        dimensions=(
+                            640 * transformation_factors[self.transformation_option][0],
+                            360 * transformation_factors[self.transformation_option][1],
+                        ),
+                        button_text="Quit Game",
+                    )
+                else:
+                    (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                        text=self.__error_msg,
+                        dimensions=(
+                            640 * transformation_factors[self.transformation_option][0],
+                            360 * transformation_factors[self.transformation_option][1],
+                        ),
+                    )
                 screen_width, screen_height = (
                     self.SCREEN.get_width(),
                     self.SCREEN.get_height(),
@@ -585,6 +591,8 @@ class H5_Lobby(GameWindowsBase):
                     if self.__window_overlay:
                         if self.__error_msg:
                             if RETURN_BUTTON.check_for_input(MENU_MOUSE_POS):
+                                if self.__connection_timer:
+                                    self.quit_game_handling(self.crsf_token, self.session)
                                 if self.__queue_canceled:
                                     self.__queue_canceled = False
                                 self.__window_overlay = False
@@ -1010,6 +1018,54 @@ class H5_Lobby(GameWindowsBase):
             OPPONENT_RECT,
             OPPONENT_POINTS,
             OPPONENT_POINTS_RECT,
+            SUBMIT_REPORT,
+        )
+
+    def create_report_window(self):
+        dims = (
+            640 * transformation_factors[self.transformation_option][0],
+            360 * transformation_factors[self.transformation_option][1],
+        )
+        overlay_dims = (
+            510 * transformation_factors[self.transformation_option][0],
+            390 * transformation_factors[self.transformation_option][1],
+        )
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
+
+        RESULT_TEXT = render_small_caps("Report", int(self.font_size[0] * 1.5), self.text_color)
+        RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.2))
+
+        MYSELF_TEXT = render_small_caps(f"You:", self.font_size[0], self.text_color)
+        total_width = MYSELF_TEXT.get_width()
+        start_x = (dims[0] + overlay_dims[0] * 0.5) - (total_width / 2)
+        start_y = dims[1] + overlay_dims[1] * 0.5
+        MYSELF_RECT = MYSELF_TEXT.get_rect(topleft=(start_x, start_y))
+
+        OPPONENT_TEXT = render_small_caps(f"Opponent:", self.font_size[0], self.text_color)
+        total_width = OPPONENT_TEXT.get_width()
+        start_x = (dims[0] + overlay_dims[0] * 0.5) - (total_width / 2)
+        start_y = dims[1] + overlay_dims[1] * 0.5
+        OPPONENT_RECT = OPPONENT_TEXT.get_rect(topleft=(start_x, start_y))
+
+        SUBMIT_REPORT = Button(
+            image=self.ACCEPT_BUTTON,
+            image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
+            image_inactive=self.ACCEPT_BUTTON_INACTIVE,
+            position=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.8),
+            text_input="Confirm",
+            font_size=self.font_size[1],
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
+        )
+
+        return (
+            RESULT_TEXT,
+            RESULT_RECT,
+            MYSELF_TEXT,
+            MYSELF_RECT,
+            OPPONENT_TEXT,
+            OPPONENT_RECT,
             SUBMIT_REPORT,
         )
 

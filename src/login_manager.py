@@ -220,6 +220,8 @@ class LoginWindow(GameWindowsBase):
                     else:
                         if self.__error_msg:
                             if BACK_BUTTON.check_for_input(MENU_MOUSE_POS):
+                                if self.__connection_timer:
+                                    self.quit_game_handling()
                                 self.__window_overlay = False
                                 self.__error_msg = None
                                 LOGIN_INPUT.set_active(self.SCREEN)
@@ -242,12 +244,18 @@ class LoginWindow(GameWindowsBase):
                     self.__error_msg = f"Connecting for {time_passed} seconds..."
 
             if self.__error_msg:
-                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = self.error_window(text=self.__error_msg, dimensions=self.error_window_dims)
+                if self.__connection_timer:
+                    (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = self.error_window(
+                        text=self.__error_msg, dimensions=self.error_window_dims, button_text="Quit Game"
+                    )
+                else:
+                    (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, BACK_BUTTON) = self.error_window(
+                        text=self.__error_msg, dimensions=self.error_window_dims
+                    )
 
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-                if not self.__connection_timer:
-                    BACK_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                BACK_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self.__allow_login:
                 self.__allow_login = False
@@ -404,14 +412,17 @@ class LoginWindow(GameWindowsBase):
                     self.__error_msg = f"Connecting for {time_passed} seconds..."
 
             if self.__error_msg:
-                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
-                    text=self.__error_msg, dimensions=self.error_window_dims
-                )
+                if self.__connection_timer:
+                    (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                        text=self.__error_msg, dimensions=self.error_window_dims, button_text="Quit Game"
+                    )
+                else:
+                    (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                        text=self.__error_msg, dimensions=self.error_window_dims
+                    )
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-
-                if not self.__connection_timer:
-                    RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self.__show_hint:
                 self.__window_overlay = True
@@ -525,14 +536,17 @@ class LoginWindow(GameWindowsBase):
                     self.__error_msg = f"Connecting for {time_passed[1]} seconds..."
 
             if self.__error_msg:
-                (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
-                    text=self.__error_msg, dimensions=self.error_window_dims
-                )
+                if self.__connection_timer:
+                    (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                        text=self.__error_msg, dimensions=self.error_window_dims, button_text="Quit Game"
+                    )
+                else:
+                    (WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT, RETURN_BUTTON) = self.error_window(
+                        text=self.__error_msg, dimensions=self.error_window_dims
+                    )
                 self.SCREEN.blit(self.SMALLER_WINDOWS_BG, (100, 100))
                 self.SCREEN.blit(WRONG_PASSWORD_TEXT, WRONG_PASSWORD_RECT)
-
-                if not self.__connection_timer:
-                    RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self.__remove_all_widgets:
                 self.__remove_all_widgets = False
@@ -623,7 +637,7 @@ class LoginWindow(GameWindowsBase):
         if not self.csrf_token or "Error" in self.csrf_token:
             self.csrf_token = self.get_csrf_token()
 
-        if "Error" in self.csrf_token:
+        if not self.csrf_token:
             self.__window_overlay = True
             return self.csrf_token
 
