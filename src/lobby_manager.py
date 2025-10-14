@@ -103,9 +103,7 @@ class H5_Lobby(GameWindowsBase):
         self.font_size = fonts_sizes[self.transformation_option]
 
         if not self.__profile_data:
-            logger.debug("Loading profile data...")
             self.get_user_profile()
-            logger.info("Profile data loaded successfully.")
 
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
@@ -176,6 +174,7 @@ class H5_Lobby(GameWindowsBase):
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
+        MY_PROFILE.set_active(is_active=True) if isinstance(self.__profile_data, dict) else MY_PROFILE.set_active(is_active=False)
         DISCORD = Button(
             image=self.DISCORD_LOGO,
             image_highlited=self.DISCORD_LOGO_HIGHLIGHTED,
@@ -1487,17 +1486,10 @@ class H5_Lobby(GameWindowsBase):
                 logger.warning("Error while fetching users profile!")
                 return response.json().get("error", "Unknown error occurred")
 
-        except requests.exceptions.ConnectTimeout:
-            self.__window_overlay = True
-            return "Error while trying to connect to server!"
-
-        except requests.exceptions.ConnectionError:
-            self.__window_overlay = True
-            return "Error while trying to connect to server!"
-
         except:
             self.__window_overlay = True
-            return "Error! Server/Player offline, check discord..."
+            logger.error("Unknown error while fetching users profile!")
+            return "User profile not available!"
 
     @run_in_thread
     def set_player_online(self):
