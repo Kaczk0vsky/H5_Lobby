@@ -102,7 +102,7 @@ class H5_Lobby(GameWindowsBase):
         self.transformation_option = self.config["resolution"]
         self.font_size = fonts_sizes[self.transformation_option]
 
-        while not self.__profile_data:
+        if not self.__profile_data:
             logger.debug("Loading profile data...")
             self.get_user_profile()
             logger.info("Profile data loaded successfully.")

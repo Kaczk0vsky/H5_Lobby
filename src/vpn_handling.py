@@ -77,25 +77,59 @@ class SoftEtherClient:
                 )
             subprocess.run(command, shell=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
-            logger.debug("Setting VPN state Error:", e.stderr)
+            logger.critical("Setting VPN state Error:", e.stderr)
 
     def create_new_client(self):
+        logger.debug("Checking VPN...")
         vpn_server_ip = self.server_url
         vpn_hub = self.hub_name
         vpn_port = "5555"
 
-        commands = [
-            f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD NicCreate VPN',
-            f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountCreate H5_Lobby_VPN /SERVER:{vpn_server_ip}:{vpn_port} /HUB:{vpn_hub} /USERNAME:{self.user_name} /NICNAME:{vpn_hub}',
-            f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountPasswordSet H5_Lobby_VPN /PASSWORD:{self.password} /TYPE:standard',
-        ]
+        # check if adapter already exists
+        command = f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD NicList {vpn_hub}'
+        try:
+            result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError as e:
+            logger.warning(f"Checking existing VPN adapters Error: {e.output}")
+            return False
 
-        for cmd in commands:
+        if "Virtual Network Adapter Name" in result.stdout:
+            logger.debug(f"{vpn_hub} adapter already exists. Skipping...")
+        else:
+            command = f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD NicCreate {vpn_hub}'
             try:
-                subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
-                time.sleep(1)
-
+                subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
             except subprocess.CalledProcessError as e:
-                logger.warning("Creating new VPN client Error:", e.stderr)
-                return False
+                if "Error code: 32" in e.output:
+                    pass
+                else:
+                    logger.warning(f"Creating new VPN adapter Error: {e.output}")
+                    return False
+            logger.info(f"{vpn_hub} adapter created successfully.")
+
+        # check if account already exists
+        command = f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountList {vpn_hub}'
+        try:
+            result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError as e:
+            logger.warning(f"Checking existing VPN accounts Error: {e.output}")
+            return False
+
+        if "VPN Connection Setting Name" in result.stdout:
+            logger.debug(f"{vpn_hub} account already exists. Skipping...")
+            return True
+        else:
+            commands = [
+                f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountCreate H5_Lobby_VPN /SERVER:{vpn_server_ip}:{vpn_port} /HUB:{vpn_hub} /USERNAME:{self.user_name} /NICNAME:{vpn_hub}',
+                f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD AccountPasswordSet H5_Lobby_VPN /PASSWORD:{self.password} /TYPE:standard',
+            ]
+            for cmd in commands:
+                try:
+                    subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
+                    time.sleep(1)
+
+                except subprocess.CalledProcessError as e:
+                    logger.warning(f"Creating new VPN client Error: {e.output}")
+                    return False
+            logger.info(f"{vpn_hub} account created successfully.")
         return True

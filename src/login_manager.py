@@ -644,9 +644,7 @@ class LoginWindow(GameWindowsBase):
                         user_data["nickname"],
                         user_data["password"],
                     )
-                    logger.debug("Creating new VPN client...")
                     self.vpn_client.create_new_client()
-                    logger.debug("VPN client created successfully.")
 
                 self.vpn_client.set_vpn_state(state=True)
                 logger.info("VPN connection established.")
@@ -730,9 +728,7 @@ class LoginWindow(GameWindowsBase):
                     self.user["nickname"],
                     self.user["password"],
                 )
-                logger.debug("Creating new VPN client...")
                 self.vpn_client.create_new_client()
-                logger.debug("VPN client created successfully.")
                 self.__remove_all_widgets = True
                 return None
 
