@@ -55,12 +55,8 @@ class GameReportSerializer(serializers.Serializer):
     def validate(self, data):
         nicknames = data.get("nicknames", [])
         castles = data.get("castles", [])
-        who_won = data.get("who_won")
 
         if len(nicknames) != len(castles):
             raise serializers.ValidationError("Number of nicknames and castles must match")
-
-        if who_won not in nicknames:
-            raise serializers.ValidationError({"who_won": "Winner must be one of the provided nicknames"})
 
         return data
