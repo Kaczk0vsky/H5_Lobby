@@ -1107,7 +1107,7 @@ class H5_Lobby(GameWindowsBase):
             image=self.ACCEPT_BUTTON,
             image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
             image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-            position=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.75),
+            position=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.8),
             text_input="Confirm",
             font_size=self.font_size[1],
             base_color=self.text_color,
