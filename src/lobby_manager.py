@@ -589,7 +589,7 @@ class H5_Lobby(GameWindowsBase):
                             FIND_GAME_BUTTON.set_active(is_active=True)
                             report_data = {
                                 "nicknames": [self.user["nickname"], self.__opponent_nickname],
-                                "castles": [MYSELF_CASTLE.get_selected_option(), OPPONENT_CASTLE.get_selected_option()],
+                                "castles": [MYSELF_CASTLE.get_selected_option().lower(), OPPONENT_CASTLE.get_selected_option().lower()],
                                 "who_won": WHO_WON_CHOICES.get_selected_option(),
                             }
                             self.handle_match_report(report_data=report_data)
@@ -1494,7 +1494,7 @@ class H5_Lobby(GameWindowsBase):
             elif response.status_code == 400:
                 self.__window_overlay = True
                 self.__connection_timer = None
-                logger.error("Error while reporting match result!")
+                logger.error(f"Error while reporting match result!: {response.text}")
                 return response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
