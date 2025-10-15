@@ -21,7 +21,7 @@ from django.urls import reverse
 
 from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player, PlayerState, Ban, Game, CastleType
-from h5_backend.serializers import UserSerializer, GameSerializer
+from h5_backend.serializers import UserSerializer, GameReportSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -432,7 +432,7 @@ class UpdateUsersList(View):
 
 
 @method_decorator(csrf_protect, name="dispatch")
-@method_decorator(ratelimit(key="user_or_ip", rate="5/m", method=["GET", "POST"], block=True), name="dispatch")
+@method_decorator(ratelimit(key="user_or_ip", rate="5/m", method=["POST"], block=True), name="dispatch")
 class HandleMatchReport(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -440,61 +440,57 @@ class HandleMatchReport(View):
     def _parse_post_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            player_serializer = UserSerializer(data=data, required_fields=["nickname"])
-            game_serializer = GameSerializer(data=data, required_fields=["is_won", "castle"])
+            game_serializer = GameReportSerializer(data=data, required_fields=["nicknames", "castles", "who_won"])
 
-            if not player_serializer.is_valid() or not game_serializer.is_valid():
+            if not game_serializer.is_valid():
                 errors = {}
-                errors.update(player_serializer.errors)
                 errors.update(game_serializer.errors)
-                return None, None, None, JsonResponse({"success": False, "errors": errors}, status=400)
+                return None, None, None, None, None, JsonResponse({"success": False, "errors": errors}, status=400)
 
-            nickname = player_serializer.validated_data["nickname"]
-            game_won = game_serializer.validated_data["is_won"]
-            castle = game_serializer.validated_data["castle"]
+            player_nickname = game_serializer.validated_data["nicknames"][0]
+            opponent_nickname = game_serializer.validated_data["nicknames"][1]
+            player_castle = game_serializer.validated_data["castles"][0]
+            opponent_castle = game_serializer.validated_data["castles"][1]
+            who_won = game_serializer.validated_data["who_won"]
 
-            if castle not in CastleType.values:
-                return None, None, None, JsonResponse({"success": False, "error": "Invalid castle type"}, status=400)
-
-            return nickname, game_won, castle, None
+            return player_nickname, opponent_nickname, player_castle, opponent_castle, who_won, None
 
         except json.JSONDecodeError:
-            return None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+            return None, None, None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _create_match_report(self, player, game_won, castle):
+    def _create_match_report(self, player: Player, player_castle: CastleType, opponent_castle: CastleType, who_won: Player):
         game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").first()
         if not game:
             return JsonResponse({"success": False, "error": "No game found"}, status=404)
 
         with transaction.atomic():
-            if not game.who_won:
+            if game.is_waiting_confirmation:
+                # TODO: add check if data is the same as in the report
+
+                if game.is_ranked:
+                    player_won = game.who_won
+                    player_lost = game.player_2 if player_won == game.player_1 else game.player_1
+                    if not game.points_change_winner and not game.points_change_loser:
+                        game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
+
+                game.is_waiting_confirmation = False
+                # TODO: add returning both players data
+
+            if game.is_new:
                 if game.player_1 == player:
-                    game.castle_1 = castle
-                    game.who_won = player if game_won else game.player_2
-                    if game_won:
-                        game.is_new = False
+                    game.castle_1 = player_castle
+                    game.castle_2 = opponent_castle
                 else:
-                    game.castle_2 = castle
-                    game.who_won = player if game_won else game.player_1
-
-            player_won = game.who_won
-            player_lost = game.player_2 if player_won == game.player_1 else game.player_1
-
-            if game.is_ranked:
-                if not game.points_change_winner and not game.points_change_loser:
-                    game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
-            else:
-                game.points_change_winner, game.points_change_loser = 0, 0
+                    game.castle_2 = player_castle
+                    game.castle_1 = opponent_castle
+                game.who_won = who_won
+                game.is_new = False
+                game.is_waiting_confirmation = True
 
             game.save()
 
-            return {
-                "winner": [player_won.nickname, player_won.ranking_points, game.points_change_winner],
-                "loser": [player_lost.nickname, player_lost.ranking_points, game.points_change_loser],
-            }
-
     @staticmethod
-    def __calculate_points_change(player_won, player_lost):
+    def __calculate_points_change(player_won: Player, player_lost: Player):
         X1 = player_won.ranking_points
         X2 = player_lost.ranking_points
         R1 = round(100 * (1 - (1 / (1 + 10 ** ((X2 - X1) / 1800)))) * (1 + (1000 - X1) / 2000))
@@ -509,20 +505,28 @@ class HandleMatchReport(View):
 
     def post(self, request, *args, **kwargs):
         try:
-            nickname, game_won, castle, parse_error = self._parse_post_data(request)
+            (
+                player_nickname,
+                opponent_nickname,
+                player_castle,
+                opponent_castle,
+                who_won,
+                parse_error,
+            ) = self._parse_post_data(request)
             if parse_error:
                 return parse_error
 
             try:
-                player = Player.objects.get(nickname=nickname)
+                player = Player.objects.get(nickname=player_nickname)
+                opponent = Player.objects.get(nickname=opponent_nickname)
+                who_won = player if who_won == player_nickname else opponent
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
-            game_data = self._create_match_report(player, game_won, castle)
-            if isinstance(game_data, JsonResponse):
-                return game_data
+            self._create_match_report(player, player_castle, opponent_castle, who_won)
 
-            return JsonResponse({"success": True, "created": True, "game_data": game_data})
+            # TODO: add returning point values later
+            return JsonResponse({"success": True})
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)

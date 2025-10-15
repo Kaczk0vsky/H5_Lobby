@@ -36,12 +36,31 @@ class UserSerializer(serializers.Serializer):
         return value
 
 
-class GameSerializer(serializers.Serializer):
-    castle = serializers.ChoiceField(choices=CastleType.choices, required=False, allow_null=True, allow_blank=True)
-    is_won = serializers.BooleanField(required=False)
+class GameReportSerializer(serializers.Serializer):
+    nicknames = serializers.ListField(
+        child=serializers.CharField(max_length=16), min_length=2, max_length=2, required=True, help_text="List of two nicknames: [player1, player2]"
+    )
+    castles = serializers.ListField(
+        child=serializers.ChoiceField(choices=CastleType.choices),
+        min_length=2,
+        max_length=2,
+        required=True,
+        help_text="List of two castles corresponding to nicknames",
+    )
+    who_won = serializers.CharField(max_length=16, required=True)
 
     def __init__(self, *args, required_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
-        if required_fields:
-            for field_name in required_fields:
-                self.fields[field_name].required = True
+
+    def validate(self, data):
+        nicknames = data.get("nicknames", [])
+        castles = data.get("castles", [])
+        who_won = data.get("who_won")
+
+        if len(nicknames) != len(castles):
+            raise serializers.ValidationError("Number of nicknames and castles must match")
+
+        if who_won not in nicknames:
+            raise serializers.ValidationError({"who_won": "Winner must be one of the provided nicknames"})
+
+        return data

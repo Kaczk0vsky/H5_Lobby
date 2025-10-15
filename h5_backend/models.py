@@ -13,7 +13,7 @@ class PlayerState(models.TextChoices):
 
 
 class CastleType(models.TextChoices):
-    HEAVEN = "heaven", "Heaven"
+    HEAVEN = "haven", "Haven"
     INFERNO = "inferno", "Inferno"
     NECROPOLIS = "necropolis", "Necropolis"
     SYLVAN = "sylvan", "Sylvan"
@@ -79,8 +79,8 @@ class Game(models.Model):
         null=True,
         blank=True,
     )
-    points_change_winner = models.IntegerField(editable=True, null=True, blank=True)
-    points_change_loser = models.IntegerField(editable=True, null=True, blank=True)
+    points_change_winner = models.IntegerField(editable=True, default=0)
+    points_change_loser = models.IntegerField(editable=True, default=0)
 
     # who won
     who_won = models.ForeignKey(
@@ -93,6 +93,8 @@ class Game(models.Model):
     )
     is_new = models.BooleanField(default=False)
     is_ranked = models.BooleanField(default=True)
+    is_waiting_confirmation = models.BooleanField(default=False)
+    is_different = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"

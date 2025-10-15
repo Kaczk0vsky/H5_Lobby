@@ -68,7 +68,6 @@ class H5_Lobby(GameWindowsBase):
     __player_declined = False
     __queue_status = False
     __update_queue_status = False
-    __update_game_data = False
     __profile_status = False
     __update_profile_status = False
     __options_status = False
@@ -79,6 +78,8 @@ class H5_Lobby(GameWindowsBase):
     __stop_refreshing_friends_list = False
     __is_connected = True
     __has_disconnected = False
+    __report_creation_status = False
+    __generate_report_elements = False
     __elapsed_time = None
     __queue_channel = None
     __error_msg = None
@@ -333,20 +334,25 @@ class H5_Lobby(GameWindowsBase):
                         self.remove_from_queue(is_accepted=False)
                         continue
 
-            if self.__game_data:
-                if self.__update_game_data:
+            if self.__report_creation_status:
+                if self.__generate_report_elements:
                     FIND_GAME_BUTTON.set_active(is_active=False)
                     (
                         RESULT_TEXT,
                         RESULT_RECT,
                         MYSELF_TEXT,
                         MYSELF_RECT,
+                        MYSELF_CASTLE,
                         OPPONENT_TEXT,
                         OPPONENT_RECT,
+                        OPPONENT_CASTLE,
+                        WHO_WON_TEXT,
+                        WHO_WON_RECT,
+                        WHO_WON_CHOICES,
                         SUBMIT_REPORT,
                     ) = self.create_report_window()
                     SUBMIT_REPORT.set_active(True)
-                    self.__update_game_data = False
+                    self.__generate_report_elements = False
 
                 self.SCREEN.blit(
                     self.SMALLER_WINDOWS_BG,
@@ -357,9 +363,11 @@ class H5_Lobby(GameWindowsBase):
                 )
                 self.SCREEN.blit(RESULT_TEXT, RESULT_RECT)
                 self.SCREEN.blit(MYSELF_TEXT, MYSELF_RECT)
-                # self.SCREEN.blit(MYSELF_POINTS, MYSELF_POINTS_RECT)
+                MYSELF_CASTLE.update(self.SCREEN, MENU_MOUSE_POS)
                 self.SCREEN.blit(OPPONENT_TEXT, OPPONENT_RECT)
-                # self.SCREEN.blit(OPPONENT_POINTS, OPPONENT_POINTS_RECT)
+                OPPONENT_CASTLE.update(self.SCREEN, MENU_MOUSE_POS)
+                self.SCREEN.blit(WHO_WON_TEXT, WHO_WON_RECT)
+                WHO_WON_CHOICES.update(self.SCREEN, MENU_MOUSE_POS)
                 SUBMIT_REPORT.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self.__profile_status or self.__options_status:
@@ -576,11 +584,22 @@ class H5_Lobby(GameWindowsBase):
                                 self.remove_from_queue(is_accepted=True)
                                 self.check_if_oponnent_accepted()
 
-                    if self.__game_data:
+                    if self.__report_creation_status:
                         if SUBMIT_REPORT.check_for_input(MENU_MOUSE_POS):
                             FIND_GAME_BUTTON.set_active(is_active=True)
-                            self.__update_game_data = False
-                            self.__game_data = None
+                            report_data = {
+                                "nicknames": [self.user["nickname"], self.__opponent_nickname],
+                                "castles": [MYSELF_CASTLE.get_selected_option(), OPPONENT_CASTLE.get_selected_option()],
+                                "who_won": WHO_WON_CHOICES.get_selected_option(),
+                            }
+                            self.handle_match_report(report_data=report_data)
+                            self.__report_creation_status = False
+                        if MYSELF_CASTLE.check_for_input(MENU_MOUSE_POS):
+                            pass
+                        if OPPONENT_CASTLE.check_for_input(MENU_MOUSE_POS):
+                            pass
+                        if WHO_WON_CHOICES.check_for_input(MENU_MOUSE_POS):
+                            pass
 
                     if self.__profile_status:
                         if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -1029,28 +1048,66 @@ class H5_Lobby(GameWindowsBase):
             510 * transformation_factors[self.transformation_option][0],
             390 * transformation_factors[self.transformation_option][1],
         )
+        castle_choices = ["Haven", "Inferno", "Necropolis", "Sylvan", "Dungeon", "Academy", "Fortress", "Stronghold"]
+        who_won_choices = ["You", "Opponent"]
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
 
-        RESULT_TEXT = render_small_caps("Report", int(self.font_size[0] * 1.5), self.text_color)
-        RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.2))
+        RESULT_TEXT = render_small_caps("Report", int(self.font_size[0] * 1.5), self.hovering_color)
+        RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.175))
 
         MYSELF_TEXT = render_small_caps(f"You:", self.font_size[0], self.text_color)
-        total_width = MYSELF_TEXT.get_width()
-        start_x = (dims[0] + overlay_dims[0] * 0.5) - (total_width / 2)
-        start_y = dims[1] + overlay_dims[1] * 0.5
-        MYSELF_RECT = MYSELF_TEXT.get_rect(topleft=(start_x, start_y))
+        MYSELF_RECT = MYSELF_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.375))
+        MYSELF_CASTLE = OptionBox(
+            position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.375),
+            dimensions=self.option_box_dims,
+            arrow_left=self.ARROW_LEFT,
+            arrow_left_highlighted=self.ARROW_LEFT_HIGHLIGHTED,
+            arrow_right=self.ARROW_RIGHT,
+            arrow_right_highlighted=self.ARROW_RIGHT_HIGHLIGHTED,
+            color=self.text_color,
+            highlight_color=self.hovering_color,
+            font_size=self.font_size[1],
+            option_list=castle_choices,
+            selected=castle_choices[0],
+        )
 
         OPPONENT_TEXT = render_small_caps(f"Opponent:", self.font_size[0], self.text_color)
-        total_width = OPPONENT_TEXT.get_width()
-        start_x = (dims[0] + overlay_dims[0] * 0.5) - (total_width / 2)
-        start_y = dims[1] + overlay_dims[1] * 0.5
-        OPPONENT_RECT = OPPONENT_TEXT.get_rect(topleft=(start_x, start_y))
+        OPPONENT_RECT = OPPONENT_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.475))
+        OPPONENT_CASTLE = OptionBox(
+            position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.475),
+            dimensions=self.option_box_dims,
+            arrow_left=self.ARROW_LEFT,
+            arrow_left_highlighted=self.ARROW_LEFT_HIGHLIGHTED,
+            arrow_right=self.ARROW_RIGHT,
+            arrow_right_highlighted=self.ARROW_RIGHT_HIGHLIGHTED,
+            color=self.text_color,
+            highlight_color=self.hovering_color,
+            font_size=self.font_size[1],
+            option_list=castle_choices,
+            selected=castle_choices[0],
+        )
+
+        WHO_WON_TEXT = render_small_caps(f"Who won:", self.font_size[0], self.text_color)
+        WHO_WON_RECT = WHO_WON_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.575))
+        WHO_WON_CHOICES = OptionBox(
+            position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.575),
+            dimensions=self.option_box_dims,
+            arrow_left=self.ARROW_LEFT,
+            arrow_left_highlighted=self.ARROW_LEFT_HIGHLIGHTED,
+            arrow_right=self.ARROW_RIGHT,
+            arrow_right_highlighted=self.ARROW_RIGHT_HIGHLIGHTED,
+            color=self.text_color,
+            highlight_color=self.hovering_color,
+            font_size=self.font_size[1],
+            option_list=who_won_choices,
+            selected=who_won_choices[0],
+        )
 
         SUBMIT_REPORT = Button(
             image=self.ACCEPT_BUTTON,
             image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
             image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-            position=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.8),
+            position=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.75),
             text_input="Confirm",
             font_size=self.font_size[1],
             base_color=self.text_color,
@@ -1063,8 +1120,13 @@ class H5_Lobby(GameWindowsBase):
             RESULT_RECT,
             MYSELF_TEXT,
             MYSELF_RECT,
+            MYSELF_CASTLE,
             OPPONENT_TEXT,
             OPPONENT_RECT,
+            OPPONENT_CASTLE,
+            WHO_WON_TEXT,
+            WHO_WON_RECT,
+            WHO_WON_CHOICES,
             SUBMIT_REPORT,
         )
 
@@ -1408,18 +1470,13 @@ class H5_Lobby(GameWindowsBase):
             time.sleep(15)
 
     @run_in_thread
-    def handle_match_report(self, is_won: bool, castle: str):
+    def handle_match_report(self, report_data: dict):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_REPORT']}/"
         if not self.crsf_token:
             self.__window_overlay = True
             self.__error_msg = "Please login again."
             return
 
-        user_data = {
-            "nickname": self.user["nickname"],
-            "is_won": is_won,
-            "castle": castle,
-        }
         headers = {
             "Referer": f"https://{env_dict["SERVER_URL"]}/",
             "X-CSRFToken": self.crsf_token,
@@ -1428,15 +1485,10 @@ class H5_Lobby(GameWindowsBase):
         logger.debug("Reporting match result...")
         self.__connection_timer = time.time()
         try:
-            response = self.session.post(url, json=user_data, headers=headers)
+            response = self.session.post(url, json=report_data, headers=headers)
             if response.status_code == 200:
-                self.__game_data = response.json().get("game_data")
-                self.__game_data["is_won"] = is_won
-                self.__update_game_data = True
                 self.__connection_timer = None
                 logger.info("Match result reported succesfully.")
-                # Reload profile information
-                self.get_user_profile()
                 return True
 
             elif response.status_code == 400:
@@ -1577,6 +1629,8 @@ class H5_Lobby(GameWindowsBase):
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.__set_buttons_active = True
         self.__stop_refreshing_friends_list = False
+        self.__report_creation_status = True
+        self.__generate_report_elements = True
         logger.debug("Window restored from tray.")
 
     def run_game(self):
