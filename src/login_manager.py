@@ -659,6 +659,7 @@ class LoginWindow(GameWindowsBase):
                         user_data["password"],
                     )
                     self.vpn_client.create_new_client()
+                self.user = user_data
 
                 self.vpn_client.set_vpn_state(state=True)
                 logger.info("VPN connection established.")
