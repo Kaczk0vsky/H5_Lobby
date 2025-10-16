@@ -78,6 +78,8 @@ class H5_Lobby(GameWindowsBase):
     __stop_refreshing_friends_list = False
     __is_connected = True
     __has_disconnected = False
+    __create_report_question = False
+    __generate_create_window_choice_elements = False
     __report_creation_status = False
     __generate_report_elements = False
     __elapsed_time = None
@@ -334,9 +336,30 @@ class H5_Lobby(GameWindowsBase):
                         self.remove_from_queue(is_accepted=False)
                         continue
 
+            if self.__create_report_question:
+                FIND_GAME_BUTTON.set_active(is_active=False)
+                if self.__generate_create_window_choice_elements:
+                    (
+                        TEXT,
+                        TEXT_RECT,
+                        YES_BUTTON,
+                        NO_BUTTON,
+                    ) = self.yes_no_window(text="Do you want to create game report?")
+                    self.__generate_create_window_choice_elements = False
+
+                self.SCREEN.blit(
+                    self.SMALLER_WINDOWS_BG,
+                    (
+                        640 * transformation_factors[self.transformation_option][0],
+                        360 * transformation_factors[self.transformation_option][1],
+                    ),
+                )
+                self.SCREEN.blit(TEXT, TEXT_RECT)
+                YES_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                NO_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
+
             if self.__report_creation_status:
                 if self.__generate_report_elements:
-                    FIND_GAME_BUTTON.set_active(is_active=False)
                     (
                         RESULT_TEXT,
                         RESULT_RECT,
@@ -600,6 +623,14 @@ class H5_Lobby(GameWindowsBase):
                             pass
                         if WHO_WON_CHOICES.check_for_input(MENU_MOUSE_POS):
                             pass
+
+                    if self.__create_report_question:
+                        if YES_BUTTON.check_for_input(MENU_MOUSE_POS):
+                            self.__create_report_question = False
+                            self.__report_creation_status = True
+                            self.__generate_report_elements = True
+                        if NO_BUTTON.check_for_input(MENU_MOUSE_POS):
+                            self.__create_report_question = False
 
                     if self.__profile_status:
                         if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -964,89 +995,14 @@ class H5_Lobby(GameWindowsBase):
             CLOSE_BUTTON,
         )
 
-    def report_window(self):
-        dims = (
-            640 * transformation_factors[self.transformation_option][0],
-            360 * transformation_factors[self.transformation_option][1],
-        )
-        overlay_dims = (
-            510 * transformation_factors[self.transformation_option][0],
-            390 * transformation_factors[self.transformation_option][1],
-        )
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
-
-        if self.__game_data["is_won"]:
-            result_text = "VICTORY"
-            result_color = "#02ba09"
-            player_points = self.__game_data["winner"][1]
-            player_points_change = f"(+{self.__game_data['winner'][2]})"
-            opponent_nickname = self.__game_data["loser"][0]
-            opponent_points = self.__game_data["loser"][1]
-            opponent_points_change = f"(-{self.__game_data['loser'][2]})"
-        else:
-            result_text = "DEFEAT"
-            result_color = "#db1102"
-            player_points_change = f"(-{self.__game_data['loser'][2]})"
-            player_points = self.__game_data["loser"][1]
-            opponent_nickname = self.__game_data["winner"][0]
-            opponent_points = self.__game_data["winner"][1]
-            opponent_points_change = f"(+{self.__game_data['winner'][2]})"
-
-        opponent_color = "#02ba09" if result_color == "#db1102" else "#db1102"
-
-        RESULT_TEXT = render_small_caps(result_text, int(self.font_size[0] * 1.5), result_color)
-        RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.2))
-
-        MYSELF_TEXT = render_small_caps(f"{self.user["nickname"]}: ", self.font_size[0], self.text_color)
-        MYSELF_POINTS = render_small_caps(f"{player_points} {player_points_change}", self.font_size[0], result_color)
-        total_width = MYSELF_TEXT.get_width() + MYSELF_POINTS.get_width()
-        start_x = (dims[0] + overlay_dims[0] * 0.5) - (total_width / 2)
-        start_y = dims[1] + overlay_dims[1] * 0.375
-        MYSELF_RECT = MYSELF_TEXT.get_rect(topleft=(start_x, start_y))
-        MYSELF_POINTS_RECT = MYSELF_POINTS.get_rect(topleft=(MYSELF_RECT.right, start_y))
-
-        OPPONENT_TEXT = render_small_caps(f"{opponent_nickname}: ", self.font_size[0], self.text_color)
-        OPPONENT_POINTS = render_small_caps(f"{opponent_points} {opponent_points_change}", self.font_size[0], opponent_color)
-        total_width = OPPONENT_TEXT.get_width() + OPPONENT_POINTS.get_width()
-        start_x = (dims[0] + overlay_dims[0] * 0.5) - (total_width / 2)
-        start_y = dims[1] + overlay_dims[1] * 0.5
-        OPPONENT_RECT = OPPONENT_TEXT.get_rect(topleft=(start_x, start_y))
-        OPPONENT_POINTS_RECT = OPPONENT_POINTS.get_rect(topleft=(OPPONENT_RECT.right, start_y))
-
-        SUBMIT_REPORT = Button(
-            image=self.ACCEPT_BUTTON,
-            image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
-            image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-            position=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.8),
-            text_input="Confirm",
-            font_size=self.font_size[1],
-            base_color=self.text_color,
-            hovering_color=self.hovering_color,
-            inactive_color=self.inactive_color,
-        )
-
-        return (
-            RESULT_TEXT,
-            RESULT_RECT,
-            MYSELF_TEXT,
-            MYSELF_RECT,
-            MYSELF_POINTS,
-            MYSELF_POINTS_RECT,
-            OPPONENT_TEXT,
-            OPPONENT_RECT,
-            OPPONENT_POINTS,
-            OPPONENT_POINTS_RECT,
-            SUBMIT_REPORT,
-        )
-
     def create_report_window(self):
         dims = (
             640 * transformation_factors[self.transformation_option][0],
             360 * transformation_factors[self.transformation_option][1],
         )
         overlay_dims = (
-            510 * transformation_factors[self.transformation_option][0],
-            390 * transformation_factors[self.transformation_option][1],
+            520 * transformation_factors[self.transformation_option][0],
+            380 * transformation_factors[self.transformation_option][1],
         )
         castle_choices = ["Haven", "Inferno", "Necropolis", "Sylvan", "Dungeon", "Academy", "Fortress", "Stronghold"]
         who_won_choices = ["You", "Opponent"]
@@ -1238,6 +1194,49 @@ class H5_Lobby(GameWindowsBase):
             RANKED_LINE,
             CHECKBOX_RANKED,
             CLOSE_BUTTON,
+        )
+
+    def yes_no_window(self, text: str):
+        dims = (
+            640 * transformation_factors[self.transformation_option][0],
+            360 * transformation_factors[self.transformation_option][1],
+        )
+        overlay_dims = (
+            520 * transformation_factors[self.transformation_option][0],
+            240 * transformation_factors[self.transformation_option][1],
+        )
+        TEXT = render_small_caps(text, int(self.font_size[0]), self.text_color)
+        TEXT_RECT = TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.275))
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
+
+        YES_BUTTON = Button(
+            image=self.ACCEPT_BUTTON,
+            image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
+            image_inactive=self.ACCEPT_BUTTON_INACTIVE,
+            position=(dims[0] + overlay_dims[0] * 0.25, dims[1] + overlay_dims[1] * 0.75),
+            text_input="Yes",
+            font_size=self.font_size[1],
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
+        )
+        NO_BUTTON = Button(
+            image=self.ACCEPT_BUTTON,
+            image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
+            image_inactive=self.ACCEPT_BUTTON_INACTIVE,
+            position=(dims[0] + overlay_dims[0] * 0.75, dims[1] + overlay_dims[1] * 0.75),
+            text_input="No",
+            font_size=self.font_size[1],
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
+        )
+
+        return (
+            TEXT,
+            TEXT_RECT,
+            YES_BUTTON,
+            NO_BUTTON,
         )
 
     @run_in_thread
@@ -1629,8 +1628,8 @@ class H5_Lobby(GameWindowsBase):
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.__set_buttons_active = True
         self.__stop_refreshing_friends_list = False
-        self.__report_creation_status = True
-        self.__generate_report_elements = True
+        self.__create_report_question = True
+        self.__generate_create_window_choice_elements = True
         logger.debug("Window restored from tray.")
 
     def run_game(self):
