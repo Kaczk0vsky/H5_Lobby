@@ -57,7 +57,7 @@ class GameWindowsBase:
         self.cursor = Cursor()
 
     def set_window_caption(self, title: str) -> None:
-        pygame.display.set_caption(f"Heroes V of Might and Magic Ashan Arena 3 - {title}")
+        pygame.display.set_caption(f"Tavern of Ashan - {title}")
 
     def play_background_music(self, music_path: str) -> None:
         pygame.init()
