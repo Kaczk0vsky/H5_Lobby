@@ -82,11 +82,12 @@ class H5_Lobby(GameWindowsBase):
     __generate_create_window_choice_elements = False
     __report_creation_status = False
     __generate_report_elements = False
+    __loading_profile_data = False
+    __profile_button_active = False
     __elapsed_time = None
     __queue_channel = None
     __error_msg = None
     __connection_timer = None
-    __game_data = None
     __profile_data = None
 
     def __init__(
@@ -105,8 +106,7 @@ class H5_Lobby(GameWindowsBase):
         self.transformation_option = self.config["resolution"]
         self.font_size = fonts_sizes[self.transformation_option]
 
-        if not self.__profile_data:
-            self.get_user_profile()
+        self.get_user_profile()
 
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
@@ -177,7 +177,6 @@ class H5_Lobby(GameWindowsBase):
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
-        MY_PROFILE.set_active(is_active=True) if isinstance(self.__profile_data, dict) else MY_PROFILE.set_active(is_active=False)
         DISCORD = Button(
             image=self.DISCORD_LOGO,
             image_highlited=self.DISCORD_LOGO_HIGHLIGHTED,
@@ -268,6 +267,10 @@ class H5_Lobby(GameWindowsBase):
                 logger.warning(f"Users list rendering error: {e}")
                 continue
 
+            if not self.__profile_button_active and not self.__loading_profile_data:
+                MY_PROFILE.set_active(is_active=True) if isinstance(self.__profile_data, dict) else MY_PROFILE.set_active(is_active=False)
+                self.__profile_button_active = True
+
             if self.__set_buttons_active:
                 FIND_GAME_BUTTON.set_active(is_active=True)
                 RANKING.set_active(is_active=True)
@@ -342,9 +345,17 @@ class H5_Lobby(GameWindowsBase):
                     (
                         TEXT,
                         TEXT_RECT,
+                        SECOND_TEXT,
+                        SECOND_TEXT_RECT,
+                        THIRD_TEXT,
+                        THIRD_TEXT_RECT,
                         YES_BUTTON,
                         NO_BUTTON,
-                    ) = self.yes_no_window(text="Do you want to create game report?")
+                    ) = self.yes_no_window(
+                        first_line="Do you want to create a report?",
+                        second_line="If you cancel, you cannot create it later.",
+                        third_line="DO NOT CREATE IF DISCONNECTED!",
+                    )
                     self.__generate_create_window_choice_elements = False
 
                 self.SCREEN.blit(
@@ -355,6 +366,10 @@ class H5_Lobby(GameWindowsBase):
                     ),
                 )
                 self.SCREEN.blit(TEXT, TEXT_RECT)
+                if SECOND_TEXT is not None and SECOND_TEXT_RECT is not None:
+                    self.SCREEN.blit(SECOND_TEXT, SECOND_TEXT_RECT)
+                if THIRD_TEXT is not None and THIRD_TEXT_RECT is not None:
+                    self.SCREEN.blit(THIRD_TEXT, THIRD_TEXT_RECT)
                 YES_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 NO_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
@@ -616,6 +631,7 @@ class H5_Lobby(GameWindowsBase):
                                 "who_won": WHO_WON_CHOICES.get_selected_option(),
                             }
                             self.handle_match_report(report_data=report_data)
+                            self.get_user_profile()
                             self.__report_creation_status = False
                         if MYSELF_CASTLE.check_for_input(MENU_MOUSE_POS):
                             pass
@@ -1196,18 +1212,30 @@ class H5_Lobby(GameWindowsBase):
             CLOSE_BUTTON,
         )
 
-    def yes_no_window(self, text: str):
+    def yes_no_window(self, first_line: str, second_line: str = None, third_line: str = None):
         dims = (
             640 * transformation_factors[self.transformation_option][0],
             360 * transformation_factors[self.transformation_option][1],
         )
         overlay_dims = (
             520 * transformation_factors[self.transformation_option][0],
-            240 * transformation_factors[self.transformation_option][1],
+            280 * transformation_factors[self.transformation_option][1],
         )
-        TEXT = render_small_caps(text, int(self.font_size[0]), self.text_color)
-        TEXT_RECT = TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.275))
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
+
+        TEXT = render_small_caps(first_line, self.font_size[0], self.hovering_color)
+        TEXT_RECT = TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.275))
+        SECOND_TEXT = None
+        SECOND_TEXT_RECT = None
+        THIRD_TEXT = None
+        THIRD_TEXT_RECT = None
+        if second_line:
+            SECOND_TEXT = render_small_caps(second_line, int(self.font_size[0] * 0.6), self.text_color)
+            SECOND_TEXT_RECT = SECOND_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.4))
+
+        if third_line:
+            THIRD_TEXT = render_small_caps(third_line, int(self.font_size[0] * 0.6), self.text_color)
+            THIRD_TEXT_RECT = THIRD_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.525))
 
         YES_BUTTON = Button(
             image=self.ACCEPT_BUTTON,
@@ -1235,6 +1263,10 @@ class H5_Lobby(GameWindowsBase):
         return (
             TEXT,
             TEXT_RECT,
+            SECOND_TEXT,
+            SECOND_TEXT_RECT,
+            THIRD_TEXT,
+            THIRD_TEXT_RECT,
             YES_BUTTON,
             NO_BUTTON,
         )
@@ -1511,6 +1543,7 @@ class H5_Lobby(GameWindowsBase):
             self.__window_overlay = True
             return "Error! Server/Player offline, check discord..."
 
+    @run_in_thread
     def get_user_profile(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_PROFILE']}/"
         if not self.crsf_token:
@@ -1524,10 +1557,13 @@ class H5_Lobby(GameWindowsBase):
             "X-CSRFToken": self.crsf_token,
             "Content-Type": "application/json",
         }
+        self.__loading_profile_data = True
         logger.debug("Fetching users profile...")
         try:
             response = self.session.get(url, params=user_data, headers=headers)
             if response.status_code == 200:
+                self.__loading_profile_data = False
+                self.__update_profile_status = True
                 self.__profile_data = response.json().get("player_information")
                 logger.info("Users profile fetched succesfully.")
                 return True
