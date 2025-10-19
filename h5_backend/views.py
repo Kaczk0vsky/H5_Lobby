@@ -487,6 +487,7 @@ class HandleMatchReport(View):
                     players_data[player_won.nickname] = game.points_change_winner
                     players_data[player_lost.nickname] = game.points_change_loser
 
+                game.save()
                 return players_data
 
             if game.is_new:
