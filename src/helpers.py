@@ -121,9 +121,9 @@ def check_input_correctnes(inputs: list, text_input: dict[any, list]) -> dict[an
     return text_input
 
 
-def get_window() -> list:
+def get_window() -> gw.Win32Window:
     time.sleep(0.1)
-    return gw.getWindowsWithTitle("Heroes V of Might and Magic Ashan Arena 3 - Menu")[0]
+    return gw.getWindowsWithTitle("Tavern of Ashan - Menu")[0]
 
 
 def check_server_connection(
