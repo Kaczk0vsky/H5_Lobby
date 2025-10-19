@@ -465,7 +465,17 @@ class HandleMatchReport(View):
 
         with transaction.atomic():
             if game.is_waiting_confirmation:
-                # TODO: add check if data is the same as in the report
+                if game.player_1 == player:
+                    if game.castle_1 != player_castle or game.castle_2 != opponent_castle or game.who_won != who_won:
+                        game.is_different = True
+                else:
+                    if game.castle_2 != player_castle or game.castle_1 != opponent_castle or game.who_won != who_won:
+                        game.is_different = True
+
+                if game.is_different:
+                    game.is_waiting_confirmation = False
+                    game.save()
+                    return
 
                 if game.is_ranked:
                     player_won = game.who_won
@@ -474,7 +484,12 @@ class HandleMatchReport(View):
                         game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
 
                 game.is_waiting_confirmation = False
-                # TODO: add returning both players data
+                players_data = {
+                    player_won.nickname: game.points_change_winner,
+                    player_lost.nickname: game.points_change_loser,
+                    "who_won": player_won.nickname,
+                }
+                return players_data
 
             if game.is_new:
                 if game.player_1 == player:
@@ -523,10 +538,9 @@ class HandleMatchReport(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
-            self._create_match_report(player, player_castle, opponent_castle, who_won)
+            data = self._create_match_report(player, player_castle, opponent_castle, who_won)
 
-            # TODO: add returning point values later
-            return JsonResponse({"success": True})
+            return JsonResponse({"success": True, "data": data})
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
