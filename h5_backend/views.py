@@ -477,18 +477,16 @@ class HandleMatchReport(View):
                     game.save()
                     return
 
+                game.is_waiting_confirmation = False
+                players_data = {"who_won": who_won.nickname}
                 if game.is_ranked:
                     player_won = game.who_won
                     player_lost = game.player_2 if player_won == game.player_1 else game.player_1
                     if not game.points_change_winner and not game.points_change_loser:
                         game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
+                    players_data[player_won.nickname] = game.points_change_winner
+                    players_data[player_lost.nickname] = game.points_change_loser
 
-                game.is_waiting_confirmation = False
-                players_data = {
-                    player_won.nickname: game.points_change_winner,
-                    player_lost.nickname: game.points_change_loser,
-                    "who_won": player_won.nickname,
-                }
                 return players_data
 
             if game.is_new:
