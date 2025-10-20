@@ -278,7 +278,7 @@ class SetPlayerStateView(View):
 
             report_data = self._check_for_unaccepted_report(player)
             if report_data:
-                return JsonResponse({"success": True, "report_data": report_data}, status=400)
+                return JsonResponse({"success": True, "report_data": report_data}, status=200)
 
             self._update_player_state(player, request_data)
             return JsonResponse({"success": True})
