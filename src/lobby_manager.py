@@ -635,6 +635,7 @@ class H5_Lobby(GameWindowsBase):
                             self.handle_match_report(report_data=report_data)
                             self.get_user_profile()
                             self.__report_creation_status = False
+                            self.__report_data = None
                         if MYSELF_CASTLE.check_for_input(MENU_MOUSE_POS):
                             pass
                         if OPPONENT_CASTLE.check_for_input(MENU_MOUSE_POS):
@@ -648,6 +649,7 @@ class H5_Lobby(GameWindowsBase):
                             self.__report_creation_status = True
                             self.__generate_report_elements = True
                         if NO_BUTTON.check_for_input(MENU_MOUSE_POS):
+                            FIND_GAME_BUTTON.set_active(is_active=True)
                             self.__create_report_question = False
 
                     if self.__profile_status:
@@ -1023,23 +1025,21 @@ class H5_Lobby(GameWindowsBase):
             380 * transformation_factors[self.transformation_option][1],
         )
         castle_choices = ["Haven", "Inferno", "Necropolis", "Sylvan", "Dungeon", "Academy", "Fortress", "Stronghold"]
-        if not self.__report_data:
-            who_won_choices = ["You", "Opponent"]
-        else:
+        who_won_choices = ["You", "Opponent"]
+        if self.__report_data:
             all_players = [p for p in self.__report_data.keys() if p != "who_won"]
             my_nickname = self.user["nickname"]
-            opponent_nickname = [p for p in all_players if p != my_nickname][0]
-            who_won_choices = [my_nickname, opponent_nickname]
+            self.__opponent_nickname = [p for p in all_players if p != my_nickname][0]
 
             my_castle = str(self.__report_data[my_nickname]).lower().capitalize()
-            opponent_castle = str(self.__report_data[opponent_nickname]).lower().capitalize()
+            opponent_castle = str(self.__report_data[self.__opponent_nickname]).lower().capitalize()
 
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
 
         RESULT_TEXT = render_small_caps("Report", int(self.font_size[0] * 1.5), self.hovering_color)
         RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.175))
 
-        MYSELF_TEXT = render_small_caps(f"{who_won_choices[0]}", self.font_size[0], self.text_color)
+        MYSELF_TEXT = render_small_caps("You:", self.font_size[0], self.text_color)
         MYSELF_RECT = MYSELF_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.375))
         MYSELF_CASTLE = OptionBox(
             position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.375),
@@ -1055,7 +1055,7 @@ class H5_Lobby(GameWindowsBase):
             selected=castle_choices[0] if not self.__report_data else my_castle,
         )
 
-        OPPONENT_TEXT = render_small_caps(f"{who_won_choices[1]}", self.font_size[0], self.text_color)
+        OPPONENT_TEXT = render_small_caps(f"{self.__opponent_nickname}:", self.font_size[0], self.text_color)
         OPPONENT_RECT = OPPONENT_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.475))
         OPPONENT_CASTLE = OptionBox(
             position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.475),
@@ -1312,7 +1312,10 @@ class H5_Lobby(GameWindowsBase):
                     self.__report_data = json_response["report_data"]
                     self.__report_creation_status = True
                     self.__generate_report_elements = True
-                    logger.info("You have unsubmitted report.")
+                    self.__update_queue_status = False
+                    self.__queue_status = False
+                    self.__get_time = False
+                    logger.warning("You have unsubmitted report.")
                     return
 
                 logger.info("Added to queue.")
@@ -1321,6 +1324,8 @@ class H5_Lobby(GameWindowsBase):
             else:
                 self.__window_overlay = True
                 self.__connection_timer = None
+                self.__update_queue_status = False
+                self.__queue_status = False
                 self.__error_msg = response.json().get("error", "Unknown error occurred")
 
         except requests.exceptions.ConnectTimeout:
