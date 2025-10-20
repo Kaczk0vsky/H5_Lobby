@@ -45,9 +45,9 @@ class GameReportSerializer(serializers.Serializer):
         min_length=2,
         max_length=2,
         required=True,
-        help_text="List of two castles corresponding to nicknames",
+        help_text="List of two castles: [castle1, castle2]",
     )
-    who_won = serializers.CharField(max_length=16, required=True)
+    who_won = serializers.CharField(max_length=16, required=True, help_text="Nickname of the player who won: player1")
 
     def __init__(self, *args, required_fields=None, **kwargs):
         super().__init__(*args, **kwargs)

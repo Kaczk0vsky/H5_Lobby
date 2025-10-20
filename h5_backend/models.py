@@ -91,6 +91,16 @@ class Game(models.Model):
         null=True,
         blank=True,
     )
+    # who created the report
+    who_created = models.ForeignKey(
+        Player,
+        on_delete=models.CASCADE,
+        editable=True,
+        related_name="player_who_created",
+        null=True,
+        blank=True,
+    )
+
     is_new = models.BooleanField(default=False)
     is_ranked = models.BooleanField(default=True)
     is_waiting_confirmation = models.BooleanField(default=False)

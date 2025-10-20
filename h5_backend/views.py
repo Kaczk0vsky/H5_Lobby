@@ -243,6 +243,22 @@ class SetPlayerStateView(View):
             player.min_opponent_points = request_data["min_opponent_points"]
         player.save()
 
+    def _check_for_unaccepted_report(self, player: Player) -> bool:
+        unaccepted_game = (
+            Game.objects.filter(Q(player_1=player) | Q(player_2=player), is_waiting_confirmation=True)
+            .exclude(who_created=player)
+            .order_by("-id")
+            .last()
+        )
+        if not unaccepted_game:
+            return None
+
+        return {
+            unaccepted_game.player_1.nickname: unaccepted_game.castle_1,
+            unaccepted_game.player_2.nickname: unaccepted_game.castle_2,
+            "who_won": unaccepted_game.who_won.nickname,
+        }
+
     def post(self, request, *args, **kwargs):
         try:
             if not self.state:
@@ -259,6 +275,10 @@ class SetPlayerStateView(View):
                 player = Player.objects.get(nickname=request_data["nickname"])
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
+
+            report_data = self._check_for_unaccepted_report(player)
+            if report_data:
+                return JsonResponse({"success": True, "report_data": report_data}, status=400)
 
             self._update_player_state(player, request_data)
             return JsonResponse({"success": True})

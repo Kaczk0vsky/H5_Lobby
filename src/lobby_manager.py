@@ -89,6 +89,7 @@ class H5_Lobby(GameWindowsBase):
     __error_msg = None
     __connection_timer = None
     __profile_data = None
+    __report_data = None
 
     def __init__(
         self,
@@ -374,6 +375,7 @@ class H5_Lobby(GameWindowsBase):
                 NO_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self.__report_creation_status:
+                FIND_GAME_BUTTON.set_active(is_active=False)
                 if self.__generate_report_elements:
                     (
                         RESULT_TEXT,
@@ -1021,13 +1023,23 @@ class H5_Lobby(GameWindowsBase):
             380 * transformation_factors[self.transformation_option][1],
         )
         castle_choices = ["Haven", "Inferno", "Necropolis", "Sylvan", "Dungeon", "Academy", "Fortress", "Stronghold"]
-        who_won_choices = ["You", "Opponent"]
+        if not self.__report_data:
+            who_won_choices = ["You", "Opponent"]
+        else:
+            all_players = [p for p in self.__report_data.keys() if p != "who_won"]
+            my_nickname = self.user["nickname"]
+            opponent_nickname = [p for p in all_players if p != my_nickname][0]
+            who_won_choices = [my_nickname, opponent_nickname]
+
+            my_castle = str(self.__report_data[my_nickname]).lower().capitalize()
+            opponent_castle = str(self.__report_data[opponent_nickname]).lower().capitalize()
+
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
 
         RESULT_TEXT = render_small_caps("Report", int(self.font_size[0] * 1.5), self.hovering_color)
         RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.175))
 
-        MYSELF_TEXT = render_small_caps(f"You:", self.font_size[0], self.text_color)
+        MYSELF_TEXT = render_small_caps(f"{who_won_choices[0]}", self.font_size[0], self.text_color)
         MYSELF_RECT = MYSELF_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.375))
         MYSELF_CASTLE = OptionBox(
             position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.375),
@@ -1040,10 +1052,10 @@ class H5_Lobby(GameWindowsBase):
             highlight_color=self.hovering_color,
             font_size=self.font_size[1],
             option_list=castle_choices,
-            selected=castle_choices[0],
+            selected=castle_choices[0] if not self.__report_data else my_castle,
         )
 
-        OPPONENT_TEXT = render_small_caps(f"Opponent:", self.font_size[0], self.text_color)
+        OPPONENT_TEXT = render_small_caps(f"{who_won_choices[1]}", self.font_size[0], self.text_color)
         OPPONENT_RECT = OPPONENT_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.475))
         OPPONENT_CASTLE = OptionBox(
             position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.475),
@@ -1056,7 +1068,7 @@ class H5_Lobby(GameWindowsBase):
             highlight_color=self.hovering_color,
             font_size=self.font_size[1],
             option_list=castle_choices,
-            selected=castle_choices[0],
+            selected=castle_choices[0] if not self.__report_data else opponent_castle,
         )
 
         WHO_WON_TEXT = render_small_caps(f"Who won:", self.font_size[0], self.text_color)
@@ -1295,6 +1307,14 @@ class H5_Lobby(GameWindowsBase):
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 self.__connection_timer = None
+                json_response = response.json()
+                if "report_data" in json_response.keys():
+                    self.__report_data = json_response["report_data"]
+                    self.__report_creation_status = True
+                    self.__generate_report_elements = True
+                    logger.info("You have unsubmitted report.")
+                    return
+
                 logger.info("Added to queue.")
                 self.scan_for_players()
 
