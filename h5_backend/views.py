@@ -518,6 +518,7 @@ class HandleMatchReport(View):
                     game.castle_2 = player_castle
                     game.castle_1 = opponent_castle
                 game.who_won = who_won
+                game.who_created = player
                 game.is_new = False
                 game.is_waiting_confirmation = True
 
