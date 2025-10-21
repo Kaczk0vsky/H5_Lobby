@@ -10,19 +10,24 @@ logger = logging.getLogger(__name__)
 class CustomFormatter(logging.Formatter):
     __white = "\x1b[97m"
     __light_green = "\x1b[92;20m"
+    __green = "\x1b[32;20m"
     __yellow = "\x1b[33;20m"
     __red = "\x1b[31;20m"
     __bold_red = "\x1b[31;1m"
+    __dark_blue = "\x1b[34;20m"
     __reset = "\x1b[0m"
 
-    __base_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    # __base_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    __time = __green + "%(asctime)s" + __reset + " - "
+    __file_name = __dark_blue + "%(name)s" + __reset + " - "
+    __message = __white + "%(message)s" + __reset
 
     FORMATS = {
-        logging.DEBUG: __white + __base_format + __reset,
-        logging.INFO: __light_green + __base_format + __reset,
-        logging.WARNING: __yellow + __base_format + __reset,
-        logging.ERROR: __red + __base_format + __reset,
-        logging.CRITICAL: __bold_red + __base_format + __reset,
+        logging.DEBUG: __time + __file_name + __white + "%(levelname)s" + __reset + " - " + __message,
+        logging.INFO: __time + __file_name + __light_green + "%(levelname)s" + __reset + " - " + __message,
+        logging.WARNING: __time + __file_name + __yellow + "%(levelname)s" + __reset + " - " + __message,
+        logging.ERROR: __time + __file_name + __red + "%(levelname)s" + __reset + " - " + __message,
+        logging.CRITICAL: __time + __file_name + __bold_red + "%(levelname)s" + __reset + " - " + __message,
     }
 
     def format(self, record):
