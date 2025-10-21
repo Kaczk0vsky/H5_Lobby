@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class CustomFormatter(logging.Formatter):
     __white = "\x1b[97m"
-    __grey = "\x1b[38;20m"
+    __light_green = "\x1b[92;20m"
     __yellow = "\x1b[33;20m"
     __red = "\x1b[31;20m"
     __bold_red = "\x1b[31;1m"
@@ -19,7 +19,7 @@ class CustomFormatter(logging.Formatter):
 
     FORMATS = {
         logging.DEBUG: __white + __base_format + __reset,
-        logging.INFO: __grey + __base_format + __reset,
+        logging.INFO: __light_green + __base_format + __reset,
         logging.WARNING: __yellow + __base_format + __reset,
         logging.ERROR: __red + __base_format + __reset,
         logging.CRITICAL: __bold_red + __base_format + __reset,
