@@ -630,7 +630,7 @@ class H5_Lobby(GameWindowsBase):
                             report_data = {
                                 "nicknames": [self.user["nickname"], self.__opponent_nickname],
                                 "castles": [MYSELF_CASTLE.get_selected_option().lower(), OPPONENT_CASTLE.get_selected_option().lower()],
-                                "who_won": WHO_WON_CHOICES.get_selected_option(),
+                                "who_won": self.user["nickname"] if WHO_WON_CHOICES.get_selected_option() == "You" else self.__opponent_nickname,
                             }
                             self.handle_match_report(report_data=report_data)
                             self.get_user_profile()
@@ -775,7 +775,7 @@ class H5_Lobby(GameWindowsBase):
             640 * transformation_factors[self.transformation_option][0],
             360 * transformation_factors[self.transformation_option][1],
         )
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, dims)
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOW_BASE, dims)
 
         if not self.__get_time:
             self.start_time = time.time()
@@ -1020,10 +1020,6 @@ class H5_Lobby(GameWindowsBase):
             640 * transformation_factors[self.transformation_option][0],
             360 * transformation_factors[self.transformation_option][1],
         )
-        overlay_dims = (
-            520 * transformation_factors[self.transformation_option][0],
-            380 * transformation_factors[self.transformation_option][1],
-        )
         castle_choices = ["Haven", "Inferno", "Necropolis", "Sylvan", "Dungeon", "Academy", "Fortress", "Stronghold"]
         who_won_choices = ["You", "Opponent"]
         if self.__report_data:
@@ -1034,15 +1030,15 @@ class H5_Lobby(GameWindowsBase):
             my_castle = str(self.__report_data[my_nickname]).lower().capitalize()
             opponent_castle = str(self.__report_data[self.__opponent_nickname]).lower().capitalize()
 
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOW_BASE, dims)
 
         RESULT_TEXT = render_small_caps("Report", int(self.font_size[0] * 1.5), self.hovering_color)
-        RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.175))
+        RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] * 1.5, dims[1] * 1.175))
 
         MYSELF_TEXT = render_small_caps("You:", self.font_size[0], self.text_color)
-        MYSELF_RECT = MYSELF_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.375))
+        MYSELF_RECT = MYSELF_TEXT.get_rect(center=((dims[0] * 1.25), dims[1] * 1.375))
         MYSELF_CASTLE = OptionBox(
-            position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.375),
+            position=(dims[0] * 1.7, dims[1] * 1.375),
             dimensions=self.option_box_dims,
             arrow_left=self.ARROW_LEFT,
             arrow_left_highlighted=self.ARROW_LEFT_HIGHLIGHTED,
@@ -1056,9 +1052,9 @@ class H5_Lobby(GameWindowsBase):
         )
 
         OPPONENT_TEXT = render_small_caps(f"{self.__opponent_nickname}:", self.font_size[0], self.text_color)
-        OPPONENT_RECT = OPPONENT_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.475))
+        OPPONENT_RECT = OPPONENT_TEXT.get_rect(center=((dims[0] * 1.25), dims[1] * 1.475))
         OPPONENT_CASTLE = OptionBox(
-            position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.475),
+            position=(dims[0] * 1.7, dims[1] * 1.475),
             dimensions=self.option_box_dims,
             arrow_left=self.ARROW_LEFT,
             arrow_left_highlighted=self.ARROW_LEFT_HIGHLIGHTED,
@@ -1072,9 +1068,9 @@ class H5_Lobby(GameWindowsBase):
         )
 
         WHO_WON_TEXT = render_small_caps(f"Who won:", self.font_size[0], self.text_color)
-        WHO_WON_RECT = WHO_WON_TEXT.get_rect(center=((dims[0] + overlay_dims[0] * 0.25), dims[1] + overlay_dims[1] * 0.575))
+        WHO_WON_RECT = WHO_WON_TEXT.get_rect(center=((dims[0] * 1.25), dims[1] * 1.575))
         WHO_WON_CHOICES = OptionBox(
-            position=(dims[0] + overlay_dims[0] * 0.7, dims[1] + overlay_dims[1] * 0.575),
+            position=(dims[0] * 1.7, dims[1] * 1.575),
             dimensions=self.option_box_dims,
             arrow_left=self.ARROW_LEFT,
             arrow_left_highlighted=self.ARROW_LEFT_HIGHLIGHTED,
@@ -1091,7 +1087,7 @@ class H5_Lobby(GameWindowsBase):
             image=self.ACCEPT_BUTTON,
             image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
             image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-            position=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.8),
+            position=(dims[0] * 1.5, dims[1] * 1.8),
             text_input="Confirm",
             font_size=self.font_size[1],
             base_color=self.text_color,
@@ -1233,7 +1229,7 @@ class H5_Lobby(GameWindowsBase):
             520 * transformation_factors[self.transformation_option][0],
             280 * transformation_factors[self.transformation_option][1],
         )
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_dims[0], overlay_dims[1]))
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOW_BASE, (overlay_dims[0], overlay_dims[1]))
 
         TEXT = render_small_caps(first_line, self.font_size[0], self.hovering_color)
         TEXT_RECT = TEXT.get_rect(center=(dims[0] + overlay_dims[0] * 0.5, dims[1] + overlay_dims[1] * 0.275))

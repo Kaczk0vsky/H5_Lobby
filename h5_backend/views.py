@@ -554,7 +554,7 @@ class HandleMatchReport(View):
             try:
                 player = Player.objects.get(nickname=player_nickname)
                 opponent = Player.objects.get(nickname=opponent_nickname)
-                who_won = player if who_won == "You" else opponent
+                who_won = player if who_won == player.nickname else opponent
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 

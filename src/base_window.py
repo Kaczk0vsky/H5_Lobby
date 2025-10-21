@@ -91,7 +91,7 @@ class GameWindowsBase:
 
     def create_universal_elements(self) -> None:
         self.BG = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/bg.png"))
-        self.SMALLER_WINDOWS_BG = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/player_search_frame.png"))
+        self.SMALLER_WINDOW_BASE = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/player_search_frame.png"))
         self.BUTTON = pygame.image.load(os.path.join(os.getcwd(), "resources/top_bar/button_dark.png"))
         self.BUTTON_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/top_bar/button_highlighted.png"))
         self.QUIT = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/close_dark.png"))
