@@ -9,6 +9,7 @@ class PlayerAdmin(admin.ModelAdmin):
     list_display = ("id", "nickname", "ranking_points", "ranking_position", "player_state")
     list_filter = ("player_state",)
     ordering = ("-ranking_points",)
+    search_fields = ("nickname",)
 
 
 @admin.register(Game)
@@ -46,3 +47,4 @@ class GameAdmin(admin.ModelAdmin):
 class BanAdmin(admin.ModelAdmin):
     list_display = ("id", "player", "created_at", "duration")
     list_filter = ("created_at",)
+    search_fields = ("player__nickname",)
