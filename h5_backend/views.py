@@ -423,8 +423,10 @@ class UpdateUsersList(View):
         try:
             players = Player.objects.exclude(player_state="offline").exclude(nickname=nickname)
             players_data = {
-                nick: [ranking_points, player_state]
-                for nick, ranking_points, player_state in players.values_list("nickname", "ranking_points", "player_state", "is_searching_ranked")
+                nick: [ranking_points, player_state, is_ranked]
+                for nick, ranking_points, player_state, is_ranked in players.values_list(
+                    "nickname", "ranking_points", "player_state", "is_searching_ranked"
+                )
             }
             return players_data, None
 
