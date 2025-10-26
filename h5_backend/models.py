@@ -25,7 +25,7 @@ class CastleType(models.TextChoices):
 
 class Player(models.Model):
     # unique id
-    id = models.IntegerField(editable=False, primary_key=True, unique=True)
+    id = models.AutoField(primary_key=True)
     # player nickname
     nickname = models.CharField(editable=True, max_length=30, unique=True)
     # ranking points
@@ -45,7 +45,7 @@ class Player(models.Model):
 
 class Game(models.Model):
     # unique id
-    id = models.IntegerField(editable=False, primary_key=True, unique=True)
+    id = models.BigAutoField(primary_key=True)
     # players
     player_1 = models.ForeignKey(
         Player,
@@ -111,7 +111,7 @@ class Game(models.Model):
 
 
 class Ban(models.Model):
-    id = models.IntegerField(editable=False, primary_key=True, unique=True)
+    id = models.AutoField(primary_key=True)
     player = models.ForeignKey(
         Player,
         on_delete=models.CASCADE,
