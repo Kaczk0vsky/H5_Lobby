@@ -322,7 +322,7 @@ class QueueHandlerView(View):
         try:
             return Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
         except Game.DoesNotExist:
-            return JsonResponse({"success": False, "game_found": False, "opponent_accepted": False, "opponent_declined": True})
+            return JsonResponse({"success": True, "game_found": False})
 
     def _remove_player_from_queue(self, player, is_accepted):
         player.player_state = PlayerState.ACCEPTED if is_accepted else PlayerState.ONLINE
