@@ -481,7 +481,7 @@ class HandleMatchReport(View):
             return None, None, None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
     def _create_match_report(self, player: Player, opponent: Player, player_castle: CastleType, opponent_castle: CastleType, who_won: Player):
-        game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").first()
+        game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).exclude(who_created=player).order_by("-id").first()
 
         with transaction.atomic():
             if not game:
