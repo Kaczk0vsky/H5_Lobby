@@ -498,7 +498,6 @@ class HandleMatchReport(View):
                 if game.is_different:
                     game.is_waiting_confirmation = False
                     game.save()
-                    return
 
                 game.is_waiting_confirmation = False
                 players_data = {"who_won": who_won.nickname}
@@ -526,6 +525,7 @@ class HandleMatchReport(View):
                 game.is_waiting_confirmation = True
 
             game.save()
+            return None
 
     @staticmethod
     def __calculate_points_change(player_won: Player, player_lost: Player):
