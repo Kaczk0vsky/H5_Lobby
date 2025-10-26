@@ -101,7 +101,7 @@ class Game(models.Model):
         blank=True,
     )
 
-    is_new = models.BooleanField(default=False)
+    is_new = models.BooleanField(default=True)
     is_ranked = models.BooleanField(default=True)
     is_waiting_confirmation = models.BooleanField(default=False)
     is_different = models.BooleanField(default=False)
