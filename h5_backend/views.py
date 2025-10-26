@@ -480,12 +480,13 @@ class HandleMatchReport(View):
         except json.JSONDecodeError:
             return None, None, None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _create_match_report(self, player: Player, player_castle: CastleType, opponent_castle: CastleType, who_won: Player):
+    def _create_match_report(self, player: Player, opponent: Player, player_castle: CastleType, opponent_castle: CastleType, who_won: Player):
         game = Game.objects.filter(Q(player_1=player) | Q(player_2=player)).order_by("-id").first()
-        if not game:
-            return JsonResponse({"success": False, "error": "No game found"}, status=404)
 
         with transaction.atomic():
+            if not game:
+                game = Game.objects.create(player_1=player, player_2=opponent)
+
             if game.is_waiting_confirmation:
                 if game.player_1 == player:
                     if game.castle_1 != player_castle or game.castle_2 != opponent_castle or game.who_won != who_won:
@@ -560,7 +561,7 @@ class HandleMatchReport(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
-            data = self._create_match_report(player, player_castle, opponent_castle, who_won)
+            data = self._create_match_report(player, opponent, player_castle, opponent_castle, who_won)
 
             return JsonResponse({"success": True, "data": data})
 
