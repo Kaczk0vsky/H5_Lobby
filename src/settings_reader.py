@@ -16,3 +16,7 @@ def load_user():
 
 def load_client_settings():
     return toml.load(os.path.join(os.getcwd(), "settings.toml"))["client_settings"]
+
+
+def load_lobby_data():
+    return toml.load(os.path.join(os.getcwd(), "settings.toml"))["lobby_data"]

@@ -1,4 +1,5 @@
 import pygame
+import string
 
 from src.helpers import render_small_caps
 
@@ -47,6 +48,7 @@ class TextInput:
     """
 
     __id = 0
+    __allowed_chars = string.ascii_letters + string.digits + string.punctuation + "_"
     _chars_deleted = 0
     _last_backspace_time = 0
     _scroll_offset = 0
@@ -125,11 +127,13 @@ class TextInput:
                 elif event.key in [pygame.K_LSHIFT, pygame.K_RSHIFT, pygame.K_CAPSLOCK]:
                     pass
                 else:
-                    if self.hide_text:
-                        self.text += "*"
-                        self.hidden_text += event.unicode
-                    else:
-                        self.text += event.unicode
+                    ch = event.unicode
+                    if ch in self.__allowed_chars:
+                        if self.hide_text:
+                            self.text += "*"
+                            self.hidden_text += event.unicode
+                        else:
+                            self.text += event.unicode
 
         if event.type == pygame.KEYUP:
             if self.active:

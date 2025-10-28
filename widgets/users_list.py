@@ -210,6 +210,7 @@ class UsersList:
                         nickname=key,
                         ranking_points=value[0],
                         state=value[1],
+                        state_info="Ranked" if value[2] else "Unranked",
                         image_line=self.line,
                         image_box=self.box,
                     )
@@ -230,6 +231,7 @@ class UsersList:
                     nickname=key,
                     ranking_points=value[0],
                     state=value[1],
+                    state_info="Ranked" if value[2] else "Unranked",
                     image_line=self.line,
                     image_box=self.box,
                 )

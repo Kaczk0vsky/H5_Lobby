@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-discord_invite = "https://discord.gg/rdNaEYSJ"
+discord_invite = "https://discord.gg/xVCFHDsq3G"
 resolution_choices = [
     "1280x720",
     "1920x1080",

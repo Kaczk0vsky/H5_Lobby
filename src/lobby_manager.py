@@ -1,6 +1,4 @@
 import pygame
-import os
-import toml
 import time
 import requests
 import random
@@ -21,7 +19,8 @@ from src.base_window import GameWindowsBase
 from src.background_manager import AschanArena3Game
 from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state, render_small_caps, check_server_connection
 from utils.decorators import run_in_thread
-from src.settings_writer import save_client_settings
+from src.settings_reader import load_lobby_data
+from src.settings_writer import save_client_settings, save_lobby_data
 from widgets.button import Button
 from widgets.option_box import OptionBox
 from widgets.progress_bar import ProgressBar
@@ -85,11 +84,13 @@ class H5_Lobby(GameWindowsBase):
     __loading_profile_data = False
     __profile_button_active = False
     __elapsed_time = None
+    __decline_time = None
     __queue_channel = None
     __error_msg = None
     __connection_timer = None
     __profile_data = None
     __report_data = None
+    __report_title = None
 
     def __init__(
         self,
@@ -106,6 +107,9 @@ class H5_Lobby(GameWindowsBase):
         self.session = session
         self.transformation_option = self.config["resolution"]
         self.font_size = fonts_sizes[self.transformation_option]
+
+        self.lobby_data = load_lobby_data()
+        self.__opponent_nickname = self.lobby_data["last_opponent"]
 
         self.get_user_profile()
 
@@ -142,26 +146,26 @@ class H5_Lobby(GameWindowsBase):
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
-        RANKING = Button(
+        CREATE_REPORT = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
                 1060 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
-            text_input="Ranking",
+            text_input="Create Report",
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
-        NEWS = Button(
+        RANKING = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
                 1290 * (transformation_factors[self.transformation_option][0]),
                 50 * (transformation_factors[self.transformation_option][1]),
             ),
-            text_input="News",
+            text_input="Ranking",
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
@@ -244,7 +248,7 @@ class H5_Lobby(GameWindowsBase):
         )
         self.refresh_friends_list(USERS_LIST)
 
-        buttons = [FIND_GAME_BUTTON, RANKING, NEWS, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
+        buttons = [FIND_GAME_BUTTON, CREATE_REPORT, RANKING, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
         logger.debug("Displaying lobby window.")
         while True:
             self.SCREEN.blit(self.BG, (0, 0))
@@ -274,8 +278,8 @@ class H5_Lobby(GameWindowsBase):
 
             if self.__set_buttons_active:
                 FIND_GAME_BUTTON.set_active(is_active=True)
+                CREATE_REPORT.set_active(is_active=True)
                 RANKING.set_active(is_active=True)
-                NEWS.set_active(is_active=True)
                 MY_PROFILE.set_active(is_active=True)
                 DISCORD.set_active(is_active=True)
                 PLAYER_PROFILE.set_active(is_active=True)
@@ -308,7 +312,14 @@ class H5_Lobby(GameWindowsBase):
                     ACCEPT_QUEUE.handle_button(self.SCREEN, MENU_MOUSE_POS)
                 if not self.__found_game:
                     minutes, seconds = calculate_time_passed(self.start_time)
-                    HEADER_TEXT = render_small_caps(f"Waiting for opponent: {minutes}:{seconds:02d}", self.font_size[0], self.text_color)
+                    if self.__decline_time:
+                        seconds_after_decline = calculate_time_passed(self.__decline_time)[1]
+                        text = "Opponent declined. Returning back to queue..."
+                        if seconds_after_decline >= 5:
+                            self.__decline_time = None
+                    else:
+                        text = f"Waiting for opponent: {minutes}:{seconds:02d}"
+                    HEADER_TEXT = render_small_caps(text, self.font_size[0], self.text_color)
                     HEADER_RECT = HEADER_TEXT.get_rect(
                         center=(
                             self.SCREEN.get_width() / 2,
@@ -390,6 +401,7 @@ class H5_Lobby(GameWindowsBase):
                         WHO_WON_RECT,
                         WHO_WON_CHOICES,
                         SUBMIT_REPORT,
+                        CANCEL_REPORT,
                     ) = self.create_report_window()
                     SUBMIT_REPORT.set_active(True)
                     self.__generate_report_elements = False
@@ -409,6 +421,7 @@ class H5_Lobby(GameWindowsBase):
                 self.SCREEN.blit(WHO_WON_TEXT, WHO_WON_RECT)
                 WHO_WON_CHOICES.update(self.SCREEN, MENU_MOUSE_POS)
                 SUBMIT_REPORT.handle_button(self.SCREEN, MENU_MOUSE_POS)
+                CANCEL_REPORT.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             if self.__profile_status or self.__options_status:
                 self.SCREEN.blit(
@@ -580,9 +593,17 @@ class H5_Lobby(GameWindowsBase):
                         FIND_GAME_BUTTON.set_active(is_active=False)
                         self.add_to_queue()
                         continue
+                    if CREATE_REPORT.check_for_input(MENU_MOUSE_POS):
+                        if self.__opponent_nickname:
+                            self.__report_creation_status = True
+                            self.__generate_report_elements = True
+                            self.__report_title = "Create Report"
+                        else:
+                            self.__window_overlay = True
+                            self.__error_msg = "You must play a game first!"
+                            logger.debug("No opponent to create report for...")
+                        continue
                     if RANKING.check_for_input(MENU_MOUSE_POS):
-                        pass
-                    if NEWS.check_for_input(MENU_MOUSE_POS):
                         pass
                     if MY_PROFILE.check_for_input(MENU_MOUSE_POS):
                         self.__update_profile_status = True
@@ -615,6 +636,7 @@ class H5_Lobby(GameWindowsBase):
                             self.__set_queue_variables(state=False)
                             self.remove_from_queue(is_accepted=False)
                             self.__player_declined = True
+                            self.__opponent_nickname = None
                             continue
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
@@ -636,21 +658,17 @@ class H5_Lobby(GameWindowsBase):
                             self.get_user_profile()
                             self.__report_creation_status = False
                             self.__report_data = None
+                        if CANCEL_REPORT.check_for_input(MENU_MOUSE_POS):
+                            FIND_GAME_BUTTON.set_active(is_active=True)
+                            self.__report_creation_status = False
+                            self.__report_data = None
+                            logger.info("Canceled report creation.")
                         if MYSELF_CASTLE.check_for_input(MENU_MOUSE_POS):
                             pass
                         if OPPONENT_CASTLE.check_for_input(MENU_MOUSE_POS):
                             pass
                         if WHO_WON_CHOICES.check_for_input(MENU_MOUSE_POS):
                             pass
-
-                    if self.__create_report_question:
-                        if YES_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            self.__create_report_question = False
-                            self.__report_creation_status = True
-                            self.__generate_report_elements = True
-                        if NO_BUTTON.check_for_input(MENU_MOUSE_POS):
-                            FIND_GAME_BUTTON.set_active(is_active=True)
-                            self.__create_report_question = False
 
                     if self.__profile_status:
                         if CLOSE_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -733,12 +751,14 @@ class H5_Lobby(GameWindowsBase):
                 continue
 
             if self.__opponent_declined and not self.__player_declined:
+                self.__decline_time = time.time()
                 self.__update_queue_status = True
                 self.__opponent_declined = False
                 self.__found_game = False
                 self.__player_accepted = False
                 self.__game_found_music = False
                 self.__elapsed_time = None
+                self.__opponent_nickname = None
                 pygame.mixer.Channel(0).set_volume(self.config["volume"])
                 if self.__queue_channel:
                     pygame.mixer.Channel(self.__queue_channel).stop()
@@ -757,14 +777,14 @@ class H5_Lobby(GameWindowsBase):
                     self.__connection_timer = None
                     self.__error_msg = None
                     FIND_GAME_BUTTON.set_active(True)
+                    CREATE_REPORT.set_active(True)
                     RANKING.set_active(True)
-                    NEWS.set_active(True)
 
             if self.__has_disconnected:
                 # TODO: add something that disables the buttons to not let the player click to much
                 FIND_GAME_BUTTON.set_active(False)
+                CREATE_REPORT.set_active(False)
                 RANKING.set_active(False)
-                NEWS.set_active(False)
                 self.check_connection_state()
                 self.__has_disconnected = False
 
@@ -1032,7 +1052,7 @@ class H5_Lobby(GameWindowsBase):
 
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOW_BASE, dims)
 
-        RESULT_TEXT = render_small_caps("Report", int(self.font_size[0] * 1.5), self.hovering_color)
+        RESULT_TEXT = render_small_caps(self.__report_title, int(self.font_size[0] * 1.5), self.hovering_color)
         RESULT_RECT = RESULT_TEXT.get_rect(center=(dims[0] * 1.5, dims[1] * 1.175))
 
         MYSELF_TEXT = render_small_caps("You:", self.font_size[0], self.text_color)
@@ -1087,8 +1107,20 @@ class H5_Lobby(GameWindowsBase):
             image=self.ACCEPT_BUTTON,
             image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
             image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-            position=(dims[0] * 1.5, dims[1] * 1.8),
+            position=(dims[0] * 1.25, dims[1] * 1.8),
             text_input="Confirm",
+            font_size=self.font_size[1],
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
+        )
+
+        CANCEL_REPORT = Button(
+            image=self.ACCEPT_BUTTON,
+            image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
+            image_inactive=self.ACCEPT_BUTTON_INACTIVE,
+            position=(dims[0] * 1.75, dims[1] * 1.8),
+            text_input="Cancel",
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
@@ -1108,6 +1140,7 @@ class H5_Lobby(GameWindowsBase):
             WHO_WON_RECT,
             WHO_WON_CHOICES,
             SUBMIT_REPORT,
+            CANCEL_REPORT,
         )
 
     def options_window(self):
@@ -1308,6 +1341,7 @@ class H5_Lobby(GameWindowsBase):
                     self.__report_data = json_response["report_data"]
                     self.__report_creation_status = True
                     self.__generate_report_elements = True
+                    self.__report_title = "Confirm Report"
                     self.__update_queue_status = False
                     self.__queue_status = False
                     self.__get_time = False
@@ -1506,8 +1540,8 @@ class H5_Lobby(GameWindowsBase):
                     json_response = response.json()
                     players_data = json_response.get("players_data")
                     sorted_players = {
-                        player: (score, format_state(state))
-                        for player, (score, state) in sorted(
+                        player: (score, format_state(state), is_ranked)
+                        for player, (score, state, is_ranked) in sorted(
                             players_data.items(),
                             key=lambda item: item[1][0],
                             reverse=True,
@@ -1539,6 +1573,7 @@ class H5_Lobby(GameWindowsBase):
         try:
             response = self.session.post(url, json=report_data, headers=headers)
             if response.status_code == 200:
+                logger.debug(response.text)
                 self.__connection_timer = None
                 logger.info("Match result reported succesfully.")
                 return True
@@ -1662,6 +1697,9 @@ class H5_Lobby(GameWindowsBase):
         logger.debug("Minimizing to tray.")
         self.__stop_refreshing_friends_list = True
         time.sleep(0.1)
+        lobby_data = {"last_opponent": self.__opponent_nickname}
+        save_lobby_data(lobby_data)
+        logger.debug(f"Saved lobby data.")
         self.window = get_window()
         self.window.minimize()
         self.window.hide()
@@ -1685,8 +1723,6 @@ class H5_Lobby(GameWindowsBase):
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.__set_buttons_active = True
         self.__stop_refreshing_friends_list = False
-        self.__create_report_question = True
-        self.__generate_create_window_choice_elements = True
         logger.debug("Window restored from tray.")
 
     def run_game(self):

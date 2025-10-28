@@ -106,7 +106,7 @@ class LoginWindow(GameWindowsBase):
         self.QUIT = pygame.transform.scale(self.QUIT, self.checkbox_dims)
         self.QUIT_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.checkbox_dims)
 
-        REMEMBER_LOGIN_TEXT = render_small_caps("Remeber me:", self.font_size[0], self.text_color)
+        REMEMBER_LOGIN_TEXT = render_small_caps("Remember me:", self.font_size[0], self.text_color)
         REMEMBER_LOGIN_RECT = REMEMBER_LOGIN_TEXT.get_rect(center=(self.text_pos[0], self.text_pos[1]))
         LOGIN_BUTTON = Button(
             image=self.BUTTON,
@@ -124,7 +124,7 @@ class LoginWindow(GameWindowsBase):
             image_highlited=self.BUTTON_HIGHLIGHTED,
             image_inactive=self.BUTTON_INACTIVE,
             position=(self.buttons_pos[0], self.buttons_pos[1] + 65),
-            text_input="Sing Up",
+            text_input="Sign Up",
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,

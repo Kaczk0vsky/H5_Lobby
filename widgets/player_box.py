@@ -34,6 +34,9 @@ class PlayerBox:
             player icon, and decorative line.
     """
 
+    __green_coloring_states = ["Online", "In queue"]
+    __additional_info_state = ["In queue", "Playing"]
+
     def __init__(
         self,
         position: tuple[float, float],
@@ -43,6 +46,7 @@ class PlayerBox:
         nickname: str,
         ranking_points: int,
         state: str,
+        state_info: str,
         image_line: pygame.Surface,
         image_box: pygame.Surface,
     ):
@@ -56,21 +60,21 @@ class PlayerBox:
         self.nickname = nickname
         self.ranking_points = ranking_points
         self.state = state
-        self.green_states = ["Online", "In queue"]
+        self.state_info = state_info
         self.rect = pygame.Rect(position, dimensions)
         self.image_line = pygame.transform.scale(image_line, (self.w, image_line.get_height() * 0.4))
         self.image_box = pygame.transform.scale(image_box, (image_box.get_width() * 1.25, image_box.get_height() * 1.25))
 
-        self.text_surface_nickname = render_small_caps(self.nickname, self.font_size, self.color)
-        self.text_surface_points = render_small_caps(f"Ranking points: {self.ranking_points}", self.font_small, self.color)
-        self.text_surface_status_title = render_small_caps("Status: ", self.font_small, self.color)
-        self.text_surface_status = render_small_caps(self.state, self.font_small, self.green if str(self.state) in self.green_states else self.red)
+        self.update_surfaces()
 
     def update_surfaces(self):
         self.text_surface_nickname = render_small_caps(self.nickname, self.font_size, self.color)
         self.text_surface_points = render_small_caps(f"Ranking points: {self.ranking_points}", self.font_small, self.color)
         self.text_surface_status_title = render_small_caps("Status: ", self.font_small, self.color)
-        self.text_surface_status = render_small_caps(self.state, self.font_small, self.green if str(self.state) in self.green_states else self.red)
+        state_str = f"{self.state} ({self.state_info})" if self.state in self.__additional_info_state else self.state
+        self.text_surface_status = render_small_caps(
+            state_str, self.font_small, self.green if str(self.state) in self.__green_coloring_states else self.red
+        )
 
     def update(self, screen: pygame.Surface) -> None:
         text_x = self.rect.x + self.w * 0.075

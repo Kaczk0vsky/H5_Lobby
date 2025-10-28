@@ -299,7 +299,7 @@ class GameWindowsBase:
         screen_width, screen_height = pygame.display.get_surface().get_size()
         overlay_y = (screen_height - overlay_height) // 2
 
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOW_BASE, (overlay_width, overlay_height))
 
         WRONG_PASSWORD_TEXT = render_small_caps(text, int(self.font_size[0]), self.text_color)
         WRONG_PASSOWRD_RECT = WRONG_PASSWORD_TEXT.get_rect(center=(screen_width // 2, overlay_y + overlay_height // 3))

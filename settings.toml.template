@@ -14,3 +14,6 @@ resolution = "1920x1080"
 volume = 0.2
 points_treshold = 1000
 is_ranked = true
+
+[lobby_data]
+last_opponent = ""

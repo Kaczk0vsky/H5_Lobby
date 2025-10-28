@@ -56,3 +56,12 @@ def check_for_missing_paths() -> dict:
             toml.dump(data, f)
 
     return data
+
+
+def save_lobby_data(lobby_data: dict):
+    with open(os.path.join(os.getcwd(), "settings.toml"), "r") as f:
+        data = toml.load(f)
+        data["lobby_data"]["last_opponent"] = lobby_data["last_opponent"]
+
+    with open(os.path.join(os.getcwd(), "settings.toml"), "w") as f:
+        toml.dump(data, f)
