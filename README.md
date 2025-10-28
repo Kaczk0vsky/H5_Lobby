@@ -269,9 +269,9 @@ sudo ufw allow 22/tcp
 ##### 9. (OPTIONAL - for cloud solutions) Set inbound rules for Ports
 Only needed if you use some clound hostef Virtual Machine. Open all ports that were described before.
 
-##### 10. Transfering to HTTPS
+##### 10. Transfering to HTTPS / Adding Websockets
 1) `sudo apt install nginx`
-2) `pip install gunicorn`
+2) `pip install gunicorn & daphne`
 3) `sudo nano /etc/systemd/system/django.service`
 4) In django.service change ExecStart to: `ExecStart=/home/h5lobby/H5_Lobby/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 admin_settings.wsgi`
 5) Create a new file with `sudo nano /etc/nginx/sites-available/django` and put into it: 
@@ -303,20 +303,74 @@ server {
     }
 
     location / {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:8001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header Connection "Upgrade";
         proxy_redirect off;
+    }
+
+    location /ws/ {
+        proxy_pass http://127.0.0.1:8002;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
     }
 }
 ```
 6) `sudo ln -s /etc/nginx/sites-available/django /etc/nginx/sites-enabled/`
-7) `sudo systemctl daemon-reload`
-8) `sudo systemctl enable nginx`
-9) `sudo systemctl restart nginx`
+7) `sudo nano /etc/systemd/system/gunicorn.service` and delete everything and put this code inside:
+```
+[Unit]
+Description=Gunicorn service for H5_Lobby (Django HTTP server)
+After=network.target
+
+[Service]
+User=h5lobby
+Group=www-data
+WorkingDirectory=/home/h5lobby/H5_Lobby
+ExecStart=/home/h5lobby/H5_Lobby/venv/bin/gunicorn \
+  --workers 3 \
+  --bind 127.0.0.1:8001 \
+  admin_settings.wsgi:application
+
+Restart=always
+RestartSec=5
+Environment="PATH=/home/h5lobby/H5_Lobby/venv/bin"
+
+[Install]
+WantedBy=multi-user.target
+```
+8) `sudo nano /etc/systemd/system/daphne.service` and delete everything and put this code inside:
+```
+[Unit]
+Description=Daphne ASGI server for H5_Lobby (WebSocket handler)
+After=network.target
+
+[Service]
+User=h5lobby
+Group=www-data
+WorkingDirectory=/home/h5lobby/H5_Lobby
+ExecStart=/home/h5lobby/H5_Lobby/venv/bin/daphne \
+  -b 127.0.0.1 -p 8002 \
+  admin_settings.asgi:application
+
+Restart=always
+RestartSec=5
+Environment="PATH=/home/h5lobby/H5_Lobby/venv/bin"
+
+[Install]
+WantedBy=multi-user.target
+```
+9) `sudo systemctl daemon-reload`
+10) `sudo systemctl enable nginx`
+11) `sudo systemctl enable gunicorn`
+12) `sudo systemctl enable daphne`
+13) `sudo systemctl restart nginx`
+14) `sudo systemctl restart gunicorn`
+15) `sudo systemctl restart daphne`
 
 ##### 11. Frontend installation
 1) `sudo apt install npm`
