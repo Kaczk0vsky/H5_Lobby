@@ -636,7 +636,6 @@ class H5_Lobby(GameWindowsBase):
                             self.__set_queue_variables(state=False)
                             self.remove_from_queue(is_accepted=False)
                             self.__player_declined = True
-                            self.__opponent_nickname = None
                             continue
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
