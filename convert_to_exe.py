@@ -65,6 +65,8 @@ def create_exe_file():
             --collect-submodules=keyboard \
             --hidden-import=logging \
             --collect-submodules=logging \
+            --hidden-import=channels \
+            --collect-submodules=channels \
             --name={EXE_NAME} main.py'
     )
 
