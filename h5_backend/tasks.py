@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 
 from h5_backend.models import Player, Game, PlayerState
+from h5_backend.notifications import notify_match_found
 
 
 @shared_task
@@ -66,7 +67,7 @@ def check_queue():
 
                         if not existing_game.exists():
                             Game.objects.create(player_1=player1_locked, player_2=player2_locked, is_new=True, is_ranked=is_ranked)
-
+                            notify_match_found(player1_locked, player2_locked)
                             player1_locked.player_state = PlayerState.WAITING_ACCEPTANCE
                             player2_locked.player_state = PlayerState.WAITING_ACCEPTANCE
                             player1_locked.save()

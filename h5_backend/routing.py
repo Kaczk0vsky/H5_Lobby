@@ -1,6 +1,6 @@
 from django.urls import re_path
-from h5_backend.consumer import TestConsumer
+from h5_backend.consumer import QueueConsumer
 
 websocket_urlpatterns = [
-    re_path(r"ws/test/$", TestConsumer.as_asgi()),
+    re_path(r"ws/queue/(?P<nickname>\w+)/$", QueueConsumer.as_asgi()),
 ]

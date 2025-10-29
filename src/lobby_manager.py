@@ -4,6 +4,9 @@ import requests
 import random
 import ctypes
 import webbrowser
+import asyncio
+import json
+import websockets
 
 from pygame.locals import *
 
@@ -1348,7 +1351,7 @@ class H5_Lobby(GameWindowsBase):
                     return
 
                 logger.info("Added to queue.")
-                self.scan_for_players()
+                asyncio.run(self.scan_for_players_ws())
 
             else:
                 self.__window_overlay = True
@@ -1413,6 +1416,21 @@ class H5_Lobby(GameWindowsBase):
             self.__has_disconnected = True
             self.__window_overlay = True
             self.__error_msg = "Error! Server/Player offline, check discord..."
+
+    async def scan_for_players_ws(self):
+        uri = f"wss://{env_dict['SERVER_URL']}/ws/queue/{self.user['nickname']}/"
+        async with websockets.connect(uri) as ws:
+            await ws.send(json.dumps({"action": "join_queue"}))
+            logger.debug("Scanning for players via WebSocket...")
+
+            async for message in ws:
+                data = json.loads(message)
+                if data.get("game_found"):
+                    self.__found_game = True
+                    self.__opponent_nickname = data["opponent"]["nickname"]
+                    self.__oponnent_ranking_points = data["opponent"]["points"]
+                    logger.debug(f"Found opponent: {self.__opponent_nickname}")
+                    break
 
     @run_in_thread
     def scan_for_players(self):
