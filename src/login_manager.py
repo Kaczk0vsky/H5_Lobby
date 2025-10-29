@@ -566,7 +566,7 @@ class LoginWindow(GameWindowsBase):
             else:
                 self.check_list.append(self.UNCHECK_MARK)
 
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOWS_BG, (overlay_width, overlay_height))
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOW_BASE, (overlay_width, overlay_height))
 
         self.TITLE_TEXT = render_small_caps(text_input[0][1], self.font_size[0], self.text_color)
         self.TITLE_RECT = self.TITLE_TEXT.get_rect(center=(x_pos * 2, y_pos))

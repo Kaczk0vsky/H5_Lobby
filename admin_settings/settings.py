@@ -27,7 +27,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["h5-tavern.pl", "www.h5-tavern.pl", "tavernofashan.pl", "www.tavernofashan.pl"]
 
-CELERY_BROKER_URL = f"amqp://h5admin:Sukub0912@localhost:5672/"
+CELERY_BROKER_URL = f"amqp://{os.getenv("CELERY_BROKER_LOGIN")}:{os.getenv("CELERY_BROKER_PASSWORD")}@localhost:5672/"
 
 # Application definition
 
@@ -59,7 +59,7 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = True  # set to True for HTTPS
 CSRF_COOKIE_SAMESITE = "Lax"  # allows for CRSF in different domains
 # CSRF_TRUSTED_ORIGINS = [f"https://{os.getenv('SERVER_URL')}"]
-CSRF_TRUSTED_ORIGINS = ["https://h5-tavern.pl", "https://www.h5-tavern.pl"]
+CSRF_TRUSTED_ORIGINS = ["https://h5-tavern.pl", "https://www.h5-tavern.pl", "https://tavernofashan.pl", "https://www.tavernofashan.pl"]
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = True
