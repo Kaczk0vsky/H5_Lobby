@@ -27,7 +27,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["h5-tavern.pl", "www.h5-tavern.pl", "tavernofashan.pl", "www.tavernofashan.pl"]
 
-CELERY_BROKER_URL = f"amqp://{os.getenv("CELERY_BROKER_LOGIN")}:{os.getenv("CELERY_BROKER_PASSWORD")}@localhost:5672/"
+CELERY_BROKER_URL = f"amqp://h5admin:Sukub0912!@localhost:5672/"
 
 # Application definition
 
@@ -95,7 +95,15 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-    }
+    },
+    "external": {
+        "ENGINE": os.getenv("EXTERNAL_DB_ENGINE"),
+        "NAME": BASE_DIR / "external_db.sqlite3",
+        "USER": os.getenv("EXTERNAL_DB_USER"),
+        "PASSWORD": os.getenv("EXTERNAL_DB_PASSWORD"),
+        "HOST": os.getenv("EXTERNAL_DB_HOST"),
+        "PORT": os.getenv("EXTERNAL_DB_PORT"),
+    },
 }
 
 
@@ -142,8 +150,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ASGI_APPLICATION = "H5_Lobby.asgi.application"
 
-CHANNELS_LAYERS = {
+CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
     },
 }

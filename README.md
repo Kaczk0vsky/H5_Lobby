@@ -372,7 +372,16 @@ WantedBy=multi-user.target
 14) `sudo systemctl restart gunicorn`
 15) `sudo systemctl restart daphne`
 
-##### 11. Frontend installation
+##### 11. Adding Redis for WebSockets
+1) `sudo apt install redis-server`
+2) `pip install channels_redis`
+3) `sudo systemctl daemon-reload`
+4) `sudo systemctl enable redis-server`
+5) `sudo systemctl restart redis`
+6) `daphne -b 0.0.0.0 -p 8001 h5_backend.asgi:application`
+7) `redis-cli ping` - check if works -> should respond with PONG
+
+##### 12. Frontend installation
 1) `sudo apt install npm`
 2) `npm install`
 3) `npm install bootstrap`
