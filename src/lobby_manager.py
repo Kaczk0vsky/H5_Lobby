@@ -1435,55 +1435,6 @@ class H5_Lobby(GameWindowsBase):
                     break
 
     @run_in_thread
-    def scan_for_players(self):
-        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_GET_PLAYERS"]}/"
-        if not self.crsf_token:
-            self.__window_overlay = True
-            self.__error_msg = "Please login again."
-            return
-
-        user_data = {"nickname": self.user["nickname"]}
-        headers = {
-            "Referer": f"https://{env_dict["SERVER_URL"]}/",
-            "X-CSRFToken": self.crsf_token,
-            "Content-Type": "application/json",
-        }
-        logger.debug("Scanning for players...")
-        while True:
-            try:
-                if not self.__queue_status:
-                    break
-                self.__connection_timer = time.time()
-                response = self.session.post(url, json=user_data, headers=headers)
-                if response.status_code == 200:
-                    self.__connection_timer = None
-                    json_response = response.json()
-                    logger.debug(f"Scan for players response: {json_response}")
-                    if json_response.get("game_found"):
-                        self.__update_queue_status = True
-                        self.__found_game = True
-                        self.__opponent_nickname = json_response.get("opponent")[0]
-                        self.__oponnent_ranking_points = json_response.get("opponent")[1]
-                        break
-
-            except requests.exceptions.ConnectTimeout:
-                self.__has_disconnected = True
-                self.__error_msg = "Error while trying to connect to server!"
-                return
-
-            except requests.exceptions.ConnectionError:
-                self.__has_disconnected = True
-                self.__error_msg = "Error! Check your internet connection..."
-                return
-
-            except:
-                self.__has_disconnected = True
-                self.__error_msg = "Error! Server/Player offline, check discord..."
-                return
-
-            time.sleep(random.randint(1, 5))
-
-    @run_in_thread
     def check_if_oponnent_accepted(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_CHECK_OPONNENT']}/"
         if not self.crsf_token:
