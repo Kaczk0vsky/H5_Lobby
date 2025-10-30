@@ -347,7 +347,8 @@ WantedBy=multi-user.target
 ```
 [Unit]
 Description=Daphne ASGI server for H5_Lobby (WebSocket handler)
-After=network.target
+After=network.target redis.service
+Requires=redis.service
 
 [Service]
 User=h5lobby
@@ -375,11 +376,21 @@ WantedBy=multi-user.target
 ##### 11. Adding Redis for WebSockets
 1) `sudo apt install redis-server`
 2) `pip install channels_redis`
-3) `sudo systemctl daemon-reload`
-4) `sudo systemctl enable redis-server`
-5) `sudo systemctl restart redis`
-6) `daphne -b 0.0.0.0 -p 8001 h5_backend.asgi:application`
-7) `redis-cli ping` - check if works -> should respond with PONG
+3) `sudo mkdir -p /run/redis`
+4) `sudo chown redis:redis /run/redis`
+5) `sudo chmod 750 /run/redis`
+6) Open: `sudo nano /etc/redis/redis.conf` and find/create:
+```
+dir /var/lib/redis
+pidfile /run/redis/redis-server.pid
+logfile /var/log/redis/redis-server.log
+```
+7) `sudo nano /etc/systemd/system/redis-server.service` and add line - `PIDFile=/run/redis/redis-server.pid`
+8) `sudo systemctl daemon-reload`
+9) `sudo systemctl reset-failed redis-server`
+10) `sudo systemctl enable redis-server`
+11) `sudo systemctl restart redis-server.service`
+12) `sudo redis-cli ping` - check if works -> should respond with PONG
 
 ##### 12. Frontend installation
 1) `sudo apt install npm`

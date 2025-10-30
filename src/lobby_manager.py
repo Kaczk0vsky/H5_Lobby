@@ -1425,10 +1425,12 @@ class H5_Lobby(GameWindowsBase):
 
             async for message in ws:
                 data = json.loads(message)
-                if data.get("game_found"):
+                logger.debug(f"WebSocket scan for players response: {data}")
+                if data.get("event") == "match_found":
+                    self.__update_queue_status = True
                     self.__found_game = True
-                    self.__opponent_nickname = data["opponent"]["nickname"]
-                    self.__oponnent_ranking_points = data["opponent"]["points"]
+                    self.__opponent_nickname = data["opponent"]
+                    self.__oponnent_ranking_points = data["points"]
                     logger.debug(f"Found opponent: {self.__opponent_nickname}")
                     break
 
