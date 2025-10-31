@@ -6,11 +6,10 @@ from django.db.models import Q
 from asgiref.sync import sync_to_async
 
 from h5_backend.models import Player, Game, Ban, PlayerState
-from h5_backend.serializers import UserSerializer
 from h5_backend.notifications import notify_match_status_changed
 
 
-class ModelParser(AsyncWebsocketConsumer):
+class ModelParser:
     async def _get_player(self, nickname):
         @sync_to_async
         def get_player():
