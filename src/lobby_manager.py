@@ -6,9 +6,11 @@ import webbrowser
 import asyncio
 import json
 import websockets
+import threading
 
 from pygame.locals import *
 
+from src.communication_manager import WebSocketClient
 from src.global_vars import (
     resolution_choices,
     points_choices,
@@ -118,17 +120,37 @@ class H5_Lobby(GameWindowsBase):
         self.transformation_option = self.config["resolution"]
         self.font_size = fonts_sizes[self.transformation_option]
 
+        # WebSocket Client Initialization
+        self.websocket_client = WebSocketClient(user=self.user)
+        self.loop = asyncio.new_event_loop()
+        self.thread = threading.Thread(target=self._run_loop, daemon=True)
+        self.thread.start()
+        asyncio.run_coroutine_threadsafe(self.websocket_client.connect(), self.loop)
+
+        # Lobby parameters initialization
         self.lobby_data = load_lobby_data()
         self.__opponent_nickname = self.lobby_data["last_opponent"]
-
         self.get_user_profile()
-
         self.set_window_caption(title="Menu")
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.create_lobby_elements()
-
         self.resolution = (int(self.config["resolution"].split("x")[0]), int(self.config["resolution"].split("x")[1]))
         self.SCREEN = pygame.display.set_mode(self.resolution)
+
+    def _run_loop(self):
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_forever()
+
+    def send_ws_message(self, payload: dict):
+        # Send a message via WebSocket in the event loop
+        if hasattr(self, "loop") and self.loop.is_running():
+            asyncio.run_coroutine_threadsafe(self.websocket_client.send(payload), self.loop)
+
+    def close_ws(self):
+        # Close the WebSocket connection and stop the event loop
+        if hasattr(self, "loop") and self.loop.is_running():
+            asyncio.run_coroutine_threadsafe(self.websocket_client.disconnect(), self.loop)
+            self.loop.call_soon_threadsafe(self.loop.stop)
 
     def __set_queue_variables(self, state: bool = False) -> None:
         self.__game_found_music = state
@@ -1322,6 +1344,7 @@ class H5_Lobby(GameWindowsBase):
         )
 
     @run_in_thread
+    # TODO: WebSocket implementation
     def add_to_queue(self):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_ADD"]}/"
         if not self.crsf_token:
@@ -1383,6 +1406,7 @@ class H5_Lobby(GameWindowsBase):
             self.__error_msg = "Error! Server/Player offline, check discord..."
 
     @run_in_thread
+    # TODO: WebSocket implementation
     def remove_from_queue(self, is_accepted: bool):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_REMOVE"]}/"
         if not self.crsf_token:
@@ -1424,6 +1448,7 @@ class H5_Lobby(GameWindowsBase):
             self.__window_overlay = True
             self.__error_msg = "Error! Server/Player offline, check discord..."
 
+    # TODO: WebSocket implementation
     async def scan_for_players_ws(self):
         uri = f"wss://{env_dict['SERVER_URL']}/ws/queue/{self.user['nickname']}/"
         async with websockets.connect(uri) as ws:
@@ -1441,6 +1466,7 @@ class H5_Lobby(GameWindowsBase):
                     logger.debug(f"Found opponent: {self.__opponent_nickname}")
                     break
 
+    # TODO: WebSocket implementation
     async def check_if_oponnent_accepted_ws(self):
         uri = f"wss://{env_dict['SERVER_URL']}/ws/queue/{self.user['nickname']}/"
         async with websockets.connect(uri) as ws:
@@ -1462,6 +1488,7 @@ class H5_Lobby(GameWindowsBase):
                     logger.error(f"Error while checking opponent acceptance: {data.get('error')}")
 
     @run_in_thread
+    # TODO: WebSocket implementation
     def refresh_friends_list(self, users_list: UsersList):
         url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_USERS_LIST']}/"
         if not self.crsf_token:
