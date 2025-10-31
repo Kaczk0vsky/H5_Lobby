@@ -22,7 +22,6 @@ from django.urls import reverse
 from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player, PlayerState, Ban, Game, CastleType
 from h5_backend.serializers import UserSerializer, GameReportSerializer
-from h5_backend.notifications import notify_match_status_changed
 
 logger = logging.getLogger(__name__)
 

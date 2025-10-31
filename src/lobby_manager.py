@@ -1,7 +1,6 @@
 import pygame
 import time
 import requests
-import random
 import ctypes
 import webbrowser
 import asyncio
@@ -20,8 +19,15 @@ from src.global_vars import (
 )
 from src.base_window import GameWindowsBase
 from src.background_manager import AschanArena3Game
-from src.helpers import play_on_empty, calculate_time_passed, get_window, format_state, render_small_caps, check_server_connection
-from utils.decorators import run_in_thread
+from src.helpers import (
+    play_on_empty,
+    calculate_time_passed,
+    get_window,
+    format_state,
+    render_small_caps,
+    check_server_connection,
+    run_async_in_thread,
+)
 from src.settings_reader import load_lobby_data
 from src.settings_writer import save_client_settings, save_lobby_data
 from widgets.button import Button
@@ -32,6 +38,7 @@ from widgets.check_box import CheckBox
 from widgets.hover_box import HoverBox
 from widgets.slider import Slider
 from utils.logger import get_logger
+from utils.decorators import run_in_thread
 
 logger = get_logger(__name__)
 
@@ -646,7 +653,7 @@ class H5_Lobby(GameWindowsBase):
                                 self.__player_accepted = True
                                 FIND_GAME_BUTTON.set_active(is_active=False)
                                 self.remove_from_queue(is_accepted=True)
-                                asyncio.run(self.check_if_oponnent_accepted_ws())
+                                run_async_in_thread(self.check_if_oponnent_accepted_ws)
 
                     if self.__report_creation_status:
                         if SUBMIT_REPORT.check_for_input(MENU_MOUSE_POS):
