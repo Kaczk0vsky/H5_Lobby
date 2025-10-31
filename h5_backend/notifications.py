@@ -10,3 +10,15 @@ def notify_match_found(player1, player2):
     async_to_sync(layer.group_send)(
         f"player_{player2.nickname}", {"type": "match.found", "opponent": player1.nickname, "points": player1.ranking_points}
     )
+
+
+def notify_match_status_changed(player, opponent_accepted, opponent_declined):
+    layer = get_channel_layer()
+    async_to_sync(layer.group_send)(
+        f"player_{player.nickname}",
+        {
+            "type": "check.if.accepted",
+            "opponent_accepted": opponent_accepted,
+            "opponent_declined": opponent_declined,
+        },
+    )

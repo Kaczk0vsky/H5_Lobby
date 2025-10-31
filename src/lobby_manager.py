@@ -646,7 +646,7 @@ class H5_Lobby(GameWindowsBase):
                                 self.__player_accepted = True
                                 FIND_GAME_BUTTON.set_active(is_active=False)
                                 self.remove_from_queue(is_accepted=True)
-                                self.check_if_oponnent_accepted()
+                                asyncio.run(self.check_if_oponnent_accepted_ws())
 
                     if self.__report_creation_status:
                         if SUBMIT_REPORT.check_for_input(MENU_MOUSE_POS):
@@ -1434,55 +1434,20 @@ class H5_Lobby(GameWindowsBase):
                     logger.debug(f"Found opponent: {self.__opponent_nickname}")
                     break
 
-    @run_in_thread
-    def check_if_oponnent_accepted(self):
-        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_CHECK_OPONNENT']}/"
-        if not self.crsf_token:
-            self.__window_overlay = True
-            self.__error_msg = "Please login again."
-            return
+    async def check_if_oponnent_accepted_ws(self):
+        uri = f"wss://{env_dict['SERVER_URL']}/ws/queue/{self.user['nickname']}/"
+        async with websockets.connect(uri) as ws:
+            await ws.send(json.dumps({"action": "check_if_accepted"}))
+            logger.debug("Checking if opponent accepted via WebSocket...")
 
-        user_data = {"nickname": self.user["nickname"]}
-        headers = {
-            "Referer": f"https://{env_dict["SERVER_URL"]}/",
-            "X-CSRFToken": self.crsf_token,
-            "Content-Type": "application/json",
-        }
-        logger.debug("Checking if opponent accepted loop starting...")
-        while True:
-            if self.__player_declined:
-                break
-
-            self.__connection_timer = time.time()
-            try:
-                response = self.session.post(url, json=user_data, headers=headers)
-                if response.status_code == 200:
-                    self.__connection_timer = None
-                    json_response = response.json()
-                    logger.debug(f"Opponent accepted check response: {json_response}")
-                    if json_response.get("opponent_accepted"):
-                        self.__opponent_accepted = True
-                        break
-                    elif json_response.get("opponent_declined"):
-                        self.__opponent_declined = True
-                        break
-
-            except requests.exceptions.ConnectTimeout:
-                self.__has_disconnected = True
-                self.__error_msg = "Error while trying to connect to server!"
-                return
-
-            except requests.exceptions.ConnectionError:
-                self.__has_disconnected = True
-                self.__error_msg = "Error! Check your internet connection..."
-                return
-
-            except:
-                self.__has_disconnected = True
-                self.__error_msg = "Error! Server/Player offline, check discord..."
-                return
-
-            time.sleep(2)
+            async for message in ws:
+                data = json.loads(message)
+                logger.debug(f"WebSocket scan for game acceptance: {data}")
+                if data.get("event") == "match_status_changed":
+                    self.__opponent_accepted = data["opponent_accepted"]
+                    self.__opponent_declined = data["opponent_declined"]
+                    logger.debug("Got opponent acceptance status.")
+                    break
 
     @run_in_thread
     def refresh_friends_list(self, users_list: UsersList):

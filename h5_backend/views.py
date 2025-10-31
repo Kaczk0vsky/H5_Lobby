@@ -22,6 +22,7 @@ from django.urls import reverse
 from h5_backend.tasks import add_new_user_to_vpn_server
 from h5_backend.models import Player, PlayerState, Ban, Game, CastleType
 from h5_backend.serializers import UserSerializer, GameReportSerializer
+from h5_backend.notifications import notify_match_status_changed
 
 logger = logging.getLogger(__name__)
 
@@ -290,18 +291,14 @@ class SetPlayerStateView(View):
 
 @method_decorator(csrf_protect, name="dispatch")
 @method_decorator(ratelimit(key="user_or_ip", rate="60/m", method="POST", block=True), name="dispatch")
-class QueueHandlerView(View):
-    action = None  # remove_player | match_players | check_opponent_state
-
+class RemoveFromQueueView(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _parse_request_data(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            required_fields = ["nickname"]
-            if self.action == "remove_player":
-                required_fields.append("is_accepted")
+            required_fields = ["nickname", "is_accepted"]
 
             serializer = UserSerializer(data=data, required_fields=required_fields)
             if not serializer.is_valid():
@@ -317,12 +314,6 @@ class QueueHandlerView(View):
             return Player.objects.get(nickname=nickname)
         except Player.DoesNotExist:
             return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
-
-    def _get_game_object(self, player):
-        try:
-            return Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
-        except Game.DoesNotExist:
-            return JsonResponse({"success": True, "game_found": False})
 
     def _remove_player_from_queue(self, player, is_accepted):
         player.player_state = PlayerState.ACCEPTED if is_accepted else PlayerState.ONLINE
@@ -341,30 +332,6 @@ class QueueHandlerView(View):
 
         return JsonResponse({"success": True})
 
-    def _match_players(self, player, game):
-        opponent = game.player_2 if player == game.player_1 else game.player_1
-        return JsonResponse({"success": True, "game_found": True, "opponent": [opponent.nickname, opponent.ranking_points]})
-
-    def _check_opponent_state(self, player, game):
-        opponent = game.player_2 if player == game.player_1 else game.player_1
-
-        if opponent.player_state in [PlayerState.ACCEPTED, PlayerState.PLAYING]:
-            with transaction.atomic():
-                opponent.player_state = PlayerState.PLAYING
-                player.player_state = PlayerState.PLAYING
-                opponent.save()
-                player.save()
-            return JsonResponse({"success": True, "opponent_accepted": True, "opponent_declined": False})
-
-        elif opponent.player_state in [PlayerState.ONLINE, PlayerState.OFFLINE]:
-            with transaction.atomic():
-                game.delete()
-                player.player_state = PlayerState.IN_QUEUE
-                player.save()
-            return JsonResponse({"success": True, "opponent_accepted": False, "opponent_declined": True})
-
-        return JsonResponse({"success": True, "opponent_accepted": False, "opponent_declined": False})
-
     def post(self, request, *args, **kwargs):
         try:
             request_data, error_response = self._parse_request_data(request)
@@ -375,24 +342,7 @@ class QueueHandlerView(View):
             if isinstance(player, JsonResponse):
                 return player
 
-            match self.action:
-                case "remove_player":
-                    return self._remove_player_from_queue(player, request_data["is_accepted"])
-
-                case "match_players":
-                    game = self._get_game_object(player)
-                    if isinstance(game, JsonResponse):
-                        return game
-                    return self._match_players(player, game)
-
-                case "check_opponent_state":
-                    game = self._get_game_object(player)
-                    if isinstance(game, JsonResponse):
-                        return game
-                    return self._check_opponent_state(player, game)
-
-                case _:
-                    return JsonResponse({"success": False, "error": "Invalid action"}, status=400)
+            return self._remove_player_from_queue(player, request_data["is_accepted"])
 
         except Exception as e:
             logger.error(f"Queue handling exception: {e}")
