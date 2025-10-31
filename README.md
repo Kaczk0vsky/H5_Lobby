@@ -384,8 +384,25 @@ WantedBy=multi-user.target
 dir /var/lib/redis
 pidfile /run/redis/redis-server.pid
 logfile /var/log/redis/redis-server.log
+daemonize no
 ```
-7) `sudo nano /etc/systemd/system/redis-server.service` and add line - `PIDFile=/run/redis/redis-server.pid`
+7) `sudo nano /etc/systemd/system/redis-server.service` and paste:
+```
+[Unit]
+Description=Redis In-Memory Data Store
+After=network.target
+
+[Service]
+User=redis
+Group=redis
+ExecStart=/usr/bin/redis-server /etc/redis/redis.conf
+ExecStop=/usr/bin/redis-cli shutdown
+PIDFile=/run/redis/redis-server.pid
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
 8) `sudo systemctl daemon-reload`
 9) `sudo systemctl reset-failed redis-server`
 10) `sudo systemctl enable redis-server`
