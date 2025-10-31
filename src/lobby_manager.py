@@ -1453,8 +1453,11 @@ class H5_Lobby(GameWindowsBase):
                 if data.get("event") == "match_status_changed":
                     self.__opponent_accepted = data["opponent_accepted"]
                     self.__opponent_declined = data["opponent_declined"]
-                    logger.debug("Got opponent acceptance status.")
-                    break
+                    if not self.__opponent_accepted and not self.__opponent_declined:
+                        pass
+                    else:
+                        logger.debug("Got opponent acceptance status.")
+                        break
                 elif data.get("error"):
                     logger.error(f"Error while checking opponent acceptance: {data.get('error')}")
 
