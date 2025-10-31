@@ -64,11 +64,19 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
     async def _check_if_accepted(self, data):
         nickname = data.get("nickname")
         player = await self._get_player(nickname)
+        if not player:
+            await self.send(json.dumps({"error": f"Player '{nickname}' not found"}))
+            return
+
         game = await self._get_game(player)
-        opponent = game.player_2 if player == game.player_1 else game.player_1
+        if not game:
+            await self.send(json.dumps({"error": "No active game found for this player"}))
+            return
 
         @sync_to_async
         def update_state():
+            opponent = game.player_2 if player == game.player_1 else game.player_1
+
             if opponent.player_state in [PlayerState.ACCEPTED, PlayerState.PLAYING]:
                 with transaction.atomic():
                     opponent.player_state = PlayerState.PLAYING

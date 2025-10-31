@@ -1437,7 +1437,7 @@ class H5_Lobby(GameWindowsBase):
     async def check_if_oponnent_accepted_ws(self):
         uri = f"wss://{env_dict['SERVER_URL']}/ws/queue/{self.user['nickname']}/"
         async with websockets.connect(uri) as ws:
-            await ws.send(json.dumps({"action": "check_if_accepted"}))
+            await ws.send(json.dumps({"action": "check_if_accepted", "nickname": self.user["nickname"]}))
             logger.debug("Checking if opponent accepted via WebSocket...")
 
             async for message in ws:
@@ -1448,6 +1448,8 @@ class H5_Lobby(GameWindowsBase):
                     self.__opponent_declined = data["opponent_declined"]
                     logger.debug("Got opponent acceptance status.")
                     break
+                elif data.get("error"):
+                    logger.error(f"Error while checking opponent acceptance: {data.get('error')}")
 
     @run_in_thread
     def refresh_friends_list(self, users_list: UsersList):
