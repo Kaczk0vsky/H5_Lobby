@@ -68,17 +68,19 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
 
         @sync_to_async
         def update_state():
+            with transaction.atomic():
+                player.player_state = PlayerState.ACCEPTED
+                player.save()
             opponent = game.player_2 if player == game.player_1 else game.player_1
 
-            if opponent.player_state in [PlayerState.ACCEPTED, PlayerState.PLAYING]:
+            if opponent.player_state == PlayerState.ACCEPTED:
                 with transaction.atomic():
                     opponent.player_state = PlayerState.PLAYING
                     player.player_state = PlayerState.PLAYING
                     opponent.save()
                     player.save()
                 notify_match_status_changed(player, True, False)
-            elif opponent.player_state == PlayerState.WAITING_ACCEPTANCE:
-                notify_match_status_changed(player, False, False)
+                notify_match_status_changed(opponent, True, False)
             elif opponent.player_state in [PlayerState.ONLINE, PlayerState.OFFLINE]:
                 with transaction.atomic():
                     game.delete()
