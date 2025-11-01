@@ -25,15 +25,7 @@ fonts_sizes = {
 }
 env_dict = {
     "SERVER_URL": os.getenv("SERVER_URL"),
-    "SERVER_PORT": os.getenv("SERVER_PORT"),
-    "SERVER_LISTEN_ON": os.getenv("SERVER_LISTEN_ON"),
-    "DJANGO_SECRET_KEY": os.getenv("DJANGO_SECRET_KEY"),
-    "RABITMQ_LOGIN": os.getenv("RABITMQ_LOGIN"),
-    "RABITMQ_PASSWORD": os.getenv("RABITMQ_PASSWORD"),
-    "VPN_SERVER_PASSWORD": os.getenv("VPN_SERVER_PASSWORD"),
     "VPN_HUB_NAME": os.getenv("VPN_HUB_NAME"),
-    "VPN_HUB_VPN_PASSWORD": os.getenv("VPN_HUB_VPN_PASSWORD"),
-    "VPN_IPSEC_SHARED_KEY": os.getenv("VPN_IPSEC_SHARED_KEY"),
     "PATH_TOKEN": os.getenv("PATH_TOKEN"),
     "PATH_REGISTER": os.getenv("PATH_REGISTER"),
     "PATH_LOGIN": os.getenv("PATH_LOGIN"),
