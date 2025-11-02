@@ -652,7 +652,7 @@ class LoginWindow(GameWindowsBase):
             response = self.session.post(url, json=user_data, headers=headers)
             if response.status_code == 200:
                 save_login_information(user_data)
-                logger.debug("Saving user information if selected...")
+                logger.debug("Saving user information...")
                 if self.vpn_client is None:
                     self.vpn_client = SoftEtherClient(
                         user_data["nickname"],
@@ -661,7 +661,6 @@ class LoginWindow(GameWindowsBase):
                     self.vpn_client.create_new_client()
                 self.user = user_data
 
-                self.vpn_client.set_vpn_state(state=True)
                 logger.info("VPN connection established.")
                 self.__allow_login = True
                 logger.info(f"User {user_data['nickname']} logged in successfully.")

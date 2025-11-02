@@ -781,6 +781,7 @@ class H5_Lobby(GameWindowsBase):
                     pygame.mixer.Channel(self.__queue_channel).stop()
                 pygame.mixer.Channel(0).set_volume(0.0)
                 self.__set_queue_variables(state=False)
+                self.vpn_client.set_vpn_state(state=True)
                 self.run_arena()
                 continue
 
@@ -1348,7 +1349,7 @@ class H5_Lobby(GameWindowsBase):
 
     def handle_ws_message(self, message):
         event = message.get("event")
-        logger.debug(f"Handling message: {message}")
+        logger.debug(f"Handling message: {message["event"]}")
 
         if event == "add_to_queue":
             pass
@@ -1365,12 +1366,12 @@ class H5_Lobby(GameWindowsBase):
             logger.debug(f"Found opponent: {self.__opponent_nickname}")
 
         elif event == "check_if_accepted":
-            self._opponent_accepted = message["opponent_accepted"]
-            self._opponent_declined = message["opponent_declined"]
+            self.__opponent_accepted = message["opponent_accepted"]
+            self.__opponent_declined = message["opponent_declined"]
 
-            if not self._opponent_accepted and not self._opponent_declined:
+            if not self.__opponent_accepted and not self.__opponent_declined:
                 logger.debug("Opponent is still deciding.")
-            else:
+            elif self.__opponent_accepted:
                 logger.debug("Got opponent acceptance status.")
 
         elif event == "refresh_friend_list":
@@ -1617,6 +1618,7 @@ class H5_Lobby(GameWindowsBase):
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.__set_buttons_active = True
         self.__stop_refreshing_friends_list = False
+        self.vpn_client.set_vpn_state(state=False)
         logger.debug("Window restored from tray.")
 
     def run_game(self):

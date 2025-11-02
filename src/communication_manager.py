@@ -24,7 +24,7 @@ class WebSocketClient:
         uri = f"wss://{env_dict['SERVER_URL']}/ws/queue/{self.user['nickname']}/"
         self.ws = await websockets.connect(uri)
         asyncio.create_task(self.listen())
-        logger.info(f"Connected to WebSocket - User: {self.user['nickname']}")
+        logger.info("Connected to WebSocket.")
 
     async def disconnect(self):
         if self.ws and not self.ws.closed:
@@ -50,6 +50,6 @@ class WebSocketClient:
     async def send(self, payload):
         if self.ws:
             await self.ws.send(json.dumps(payload))
-            logger.debug(f"Sent: {payload}")
+            logger.debug(f"Sent: {payload["action"]}")
         else:
             logger.warning("Tried to send message, but WebSocket is closed.")

@@ -94,7 +94,7 @@ class SoftEtherClient:
             return False
 
         if "Virtual Network Adapter Name" in result.stdout:
-            logger.debug(f"{vpn_hub} adapter already exists. Skipping...")
+            logger.debug(f"VPN adapter already exists. Skipping...")
         else:
             command = f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD NicCreate {vpn_hub}'
             try:
@@ -116,7 +116,7 @@ class SoftEtherClient:
             return False
 
         if "VPN Connection Setting Name" in result.stdout:
-            logger.debug(f"{vpn_hub} account already exists. Skipping...")
+            logger.debug(f"User account already exists. Skipping...")
             return True
         else:
             commands = [
