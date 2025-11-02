@@ -153,6 +153,8 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
                     player.save()
                 notify_match_status_changed(player, True, False)
                 notify_match_status_changed(opponent, True, False)
+            elif opponent.player_state == PlayerState.WAITING_ACCEPTANCE:
+                notify_match_status_changed(player, False, False)
             elif opponent.player_state in [PlayerState.ONLINE, PlayerState.OFFLINE]:
                 with transaction.atomic():
                     game.delete()
