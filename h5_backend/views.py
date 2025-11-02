@@ -348,7 +348,9 @@ class HandleMatchReport(View):
 
     def _create_match_report(self, player: Player, opponent: Player, player_castle: CastleType, opponent_castle: CastleType, who_won: Player):
         game = (
-            Game.objects.filter((Q(player_1=player) | Q(player_2=player)) & (Q(is_new=True) | Q(is_waiting_confirmation=True)))
+            Game.objects.filter(
+                (Q(player_1=player) | Q(player_2=player)) & (Q(is_new=True) | Q(is_waiting_confirmation=True) & ~Q(who_created=player))
+            )
             .order_by("-id")
             .first()
         )
