@@ -22,9 +22,9 @@ class WebSocketClient:
 
     async def connect(self):
         uri = f"wss://{env_dict['SERVER_URL']}/ws/queue/{self.user['nickname']}/"
-        logger.info(f"Connecting to WebSocket - User: {self.user['nickname']}")
         self.ws = await websockets.connect(uri)
         asyncio.create_task(self.listen())
+        logger.info(f"Connected to WebSocket - User: {self.user['nickname']}")
 
     async def disconnect(self):
         if self.ws and not self.ws.closed:
@@ -43,11 +43,13 @@ class WebSocketClient:
             logger.error(f"Unexpected error in listen(): {e}")
 
     async def reconnect(self):
+        self.ws = None
         await asyncio.sleep(3)
         await self.connect()
 
     async def send(self, payload):
-        if self.ws and not self.ws.closed:
+        if self.ws:
             await self.ws.send(json.dumps(payload))
+            logger.debug(f"Sent: {payload}")
         else:
             logger.warning("Tried to send message, but WebSocket is closed.")

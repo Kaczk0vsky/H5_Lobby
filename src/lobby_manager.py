@@ -4,8 +4,7 @@ import requests
 import ctypes
 import webbrowser
 import asyncio
-import json
-import websockets
+import queue
 import threading
 import concurrent.futures
 
@@ -146,14 +145,6 @@ class H5_Lobby(GameWindowsBase):
         if hasattr(self, "loop") and self.loop.is_running():
             asyncio.run_coroutine_threadsafe(self.websocket_client.send(payload), self.loop)
 
-    def receive_ws_message(self, timeout: float = 0.1):
-        if hasattr(self, "loop") and self.loop.is_running():
-            future = asyncio.run_coroutine_threadsafe(self.websocket_client._message_queue.get(), self.loop)
-            try:
-                return future.result(timeout=timeout)
-            except concurrent.futures.TimeoutError:
-                return None
-
     def close_ws(self):
         if hasattr(self, "loop") and self.loop.is_running():
             asyncio.run_coroutine_threadsafe(self.websocket_client.disconnect(), self.loop)
@@ -290,10 +281,14 @@ class H5_Lobby(GameWindowsBase):
         buttons = [FIND_GAME_BUTTON, CREATE_REPORT, RANKING, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
         logger.debug("Displaying lobby window.")
         while True:
+            while not self.websocket_client._message_queue.empty():
+                message = self.websocket_client._message_queue.get_nowait()
+                if message:
+                    self.handle_ws_message(message)
+
             self.SCREEN.blit(self.BG, (0, 0))
             self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
-            self.handle_ws_message(message=self.receive_ws_message())
 
             self.SCREEN.blit(
                 self.TOP_BAR,
@@ -683,7 +678,7 @@ class H5_Lobby(GameWindowsBase):
                                 self.__player_accepted = True
                                 FIND_GAME_BUTTON.set_active(is_active=False)
                                 self.remove_from_queue_ws(is_accepted=True)
-                                run_async_in_thread(self.check_if_oponnent_accepted_ws)
+                                self.check_if_oponnent_accepted_ws()
 
                     if self.__report_creation_status:
                         if SUBMIT_REPORT.check_for_input(MENU_MOUSE_POS):
@@ -1352,42 +1347,41 @@ class H5_Lobby(GameWindowsBase):
         )
 
     def handle_ws_message(self, message):
-        if message:
-            event = message.get("event")
-            logger.debug(f"Handling message: {message}")
+        event = message.get("event")
+        logger.debug(f"Handling message: {message}")
 
-            if event == "add_to_queue":
-                asyncio.run(self.scan_for_players_ws())
+        if event == "add_to_queue":
+            pass
 
-            elif event == "unaccepted_report_data":
-                # show the report window
-                pass
+        elif event == "unaccepted_report_data":
+            # show the report window
+            pass
 
-            elif event == "match_found":
-                self.__update_queue_status = True
-                self.__found_game = True
-                self.__opponent_nickname = message["opponent"]
-                self.__oponnent_ranking_points = message["points"]
-                logger.debug(f"Found opponent: {self.__opponent_nickname}")
+        elif event == "match_found":
+            self.__update_queue_status = True
+            self.__found_game = True
+            self.__opponent_nickname = message["opponent"]
+            self.__oponnent_ranking_points = message["points"]
+            logger.debug(f"Found opponent: {self.__opponent_nickname}")
 
-            elif event == "match_status_changed":
-                self._opponent_accepted = message["opponent_accepted"]
-                self._opponent_declined = message["opponent_declined"]
+        elif event == "match_status_changed":
+            self._opponent_accepted = message["opponent_accepted"]
+            self._opponent_declined = message["opponent_declined"]
 
-                if not self._opponent_accepted and not self._opponent_declined:
-                    logger.debug("Opponent is still deciding.")
-                else:
-                    logger.debug("Got opponent acceptance status.")
-
-            elif event == "refresh_friend_list":
-                # update the users list
-                pass
-
-            elif event == "error_occured":
-                logger.warning(f"Error occured: {event}")
-
+            if not self._opponent_accepted and not self._opponent_declined:
+                logger.debug("Opponent is still deciding.")
             else:
-                logger.warning(f"Unknown event type: {event}")
+                logger.debug("Got opponent acceptance status.")
+
+        elif event == "refresh_friend_list":
+            # update the users list
+            pass
+
+        elif event == "error_occured":
+            logger.warning(f"Error occured: {event}")
+
+        else:
+            logger.warning(f"Unknown event type: {event}")
 
     def add_to_queue_ws(self):
         payload = {
@@ -1406,13 +1400,9 @@ class H5_Lobby(GameWindowsBase):
         }
         self.send_ws_message(payload)
 
-    async def scan_for_players_ws(self):
-        payload = {"action": "join_queue"}
-        self.send_ws_message(payload)
-
-    async def check_if_oponnent_accepted_ws(self):
+    def check_if_oponnent_accepted_ws(self):
         payload = {
-            "action": "match_status_changed",
+            "action": "check_if_accepted",
             "nickname": self.user["nickname"],
         }
         self.send_ws_message(payload)

@@ -80,9 +80,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
             else:
                 pass
         except Exception as e:
-            player = await self._get_player(data.get("nickname"))
-            if player:
-                notify_error(player, str(e))
+            pass
 
     async def _add_to_queue(self, data):
         nickname = data.get("nickname")
