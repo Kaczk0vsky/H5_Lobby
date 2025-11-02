@@ -7,6 +7,7 @@ import asyncio
 import json
 import websockets
 import threading
+import concurrent.futures
 
 from pygame.locals import *
 
@@ -142,12 +143,18 @@ class H5_Lobby(GameWindowsBase):
         self.loop.run_forever()
 
     def send_ws_message(self, payload: dict):
-        # Send a message via WebSocket in the event loop
         if hasattr(self, "loop") and self.loop.is_running():
             asyncio.run_coroutine_threadsafe(self.websocket_client.send(payload), self.loop)
 
+    def receive_ws_message(self, timeout: float = 0.1):
+        if hasattr(self, "loop") and self.loop.is_running():
+            future = asyncio.run_coroutine_threadsafe(self.websocket_client._message_queue.get(), self.loop)
+            try:
+                return future.result(timeout=timeout)
+            except concurrent.futures.TimeoutError:
+                return None
+
     def close_ws(self):
-        # Close the WebSocket connection and stop the event loop
         if hasattr(self, "loop") and self.loop.is_running():
             asyncio.run_coroutine_threadsafe(self.websocket_client.disconnect(), self.loop)
             self.loop.call_soon_threadsafe(self.loop.stop)
@@ -286,6 +293,7 @@ class H5_Lobby(GameWindowsBase):
             self.SCREEN.blit(self.BG, (0, 0))
             self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
+            self.handle_ws_message(message=self.receive_ws_message())
 
             self.SCREEN.blit(
                 self.TOP_BAR,
@@ -380,7 +388,7 @@ class H5_Lobby(GameWindowsBase):
                         FIND_GAME_BUTTON.set_active(is_active=True)
                         OPTIONS_BUTTON.set_active(is_active=True)
                         self.__set_queue_variables(state=False)
-                        self.remove_from_queue(is_accepted=False)
+                        self.remove_from_queue_ws(is_accepted=False)
                         continue
 
             if self.__create_report_question:
@@ -615,7 +623,7 @@ class H5_Lobby(GameWindowsBase):
                 USERS_LIST.event(event)
                 if event.type == pygame.QUIT:
                     if self.__queue_status:
-                        self.remove_from_queue(is_accepted=False)
+                        self.remove_from_queue_ws(is_accepted=False)
                     self.quit_game_handling(self.crsf_token, self.session)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -623,7 +631,7 @@ class H5_Lobby(GameWindowsBase):
                         self.__queue_status = True
                         self.__player_declined = False
                         FIND_GAME_BUTTON.set_active(is_active=False)
-                        self.add_to_queue()
+                        self.add_to_queue_ws()
                         continue
                     if CREATE_REPORT.check_for_input(MENU_MOUSE_POS):
                         if self.__opponent_nickname:
@@ -656,7 +664,7 @@ class H5_Lobby(GameWindowsBase):
                         continue
                     if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                         if self.__queue_status:
-                            self.remove_from_queue(is_accepted=False)
+                            self.remove_from_queue_ws(is_accepted=False)
                         self.quit_game_handling(self.crsf_token, self.session)
                     if self.__queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
@@ -666,7 +674,7 @@ class H5_Lobby(GameWindowsBase):
                             FIND_GAME_BUTTON.set_active(is_active=True)
                             OPTIONS_BUTTON.set_active(True)
                             self.__set_queue_variables(state=False)
-                            self.remove_from_queue(is_accepted=False)
+                            self.remove_from_queue_ws(is_accepted=False)
                             self.__player_declined = True
                             continue
                         if ACCEPT_QUEUE is not None:
@@ -674,7 +682,7 @@ class H5_Lobby(GameWindowsBase):
                                 self.__update_queue_status = True
                                 self.__player_accepted = True
                                 FIND_GAME_BUTTON.set_active(is_active=False)
-                                self.remove_from_queue(is_accepted=True)
+                                self.remove_from_queue_ws(is_accepted=True)
                                 run_async_in_thread(self.check_if_oponnent_accepted_ws)
 
                     if self.__report_creation_status:
@@ -793,7 +801,7 @@ class H5_Lobby(GameWindowsBase):
                 pygame.mixer.Channel(0).set_volume(self.config["volume"])
                 if self.__queue_channel:
                     pygame.mixer.Channel(self.__queue_channel).stop()
-                self.add_to_queue()
+                self.add_to_queue_ws()
 
             if self.__connection_timer:
                 time_passed = calculate_time_passed(start_time=self.__connection_timer)
@@ -1343,149 +1351,71 @@ class H5_Lobby(GameWindowsBase):
             NO_BUTTON,
         )
 
-    @run_in_thread
-    # TODO: WebSocket implementation
-    def add_to_queue(self):
-        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_ADD"]}/"
-        if not self.crsf_token:
-            self.__window_overlay = True
-            self.__error_msg = "Please login again."
-            return
+    def handle_ws_message(self, message):
+        if message:
+            event = message.get("event")
+            logger.debug(f"Handling message: {message}")
 
-        user_data = {
+            if event == "add_to_queue":
+                asyncio.run(self.scan_for_players_ws())
+
+            elif event == "unaccepted_report_data":
+                # show the report window
+                pass
+
+            elif event == "match_found":
+                self.__update_queue_status = True
+                self.__found_game = True
+                self.__opponent_nickname = message["opponent"]
+                self.__oponnent_ranking_points = message["points"]
+                logger.debug(f"Found opponent: {self.__opponent_nickname}")
+
+            elif event == "match_status_changed":
+                self._opponent_accepted = message["opponent_accepted"]
+                self._opponent_declined = message["opponent_declined"]
+
+                if not self._opponent_accepted and not self._opponent_declined:
+                    logger.debug("Opponent is still deciding.")
+                else:
+                    logger.debug("Got opponent acceptance status.")
+
+            elif event == "refresh_friend_list":
+                # update the users list
+                pass
+
+            elif event == "error_occured":
+                logger.warning(f"Error occured: {event}")
+
+            else:
+                logger.warning(f"Unknown event type: {event}")
+
+    def add_to_queue_ws(self):
+        payload = {
+            "action": "add_to_queue",
             "nickname": self.user["nickname"],
             "is_searching_ranked": self.config["is_ranked"],
             "min_opponent_points": self.config["points_treshold"],
         }
-        headers = {
-            "Referer": f"https://{env_dict["SERVER_URL"]}/",
-            "X-CSRFToken": self.crsf_token,
-            "Content-Type": "application/json",
-        }
-        self.__connection_timer = time.time()
-        logger.debug("Adding to queue...")
-        try:
-            response = self.session.post(url, json=user_data, headers=headers)
-            if response.status_code == 200:
-                self.__connection_timer = None
-                json_response = response.json()
-                if "report_data" in json_response.keys():
-                    self.__report_data = json_response["report_data"]
-                    self.__report_creation_status = True
-                    self.__generate_report_elements = True
-                    self.__report_title = "Confirm Report"
-                    self.__update_queue_status = False
-                    self.__queue_status = False
-                    self.__get_time = False
-                    logger.warning("You have unsubmitted report.")
-                    return
+        self.send_ws_message(payload)
 
-                logger.info("Added to queue.")
-                asyncio.run(self.scan_for_players_ws())
-
-            else:
-                self.__window_overlay = True
-                self.__connection_timer = None
-                self.__update_queue_status = False
-                self.__queue_status = False
-                self.__error_msg = response.json().get("error", "Unknown error occurred")
-
-        except requests.exceptions.ConnectTimeout:
-            self.__has_disconnected = True
-            self.__window_overlay = True
-            self.__error_msg = "Error while trying to connect to server!"
-
-        except requests.exceptions.ConnectionError:
-            self.__has_disconnected = True
-            self.__window_overlay = True
-            self.__error_msg = "Error! Check your internet connection..."
-
-        except:
-            self.__has_disconnected = True
-            self.__window_overlay = True
-            self.__error_msg = "Error! Server/Player offline, check discord..."
-
-    @run_in_thread
-    # TODO: WebSocket implementation
-    def remove_from_queue(self, is_accepted: bool):
-        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict["PATH_REMOVE"]}/"
-        if not self.crsf_token:
-            self.__window_overlay = True
-            self.__error_msg = "Please login again."
-            return
-
-        user_data = {
+    def remove_from_queue_ws(self, is_accepted: bool):
+        payload = {
+            "action": "remove_from_queue",
             "nickname": self.user["nickname"],
-            "is_accepted": is_accepted,
+            "is_queue_accepted": is_accepted,
         }
-        headers = {
-            "Referer": f"https://{env_dict["SERVER_URL"]}/",
-            "X-CSRFToken": self.crsf_token,
-            "Content-Type": "application/json",
-        }
-        self.__connection_timer = time.time()
-        logger.debug("Removing from queue...")
-        try:
-            response = self.session.post(url, json=user_data, headers=headers)
-            if response.status_code == 200:
-                self.__connection_timer = None
-                logger.info("Removed from queue.")
-            else:
-                self.__connection_timer = None
+        self.send_ws_message(payload)
 
-        except requests.exceptions.ConnectTimeout:
-            self.__has_disconnected = True
-            self.__window_overlay = True
-            self.__error_msg = "Error while trying to connect to server!"
-
-        except requests.exceptions.ConnectionError:
-            self.__has_disconnected = True
-            self.__window_overlay = True
-            self.__error_msg = "Error! Check your internet connection..."
-
-        except:
-            self.__has_disconnected = True
-            self.__window_overlay = True
-            self.__error_msg = "Error! Server/Player offline, check discord..."
-
-    # TODO: WebSocket implementation
     async def scan_for_players_ws(self):
-        uri = f"wss://{env_dict['SERVER_URL']}/ws/queue/{self.user['nickname']}/"
-        async with websockets.connect(uri) as ws:
-            await ws.send(json.dumps({"action": "join_queue"}))
-            logger.debug("Scanning for players via WebSocket...")
+        payload = {"action": "join_queue"}
+        self.send_ws_message(payload)
 
-            async for message in ws:
-                data = json.loads(message)
-                logger.debug(f"WebSocket scan for players response: {data}")
-                if data.get("event") == "match_found":
-                    self.__update_queue_status = True
-                    self.__found_game = True
-                    self.__opponent_nickname = data["opponent"]
-                    self.__oponnent_ranking_points = data["points"]
-                    logger.debug(f"Found opponent: {self.__opponent_nickname}")
-                    break
-
-    # TODO: WebSocket implementation
     async def check_if_oponnent_accepted_ws(self):
-        uri = f"wss://{env_dict['SERVER_URL']}/ws/queue/{self.user['nickname']}/"
-        async with websockets.connect(uri) as ws:
-            await ws.send(json.dumps({"action": "check_if_accepted", "nickname": self.user["nickname"]}))
-            logger.debug("Checking if opponent accepted via WebSocket...")
-
-            async for message in ws:
-                data = json.loads(message)
-                logger.debug(f"WebSocket scan for game acceptance: {data}")
-                if data.get("event") == "match_status_changed":
-                    self.__opponent_accepted = data["opponent_accepted"]
-                    self.__opponent_declined = data["opponent_declined"]
-                    if not self.__opponent_accepted and not self.__opponent_declined:
-                        pass
-                    else:
-                        logger.debug("Got opponent acceptance status.")
-                        break
-                elif data.get("error"):
-                    logger.error(f"Error while checking opponent acceptance: {data.get('error')}")
+        payload = {
+            "action": "match_status_changed",
+            "nickname": self.user["nickname"],
+        }
+        self.send_ws_message(payload)
 
     @run_in_thread
     # TODO: WebSocket implementation

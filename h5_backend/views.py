@@ -238,26 +238,7 @@ class SetPlayerStateView(View):
 
     def _update_player_state(self, player, request_data):
         player.player_state = self.state
-        if self.state == "in_queue":
-            player.is_searching_ranked = request_data["is_searching_ranked"]
-            player.min_opponent_points = request_data["min_opponent_points"]
         player.save()
-
-    def _check_for_unaccepted_report(self, player: Player) -> bool:
-        unaccepted_game = (
-            Game.objects.filter(Q(player_1=player) | Q(player_2=player), is_waiting_confirmation=True)
-            .exclude(who_created=player)
-            .order_by("-id")
-            .last()
-        )
-        if not unaccepted_game:
-            return None
-
-        return {
-            unaccepted_game.player_1.nickname: unaccepted_game.castle_1,
-            unaccepted_game.player_2.nickname: unaccepted_game.castle_2,
-            "who_won": unaccepted_game.who_won.nickname,
-        }
 
     def post(self, request, *args, **kwargs):
         try:
@@ -276,75 +257,11 @@ class SetPlayerStateView(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
 
-            report_data = self._check_for_unaccepted_report(player)
-            if report_data:
-                return JsonResponse({"success": True, "report_data": report_data}, status=200)
-
             self._update_player_state(player, request_data)
             return JsonResponse({"success": True})
 
         except Exception as e:
             logger.error(f"Setting player state error: {e}")
-            return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
-
-
-@method_decorator(csrf_protect, name="dispatch")
-@method_decorator(ratelimit(key="user_or_ip", rate="60/m", method="POST", block=True), name="dispatch")
-class RemoveFromQueueView(View):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def _parse_request_data(self, request):
-        try:
-            data = json.loads(request.body.decode("utf-8"))
-            required_fields = ["nickname", "is_accepted"]
-
-            serializer = UserSerializer(data=data, required_fields=required_fields)
-            if not serializer.is_valid():
-                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-
-            return serializer.validated_data, None
-
-        except json.JSONDecodeError:
-            return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
-
-    def _get_player_object(self, nickname):
-        try:
-            return Player.objects.get(nickname=nickname)
-        except Player.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Player profile not found"}, status=400)
-
-    def _remove_player_from_queue(self, player, is_accepted):
-        player.player_state = PlayerState.ACCEPTED if is_accepted else PlayerState.ONLINE
-        player.save()
-        if not is_accepted:
-            with transaction.atomic():
-                try:
-                    game = Game.objects.filter(Q(player_1=player, is_new=True) | Q(player_2=player, is_new=True)).get()
-                except Game.DoesNotExist:
-                    return JsonResponse({"success": False, "error": "Queue has been declined"}, status=404)
-
-                opponent = game.player_2 if player == game.player_1 else game.player_1
-                opponent.player_state = PlayerState.IN_QUEUE
-                opponent.save()
-                game.delete()
-
-        return JsonResponse({"success": True})
-
-    def post(self, request, *args, **kwargs):
-        try:
-            request_data, error_response = self._parse_request_data(request)
-            if error_response:
-                return error_response
-
-            player = self._get_player_object(request_data["nickname"])
-            if isinstance(player, JsonResponse):
-                return player
-
-            return self._remove_player_from_queue(player, request_data["is_accepted"])
-
-        except Exception as e:
-            logger.error(f"Queue handling exception: {e}")
             return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
 
 
