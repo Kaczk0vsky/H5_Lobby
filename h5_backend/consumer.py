@@ -68,18 +68,15 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def receive(self, text_data):
-        try:
-            data = json.loads(text_data)
-            action = data.get("action")
-            if action == "add_to_queue":
-                await self._add_to_queue(data)
-            elif action == "remove_from_queue":
-                await self._remove_from_queue(data)
-            elif action == "check_if_accepted":
-                await self._check_if_accepted(data)
-            else:
-                pass
-        except Exception as e:
+        data = json.loads(text_data)
+        action = data.get("action")
+        if action == "add_to_queue":
+            await self._add_to_queue(data)
+        elif action == "remove_from_queue":
+            await self._remove_from_queue(data)
+        elif action == "check_if_accepted":
+            await self._check_if_accepted(data)
+        else:
             pass
 
     async def _add_to_queue(self, data):

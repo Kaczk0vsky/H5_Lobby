@@ -1364,7 +1364,7 @@ class H5_Lobby(GameWindowsBase):
             self.__oponnent_ranking_points = message["points"]
             logger.debug(f"Found opponent: {self.__opponent_nickname}")
 
-        elif event == "match_status_changed":
+        elif event == "check_if_accepted":
             self._opponent_accepted = message["opponent_accepted"]
             self._opponent_declined = message["opponent_declined"]
 
