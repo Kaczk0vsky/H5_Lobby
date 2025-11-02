@@ -104,7 +104,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
 
     async def _remove_from_queue(self, data):
         nickname = data.get("nickname")
-        is_queue_accepted = data.get("is_accepted")
+        is_queue_accepted = data.get("is_queue_accepted")
         player = await self._get_player(nickname)
         if not player:
             raise ValueError(f"Player {nickname} not found")
