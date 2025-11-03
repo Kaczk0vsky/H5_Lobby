@@ -7,9 +7,9 @@ from h5_backend.models import OfflineMessage, Player
 def send_or_store(player: Player, event_type: str, payload: dict):
     layer = get_channel_layer()
     group_name = f"player_{player.nickname}"
-    try:
+    if player.connected_to_ws:
         async_to_sync(layer.group_send)(group_name, {"type": event_type, **payload})
-    except Exception:
+    else:
         OfflineMessage.objects.create(recipient=player, event_type=event_type, payload=payload)
 
 

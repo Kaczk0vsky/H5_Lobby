@@ -58,11 +58,15 @@ class ModelParser:
 
 class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
     @sync_to_async
-    def _get_pending_messages(self, player):
+    def _get_pending_messages(self, player: Player):
         return list(OfflineMessage.objects.filter(recipient=player).order_by("created_at"))
 
     @sync_to_async
-    def _delete_delivered(self, msg):
+    def _set_connection_state(self, player: Player, state: bool):
+        player.connected_to_ws = state
+
+    @sync_to_async
+    def _delete_delivered(self, msg: OfflineMessage):
         msg.delete()
 
     async def connect(self):
@@ -73,18 +77,21 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         await self.accept()
 
         player = await self._get_player(self.nickname)
+        await self._set_connection_state(player, True)
         await self._send_pending_messages(player)
 
-    async def _send_pending_messages(self, player):
+    async def _send_pending_messages(self, player: Player):
         pending = await self._get_pending_messages(player)
         for msg in pending:
             await self.send(json.dumps({"event": msg.event_type, **msg.payload}))
             await self._delete_delivered(msg)
 
-    async def disconnect(self, close_code):
+    async def disconnect(self):
+        player = await self._get_player(self.nickname)
+        await self._set_connection_state(player, False)
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
-    async def receive(self, text_data):
+    async def receive(self, text_data: str):
         data = json.loads(text_data)
         action = data.get("action")
         if action == "add_to_queue":
@@ -96,7 +103,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         else:
             pass
 
-    async def _add_to_queue(self, data):
+    async def _add_to_queue(self, data: str):
         nickname = data.get("nickname")
         is_searching_ranked = data.get("is_searching_ranked")
         min_opponent_points = data.get("min_opponent_points")
@@ -120,7 +127,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
 
         await add_to_queue()
 
-    async def _remove_from_queue(self, data):
+    async def _remove_from_queue(self, data: str):
         nickname = data.get("nickname")
         is_queue_accepted = data.get("is_queue_accepted")
         player = await self._get_player(nickname)
@@ -143,7 +150,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
 
         await remove_from_queue()
 
-    async def _check_if_accepted(self, data):
+    async def _check_if_accepted(self, data: str):
         nickname = data.get("nickname")
         player = await self._get_player(nickname)
         if not player:

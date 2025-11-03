@@ -38,6 +38,8 @@ class Player(models.Model):
     is_searching_ranked = models.BooleanField(editable=True, default=True)
     # minimal opponent points in searching
     min_opponent_points = models.IntegerField(editable=True, default=0)
+    # for ws connection purposes
+    connected_to_ws = models.BooleanField(editable=False)
 
     def __str__(self):
         return f"{self.nickname} - {self.ranking_points} ({self.player_state})"

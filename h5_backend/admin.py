@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.db.models import Q
 
 from h5_backend.models import Player, Game, Ban, OfflineMessage
 
