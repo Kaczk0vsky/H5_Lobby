@@ -354,7 +354,7 @@ class HandleMatchReport(View):
             .order_by("-id")
             .first()
         )
-
+        # FIXME: when adding transaction atomic everything goes to hell and magic starts happening
         if not game:
             game = Game.objects.create(player_1=player, player_2=opponent)
 

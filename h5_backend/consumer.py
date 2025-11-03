@@ -87,10 +87,10 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         if not player:
             raise ValueError(f"Player {nickname} not found")
 
-        # unaccepted_game = await self._get_unaccepted_game(player)
-        # if unaccepted_game:
-        #     notify_unaccepted_report(player, unaccepted_game)
-        #     raise ValueError(f"You have unconfirmed report!")
+        unaccepted_game = await self._get_unaccepted_game(player)
+        if unaccepted_game:
+            notify_unaccepted_report(player, unaccepted_game)
+            raise ValueError(f"You have unconfirmed report!")
 
         @sync_to_async
         def add_to_queue():
@@ -187,9 +187,9 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
             json.dumps(
                 {
                     "event": "unaccepted_report_data",
-                    event["player1_nickname"]: event["player1_castle"],
-                    event["player2_nickname"]: event["player2_castle"],
-                    "who_won": event.game.who_won.nickname,
+                    "nicknames": [event["player1_nickname"], event["player2_nickname"]],
+                    "castles": [event["player1_castle"], event["player2_castle"]],
+                    "who_won": event["who_won"],
                 }
             )
         )

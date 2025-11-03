@@ -1351,12 +1351,15 @@ class H5_Lobby(GameWindowsBase):
         event = message.get("event")
         logger.debug(f"Handling message: {message["event"]}")
 
-        if event == "add_to_queue":
-            pass
-
-        elif event == "unaccepted_report_data":
-            # show the report window
-            pass
+        if event == "unaccepted_report_data":
+            self.__report_data = {
+                "nicknames": message.get("nicknames"),
+                "castles": message.get("castles"),
+                "who_won": message.get("who_won"),
+            }
+            self.__report_title = "Confirm Report"
+            self.__generate_report_elements = True
+            self.__report_creation_status = True
 
         elif event == "match_found":
             self.__update_queue_status = True
