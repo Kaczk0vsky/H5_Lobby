@@ -1077,13 +1077,25 @@ class H5_Lobby(GameWindowsBase):
         )
         castle_choices = ["Haven", "Inferno", "Necropolis", "Sylvan", "Dungeon", "Academy", "Fortress", "Stronghold"]
         who_won_choices = ["You", "Opponent"]
-        if self.__report_data:
-            all_players = [p for p in self.__report_data.keys() if p != "who_won"]
-            my_nickname = self.user["nickname"]
-            self.__opponent_nickname = [p for p in all_players if p != my_nickname][0]
 
-            my_castle = str(self.__report_data[my_nickname]).lower().capitalize()
-            opponent_castle = str(self.__report_data[self.__opponent_nickname]).lower().capitalize()
+        if self.__report_data:
+            nicknames = self.__report_data["nicknames"]
+            castles = self.__report_data["castles"]
+            who_won = self.__report_data["who_won"]
+            my_nickname = self.user["nickname"]
+            who_won_choices = ["You" if who_won == my_nickname else "Opponent"]
+
+            if my_nickname == nicknames[0]:
+                my_castle = castles[0]
+                self.__opponent_nickname = nicknames[1]
+                opponent_castle = castles[1]
+            else:
+                my_castle = castles[1]
+                self.__opponent_nickname = nicknames[0]
+                opponent_castle = castles[0]
+
+            my_castle = my_castle.lower().capitalize()
+            opponent_castle = opponent_castle.lower().capitalize()
 
         self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOW_BASE, dims)
 
@@ -1360,6 +1372,7 @@ class H5_Lobby(GameWindowsBase):
             self.__report_title = "Confirm Report"
             self.__generate_report_elements = True
             self.__report_creation_status = True
+            self.__set_queue_variables(state=False)
 
         elif event == "match_found":
             self.__update_queue_status = True

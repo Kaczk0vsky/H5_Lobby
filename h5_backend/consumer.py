@@ -38,7 +38,7 @@ class ModelParser:
                     Game.objects.filter(Q(player_1=player) | Q(player_2=player), is_waiting_confirmation=True)
                     .exclude(who_created=player)
                     .order_by("-id")
-                    .last()
+                    .first()
                 )
             except Game.DoesNotExist:
                 return None
