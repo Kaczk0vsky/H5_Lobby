@@ -355,49 +355,48 @@ class HandleMatchReport(View):
             .first()
         )
 
-        with transaction.atomic():
-            if not game:
-                game = Game.objects.create(player_1=player, player_2=opponent)
+        if not game:
+            game = Game.objects.create(player_1=player, player_2=opponent)
 
-            if game.is_waiting_confirmation:
-                if game.player_1 == player:
-                    if game.castle_1 != player_castle or game.castle_2 != opponent_castle or game.who_won != who_won:
-                        game.is_different = True
-                else:
-                    if game.castle_2 != player_castle or game.castle_1 != opponent_castle or game.who_won != who_won:
-                        game.is_different = True
+        if game.is_waiting_confirmation:
+            if game.player_1 == player:
+                if game.castle_1 != player_castle or game.castle_2 != opponent_castle or game.who_won != who_won:
+                    game.is_different = True
+            else:
+                if game.castle_2 != player_castle or game.castle_1 != opponent_castle or game.who_won != who_won:
+                    game.is_different = True
 
-                if game.is_different:
-                    game.is_waiting_confirmation = False
-                    game.save()
-
+            if game.is_different:
                 game.is_waiting_confirmation = False
-                players_data = {"who_won": who_won.nickname}
-                if game.is_ranked:
-                    player_won = game.who_won
-                    player_lost = game.player_2 if player_won == game.player_1 else game.player_1
-                    if not game.points_change_winner and not game.points_change_loser:
-                        game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
-                    players_data[player_won.nickname] = game.points_change_winner
-                    players_data[player_lost.nickname] = game.points_change_loser
-
                 game.save()
-                return players_data
 
-            if game.is_new:
-                if game.player_1 == player:
-                    game.castle_1 = player_castle
-                    game.castle_2 = opponent_castle
-                else:
-                    game.castle_2 = player_castle
-                    game.castle_1 = opponent_castle
-                game.who_won = who_won
-                game.who_created = player
-                game.is_new = False
-                game.is_waiting_confirmation = True
+            game.is_waiting_confirmation = False
+            players_data = {"who_won": who_won.nickname}
+            if game.is_ranked:
+                player_won = game.who_won
+                player_lost = game.player_2 if player_won == game.player_1 else game.player_1
+                if not game.points_change_winner and not game.points_change_loser:
+                    game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
+                players_data[player_won.nickname] = game.points_change_winner
+                players_data[player_lost.nickname] = game.points_change_loser
 
             game.save()
-            return None
+            return players_data
+
+        if game.is_new:
+            if game.player_1 == player:
+                game.castle_1 = player_castle
+                game.castle_2 = opponent_castle
+            else:
+                game.castle_2 = player_castle
+                game.castle_1 = opponent_castle
+            game.who_won = who_won
+            game.who_created = player
+            game.is_new = False
+            game.is_waiting_confirmation = True
+
+        game.save()
+        return None
 
     @staticmethod
     def __calculate_points_change(player_won: Player, player_lost: Player):
