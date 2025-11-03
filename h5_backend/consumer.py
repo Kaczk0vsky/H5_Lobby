@@ -88,12 +88,13 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
             raise ValueError(f"Player {nickname} not found")
 
         unaccepted_game = await self._get_unaccepted_game(player)
-        if unaccepted_game:
-            notify_unaccepted_report(player, unaccepted_game)
-            raise ValueError(f"You have unconfirmed report!")
 
         @sync_to_async
         def add_to_queue():
+            if unaccepted_game:
+                notify_unaccepted_report(player, unaccepted_game)
+                raise ValueError(f"You have unconfirmed report!")
+
             with transaction.atomic():
                 player.player_state = PlayerState.IN_QUEUE
                 player.is_searching_ranked = is_searching_ranked
