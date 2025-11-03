@@ -131,3 +131,10 @@ class Ban(models.Model):
 
     def __str__(self):
         return f"Player {self.player} - {self.get_time_left()}"
+
+
+class OfflineMessage(models.Model):
+    recipient = models.ForeignKey("Player", on_delete=models.CASCADE)
+    event_type = models.CharField(max_length=100)
+    payload = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)

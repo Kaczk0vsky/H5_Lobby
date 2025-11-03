@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 from asgiref.sync import sync_to_async
 
-from h5_backend.models import Player, Game, Ban, PlayerState
+from h5_backend.models import Player, Game, Ban, PlayerState, OfflineMessage
 from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_opponent_left_queue
 
 
@@ -57,12 +57,29 @@ class ModelParser:
 
 
 class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
+    @sync_to_async
+    def _get_pending_messages(self, player):
+        return list(OfflineMessage.objects.filter(recipient=player).order_by("created_at"))
+
+    @sync_to_async
+    def _delete_delivered(self, msg):
+        msg.delete()
+
     async def connect(self):
         self.nickname = self.scope["url_route"]["kwargs"]["nickname"]
         self.group_name = f"player_{self.nickname}"
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
+
+        player = await self._get_player(self.nickname)
+        await self._send_pending_messages(player)
+
+    async def _send_pending_messages(self, player):
+        pending = await self._get_pending_messages(player)
+        for msg in pending:
+            await self.send(json.dumps({"event": msg.event_type, **msg.payload}))
+            await self._delete_delivered(msg)
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)

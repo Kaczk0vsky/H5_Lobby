@@ -1,33 +1,32 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
+from h5_backend.models import OfflineMessage, Player
+
+
+def send_or_store(player: Player, event_type: str, payload: dict):
+    layer = get_channel_layer()
+    group_name = f"player_{player.nickname}"
+    try:
+        async_to_sync(layer.group_send)(group_name, {"type": event_type, **payload})
+    except Exception:
+        OfflineMessage.objects.create(recipient=player, event_type=event_type, payload=payload)
+
 
 def notify_match_found(player1, player2):
-    layer = get_channel_layer()
-    async_to_sync(layer.group_send)(
-        f"player_{player1.nickname}", {"type": "match.found", "opponent": player2.nickname, "points": player2.ranking_points}
-    )
-    async_to_sync(layer.group_send)(
-        f"player_{player2.nickname}", {"type": "match.found", "opponent": player1.nickname, "points": player1.ranking_points}
-    )
+    send_or_store(player1, "match.found", {"opponent": player2.nickname, "points": player2.ranking_points})
+    send_or_store(player2, "match.found", {"opponent": player1.nickname, "points": player1.ranking_points})
 
 
 def notify_match_status_changed(player, opponent_accepted, opponent_declined):
-    layer = get_channel_layer()
-    async_to_sync(layer.group_send)(
-        f"player_{player.nickname}",
-        {
-            "type": "check.if.accepted",
-            "opponent_accepted": opponent_accepted,
-            "opponent_declined": opponent_declined,
-        },
+    send_or_store(
+        player, "match.found", {"type": "check.if.accepted", "opponent_accepted": opponent_accepted, "opponent_declined": opponent_declined}
     )
 
 
 def notify_unaccepted_report(player, game):
-    layer = get_channel_layer()
-    async_to_sync(layer.group_send)(
-        f"player_{player.nickname}",
+    send_or_store(
+        player,
         {
             "type": "unaccepted.report.data",
             "player1_nickname": game.player_1.nickname,
@@ -40,22 +39,8 @@ def notify_unaccepted_report(player, game):
 
 
 def notify_opponent_left_queue(player, opponent):
-    layer = get_channel_layer()
-    async_to_sync(layer.group_send)(
-        f"player_{player.nickname}",
-        {
-            "type": "opponent.left.queue",
-            "opponent": opponent.nickname,
-        },
-    )
+    send_or_store(player, {"type": "opponent.left.queue", "opponent": opponent.nickname})
 
 
 def notify_users_list_change(player, users_list):
-    layer = get_channel_layer()
-    async_to_sync(layer.group_send)(
-        f"player_{player.nickname}",
-        {
-            "type": "refresh.friend.list",
-            "users_list": users_list,
-        },
-    )
+    send_or_store(player, {"type": "refresh.friend.list", "users_list": users_list})

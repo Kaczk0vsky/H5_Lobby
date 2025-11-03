@@ -50,6 +50,5 @@ class WebSocketClient:
     async def send(self, payload):
         if self.ws:
             await self.ws.send(json.dumps(payload))
-            logger.debug(f"Sent: {payload["action"]}")
         else:
             logger.warning("Tried to send message, but WebSocket is closed.")

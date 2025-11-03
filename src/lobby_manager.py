@@ -100,6 +100,7 @@ class H5_Lobby(GameWindowsBase):
     __profile_data = None
     __report_data = None
     __report_title = None
+    __sorted_players = None
 
     def __init__(
         self,
@@ -283,7 +284,7 @@ class H5_Lobby(GameWindowsBase):
                     self.handle_ws_message(message)
 
             if self.__refresh_users_list:
-                USERS_LIST.get_players_list(self.sorted_players)
+                USERS_LIST.get_players_list(self.__sorted_players)
                 self.__refresh_users_list = False
 
             self.SCREEN.blit(self.BG, (0, 0))
@@ -1361,7 +1362,6 @@ class H5_Lobby(GameWindowsBase):
 
     def handle_ws_message(self, message):
         event = message.get("event")
-        logger.debug(f"Handling message: {message["event"]}")
 
         if event == "unaccepted_report_data":
             self.__report_data = {
@@ -1392,15 +1392,18 @@ class H5_Lobby(GameWindowsBase):
 
         elif event == "refresh_friend_list":
             players_data = message.get("users_list")
-            self.sorted_players = {
+            previous_sorted_players = self.__sorted_players
+            self.__sorted_players = {
                 player: (score, format_state(state), is_ranked)
                 for player, (score, state, is_ranked) in sorted(
                     players_data.items(),
                     key=lambda item: item[1][0],
                     reverse=True,
                 )
+                if player != self.user["nickname"]
             }
-            self.__refresh_users_list = True
+            if not previous_sorted_players == self.__sorted_players:
+                self.__refresh_users_list = True
 
         elif event == "error_occured":
             logger.warning(f"Error occured: {event}")
