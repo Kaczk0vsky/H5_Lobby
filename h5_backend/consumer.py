@@ -64,6 +64,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
     @sync_to_async
     def _set_connection_state(self, player: Player, state: bool):
         player.connected_to_ws = state
+        player.save()
 
     @sync_to_async
     def _delete_delivered(self, msg: OfflineMessage):
