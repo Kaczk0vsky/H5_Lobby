@@ -93,7 +93,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         def add_to_queue():
             if unaccepted_game:
                 notify_unaccepted_report(player, unaccepted_game)
-                raise ValueError(f"You have unconfirmed report!")
+                return
 
             with transaction.atomic():
                 player.player_state = PlayerState.IN_QUEUE
