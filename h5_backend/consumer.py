@@ -6,7 +6,7 @@ from django.db.models import Q
 from asgiref.sync import sync_to_async
 
 from h5_backend.models import Player, Game, Ban, PlayerState
-from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_opponent_left_queue, notify_error
+from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_opponent_left_queue
 
 
 class ModelParser:
@@ -205,12 +205,12 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
             )
         )
 
-    async def error_occured(self, event):
+    async def refresh_friend_list(self, event):
         await self.send(
             json.dumps(
                 {
-                    "event": "error_occured",
-                    "error_message": event["error_message"],
+                    "event": "refresh_friend_list",
+                    "users_list": event["users_list"],
                 }
             )
         )

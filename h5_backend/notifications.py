@@ -50,12 +50,12 @@ def notify_opponent_left_queue(player, opponent):
     )
 
 
-def notify_error(player, error):
+def notify_users_list_change(player, users_list):
     layer = get_channel_layer()
     async_to_sync(layer.group_send)(
         f"player_{player.nickname}",
         {
-            "type": "error.occured",
-            "error_message": error,
+            "type": "refresh.friend.list",
+            "users_list": users_list,
         },
     )

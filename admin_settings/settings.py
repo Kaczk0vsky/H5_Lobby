@@ -22,7 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
-# TODO: set False for HTTPS
 DEBUG = False
 
 ALLOWED_HOSTS = ["h5-tavern.pl", "www.h5-tavern.pl", "tavernofashan.pl", "www.tavernofashan.pl"]
@@ -150,6 +149,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ASGI_APPLICATION = "H5_Lobby.asgi.application"
 
+# WebSocket Settings
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -157,4 +157,14 @@ CHANNEL_LAYERS = {
             "hosts": [("127.0.0.1", 6379)],
         },
     },
+}
+
+# Cache Settings
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+    }
 }

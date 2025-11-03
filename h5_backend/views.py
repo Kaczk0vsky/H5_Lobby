@@ -266,60 +266,6 @@ class SetPlayerStateView(View):
 
 
 @method_decorator(csrf_protect, name="dispatch")
-@method_decorator(ratelimit(key="user_or_ip", rate="10/m", method="POST", block=True), name="dispatch")
-class UpdateUsersList(View):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def _parse_request_data(self, request):
-        try:
-            data = json.loads(request.body.decode("utf-8"))
-            serializer = UserSerializer(data=data, required_fields=["nickname"])
-            if not serializer.is_valid():
-                return None, JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-
-            nickname = serializer.validated_data["nickname"]
-
-            return nickname, None
-
-        except json.JSONDecodeError:
-            return None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
-
-    def _get_online_players(self, nickname):
-        try:
-            players = Player.objects.exclude(player_state="offline").exclude(nickname=nickname)
-            players_data = {
-                nick: [ranking_points, player_state, is_ranked]
-                for nick, ranking_points, player_state, is_ranked in players.values_list(
-                    "nickname", "ranking_points", "player_state", "is_searching_ranked"
-                )
-            }
-            return players_data, None
-
-        except Exception as e:
-            return None, JsonResponse({"success": False, "error": "Players not found"}, status=400)
-
-    def post(self, request, *args, **kwargs):
-        try:
-            nickname, parse_error = self._parse_request_data(request)
-            if parse_error:
-                return parse_error
-
-            players_data, fetch_error = self._get_online_players(nickname)
-            if fetch_error:
-                return fetch_error
-
-            return JsonResponse({"success": True, "players_data": players_data})
-
-        except json.JSONDecodeError:
-            return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
-
-        except Exception as e:
-            logger.error(f"Checking if opponent accepted error: {e}")
-            return JsonResponse({"success": False, "error": "Something went wrong"}, status=500)
-
-
-@method_decorator(csrf_protect, name="dispatch")
 @method_decorator(ratelimit(key="user_or_ip", rate="5/m", method=["POST"], block=True), name="dispatch")
 class HandleMatchReport(View):
     def __init__(self, **kwargs):

@@ -4,9 +4,7 @@ import requests
 import ctypes
 import webbrowser
 import asyncio
-import queue
 import threading
-import concurrent.futures
 
 from pygame.locals import *
 
@@ -28,7 +26,6 @@ from src.helpers import (
     format_state,
     render_small_caps,
     check_server_connection,
-    run_async_in_thread,
 )
 from src.settings_reader import load_lobby_data
 from src.settings_writer import save_client_settings, save_lobby_data
@@ -86,7 +83,7 @@ class H5_Lobby(GameWindowsBase):
     __queue_canceled = False
     __reconnect_back_to_game = False
     __set_buttons_active = False
-    __stop_refreshing_friends_list = False
+    __refresh_users_list = False
     __is_connected = True
     __has_disconnected = False
     __create_report_question = False
@@ -276,7 +273,6 @@ class H5_Lobby(GameWindowsBase):
             line=self.LINE,
             box=self.CHECKBOX,
         )
-        self.refresh_friends_list(USERS_LIST)
 
         buttons = [FIND_GAME_BUTTON, CREATE_REPORT, RANKING, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
         logger.debug("Displaying lobby window.")
@@ -285,6 +281,10 @@ class H5_Lobby(GameWindowsBase):
                 message = self.websocket_client._message_queue.get_nowait()
                 if message:
                     self.handle_ws_message(message)
+
+            if self.__refresh_users_list:
+                USERS_LIST.get_players_list(self.sorted_players)
+                self.__refresh_users_list = False
 
             self.SCREEN.blit(self.BG, (0, 0))
             self.cursor.update()
@@ -1391,8 +1391,16 @@ class H5_Lobby(GameWindowsBase):
                 logger.debug("Got opponent acceptance status.")
 
         elif event == "refresh_friend_list":
-            # update the users list
-            pass
+            players_data = message.get("users_list")
+            self.sorted_players = {
+                player: (score, format_state(state), is_ranked)
+                for player, (score, state, is_ranked) in sorted(
+                    players_data.items(),
+                    key=lambda item: item[1][0],
+                    reverse=True,
+                )
+            }
+            self.__refresh_users_list = True
 
         elif event == "error_occured":
             logger.warning(f"Error occured: {event}")
@@ -1423,48 +1431,6 @@ class H5_Lobby(GameWindowsBase):
             "nickname": self.user["nickname"],
         }
         self.send_ws_message(payload)
-
-    @run_in_thread
-    # TODO: WebSocket implementation
-    def refresh_friends_list(self, users_list: UsersList):
-        url = f"https://{env_dict["SERVER_URL"]}/db/{env_dict['PATH_TO_USERS_LIST']}/"
-        if not self.crsf_token:
-            self.__window_overlay = True
-            self.__error_msg = "Please login again."
-            return
-
-        user_data = {"nickname": self.user["nickname"]}
-        headers = {
-            "Referer": f"https://{env_dict["SERVER_URL"]}/",
-            "X-CSRFToken": self.crsf_token,
-            "Content-Type": "application/json",
-        }
-        logger.debug("Refreshing friends list...")
-        while True:
-            if self.__stop_refreshing_friends_list:
-                time.sleep(30)
-                continue
-
-            try:
-                response = self.session.post(url, json=user_data, headers=headers)
-                if response.status_code == 200:
-                    json_response = response.json()
-                    players_data = json_response.get("players_data")
-                    sorted_players = {
-                        player: (score, format_state(state), is_ranked)
-                        for player, (score, state, is_ranked) in sorted(
-                            players_data.items(),
-                            key=lambda item: item[1][0],
-                            reverse=True,
-                        )
-                    }
-                    users_list.get_players_list(sorted_players)
-                    logger.info("Friends list refreshed succesfully.")
-
-            except Exception as e:
-                logger.warning(f"Error while refreshing friends list: {e}")
-
-            time.sleep(15)
 
     @run_in_thread
     def handle_match_report(self, report_data: dict):

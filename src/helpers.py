@@ -216,12 +216,3 @@ def disconnect_unused_network_adapters():
         logger.error(f"Error executing PowerShell command: {e}")
     except json.JSONDecodeError:
         logger.error("Failed to parse JSON from PowerShell output.")
-
-
-def run_async_in_thread(coro_func, *args, **kwargs):
-    def runner():
-        asyncio.run(coro_func(*args, **kwargs))
-
-    thread = threading.Thread(target=runner, daemon=True)
-    thread.start()
-    return thread

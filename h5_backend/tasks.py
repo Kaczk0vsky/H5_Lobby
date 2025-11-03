@@ -3,9 +3,10 @@ import subprocess
 from celery import shared_task
 from django.db import transaction
 from django.db.models import Q
+from django.core.cache import cache
 
 from h5_backend.models import Player, Game, PlayerState
-from h5_backend.notifications import notify_match_found
+from h5_backend.notifications import notify_match_found, notify_users_list_change
 
 
 @shared_task
@@ -72,3 +73,22 @@ def check_queue():
                             player2_locked.player_state = PlayerState.WAITING_ACCEPTANCE
                             player1_locked.save()
                             player2_locked.save()
+
+
+@shared_task
+def update_user_list():
+    current_users = Player.objects.exclude(player_state=PlayerState.OFFLINE)
+    current_users_formatted = {
+        nick: [ranking_points, player_state, is_ranked]
+        for nick, ranking_points, player_state, is_ranked in current_users.values_list(
+            "nickname", "ranking_points", "player_state", "is_searching_ranked"
+        )
+    }
+    previous_users_formatted = cache.get("previous_users_formatted") or []
+
+    if not current_users_formatted == previous_users_formatted:
+        for player in current_users:
+            users_list = current_users_formatted.pop(str(player.nickname))
+            notify_users_list_change(player, users_list)
+
+    cache.set("previous_users_formatted", current_users_formatted, timeout=None)
