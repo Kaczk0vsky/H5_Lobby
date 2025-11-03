@@ -86,7 +86,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
             await self.send(json.dumps({"event": msg.event_type, **msg.payload}))
             await self._delete_delivered(msg)
 
-    async def disconnect(self):
+    async def disconnect(self, close_code):
         player = await self._get_player(self.nickname)
         await self._set_connection_state(player, False)
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
