@@ -88,7 +88,8 @@ def update_user_list():
 
     if not current_users_formatted == previous_users_formatted:
         for player in current_users:
-            users_list = current_users_formatted.pop(str(player.nickname))
+            users_list = current_users_formatted.copy()
+            users_list.pop(player.nickname, None)
             notify_users_list_change(player, users_list)
 
     cache.set("previous_users_formatted", current_users_formatted, timeout=None)
