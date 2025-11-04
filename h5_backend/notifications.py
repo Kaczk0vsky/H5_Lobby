@@ -43,4 +43,4 @@ def notify_opponent_left_queue(player, opponent):
 
 
 def notify_users_list_change(player, users_list):
-    send_or_store(player, {"type": "refresh.friend.list", "users_list": users_list})
+    send_or_store(player, "refresh.friend.list", {"type": "refresh.friend.list", "users_list": users_list})
