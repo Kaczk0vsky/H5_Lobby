@@ -138,5 +138,5 @@ class Ban(models.Model):
 class OfflineMessage(models.Model):
     recipient = models.ForeignKey("Player", on_delete=models.CASCADE)
     event_type = models.CharField(max_length=255)
-    payload = models.CharField()
+    payload = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)

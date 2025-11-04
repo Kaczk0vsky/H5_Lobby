@@ -1,13 +1,13 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
-from h5_backend.models import OfflineMessage, Player
+from h5_backend.models import OfflineMessage, Player, PlayerState
 
 
 def send_or_store(player: Player, event_type: str, payload: dict):
     layer = get_channel_layer()
     group_name = f"player_{player.nickname}"
-    if player.connected_to_ws:
+    if player.player_state != PlayerState.OFFLINE and player.connected_to_ws:
         async_to_sync(layer.group_send)(group_name, {"type": event_type, **payload})
     else:
         OfflineMessage.objects.create(recipient=player, event_type=event_type, payload=payload)
