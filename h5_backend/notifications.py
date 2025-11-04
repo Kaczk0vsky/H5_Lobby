@@ -14,21 +14,19 @@ def send_or_store(player: Player, event_type: str, payload: dict):
 
 
 def notify_match_found(player1, player2):
-    send_or_store(player1, "match.found", {"opponent": player2.nickname, "points": player2.ranking_points})
-    send_or_store(player2, "match.found", {"opponent": player1.nickname, "points": player1.ranking_points})
+    send_or_store(player1, "match_found", {"opponent": player2.nickname, "points": player2.ranking_points})
+    send_or_store(player2, "match_found", {"opponent": player1.nickname, "points": player1.ranking_points})
 
 
 def notify_match_status_changed(player, opponent_accepted, opponent_declined):
-    send_or_store(
-        player, "match.found", {"type": "check.if.accepted", "opponent_accepted": opponent_accepted, "opponent_declined": opponent_declined}
-    )
+    send_or_store(player, "check_if_accepted", {"opponent_accepted": opponent_accepted, "opponent_declined": opponent_declined})
 
 
 def notify_unaccepted_report(player, game):
     send_or_store(
         player,
+        "unaccepted_report_data",
         {
-            "type": "unaccepted.report.data",
             "player1_nickname": game.player_1.nickname,
             "player2_nickname": game.player_2.nickname,
             "player1_castle": game.castle_1,
@@ -39,8 +37,8 @@ def notify_unaccepted_report(player, game):
 
 
 def notify_opponent_left_queue(player, opponent):
-    send_or_store(player, {"type": "opponent.left.queue", "opponent": opponent.nickname})
+    send_or_store(player, "opponent_left_queue", {"opponent": opponent.nickname})
 
 
 def notify_users_list_change(player, users_list):
-    send_or_store(player, "refresh.friend.list", {"type": "refresh.friend.list", "users_list": users_list})
+    send_or_store(player, "refresh_friend_list", {"users_list": users_list})
