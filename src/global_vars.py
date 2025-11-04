@@ -24,7 +24,7 @@ fonts_sizes = {
     "2560x1440": [40, 32],
 }
 env_dict = {
-    "SERVER_URL": os.getenv("SERVER_URL"),
+    "SERVER_URL": "tavernofashan.pl",
     "VPN_HUB_NAME": os.getenv("VPN_HUB_NAME"),
     "PATH_TOKEN": os.getenv("PATH_TOKEN"),
     "PATH_REGISTER": os.getenv("PATH_REGISTER"),

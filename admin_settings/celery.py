@@ -13,10 +13,6 @@ app.conf.beat_schedule = {
         "task": "h5_backend.tasks.check_queue",
         "schedule": 5,
     },
-    "every-3-seconds": {
-        "task": "h5_backend.tasks.update_user_list",
-        "schedule": 3,
-    },
 }
 app.conf.timezone = "UTC"
 
