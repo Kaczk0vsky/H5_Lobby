@@ -67,7 +67,7 @@ def check_queue():
 
                         if not existing_game.exists():
                             Game.objects.create(player_1=player1_locked, player_2=player2_locked, is_new=True, is_ranked=is_ranked)
-                            notify_match_found(player1_locked, player2_locked)
+                            notify_match_found(player1=player1_locked, player2=player2_locked, is_invited=False)
                             player1_locked.player_state = PlayerState.WAITING_ACCEPTANCE
                             player2_locked.player_state = PlayerState.WAITING_ACCEPTANCE
                             player1_locked.save()

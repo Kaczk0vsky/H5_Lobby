@@ -13,9 +13,9 @@ def send_or_store(player: Player, event_type: str, payload: dict):
         OfflineMessage.objects.create(recipient=player, event_type=event_type, payload=payload)
 
 
-def notify_match_found(player1, player2):
-    send_or_store(player1, "match_found", {"opponent": player2.nickname, "points": player2.ranking_points})
-    send_or_store(player2, "match_found", {"opponent": player1.nickname, "points": player1.ranking_points})
+def notify_match_found(player1, player2, is_invited):
+    send_or_store(player1, "match_found", {"opponent": player2.nickname, "points": player2.ranking_points, "is_invited": is_invited})
+    send_or_store(player2, "match_found", {"opponent": player1.nickname, "points": player1.ranking_points, "is_invited": is_invited})
 
 
 def notify_match_status_changed(player, opponent_accepted, opponent_declined):

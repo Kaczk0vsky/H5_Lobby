@@ -6,7 +6,7 @@ from django.db.models import Q
 from asgiref.sync import sync_to_async
 
 from h5_backend.models import Player, Game, Ban, PlayerState, OfflineMessage
-from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_opponent_left_queue
+from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_opponent_left_queue, notify_match_found
 
 
 class ModelParser:
@@ -101,6 +101,8 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
             await self._remove_from_queue(data)
         elif action == "check_if_accepted":
             await self._check_if_accepted(data)
+        elif action == "invite_player":
+            await self._invite_player(data)
         else:
             pass
 
@@ -184,6 +186,31 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
                 notify_match_status_changed(player, False, True)
 
         await update_state()
+
+    async def _invite_player(self, data: str):
+        player_nickname = data.get("nickname")
+        opponent_nickname = data.get("opponent")
+        is_searching_ranked = data.get("is_searching_ranked")
+        min_opponent_points = data.get("min_opponent_points")
+        player = await self._get_player(player_nickname)
+        if not player:
+            raise ValueError(f"Player {player_nickname} not found")
+
+        opponent = await self._get_player(opponent_nickname)
+        if not opponent:
+            raise ValueError(f"Player {opponent} not found")
+
+        @sync_to_async
+        def send_invite():
+            if player.player_state == PlayerState.ONLINE and opponent.player_state == PlayerState.ONLINE:
+                Game.objects.create(player_1=player, player_2=opponent, is_new=True, is_ranked=is_searching_ranked)
+                notify_match_found(player1=player, player2=opponent, is_invited=True)
+                player.player_state = PlayerState.WAITING_ACCEPTANCE
+                opponent.player_state = PlayerState.WAITING_ACCEPTANCE
+                player.save()
+                opponent.save()
+
+        await send_invite()
 
     # EVENT HANDLERS
     async def match_found(self, event):
