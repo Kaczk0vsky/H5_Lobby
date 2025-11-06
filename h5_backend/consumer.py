@@ -191,7 +191,6 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         player_nickname = data.get("nickname")
         opponent_nickname = data.get("opponent")
         is_searching_ranked = data.get("is_searching_ranked")
-        min_opponent_points = data.get("min_opponent_points")
         player = await self._get_player(player_nickname)
         if not player:
             raise ValueError(f"Player {player_nickname} not found")

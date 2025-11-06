@@ -20,7 +20,7 @@ from src.global_vars import (
 from src.base_window import GameWindowsBase
 from src.background_manager import AschanArena3Game
 from src.helpers import (
-    play_on_empty,
+    play_on_empty_channel,
     calculate_time_passed,
     get_window,
     format_state,
@@ -92,6 +92,7 @@ class H5_Lobby(GameWindowsBase):
     __generate_report_elements = False
     __loading_profile_data = False
     __profile_button_active = False
+    __is_invited = False
     __elapsed_time = None
     __decline_time = None
     __queue_channel = None
@@ -264,6 +265,7 @@ class H5_Lobby(GameWindowsBase):
                 590 * (transformation_factors[self.transformation_option][1]),
             ),
             color=self.text_color,
+            hovering_color=self.hovering_color,
             font_size=self.font_size[0],
             title="Players Online",
             image=self.PLAYER_LIST,
@@ -303,7 +305,9 @@ class H5_Lobby(GameWindowsBase):
                 button.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
             try:
-                USERS_LIST.update(self.SCREEN)
+                USERS_LIST.update(self.SCREEN, MENU_MOUSE_POS)
+                for player, _ in USERS_LIST.player_list:
+                    player.player_action_menu.update(self.SCREEN, MENU_MOUSE_POS)
             except pygame.error as e:
                 logger.warning(f"Users list rendering error: {e}")
                 continue
@@ -617,6 +621,15 @@ class H5_Lobby(GameWindowsBase):
 
             for event in pygame.event.get():
                 USERS_LIST.event(event)
+                for player, _ in USERS_LIST.player_list:
+                    player_action = player.player_action_menu.event(event, MENU_MOUSE_POS)
+                    if player_action == "invite_player":
+                        self.send_game_invite_ws(opponent_nickname=player.nickname)
+                        logger.debug(f"Invited player: {player.nickname}")
+                    elif player_action == "send_message":
+                        # TODO: sending messages functionality
+                        pass
+
                 if event.type == pygame.QUIT:
                     if self.__queue_status:
                         self.remove_from_queue_ws(is_accepted=False)
@@ -745,6 +758,7 @@ class H5_Lobby(GameWindowsBase):
                                     590 * (transformation_factors[self.transformation_option][1]),
                                 ),
                                 color=self.text_color,
+                                hovering_color=self.hovering_color,
                                 font_size=self.font_size[0],
                                 title="Players Online",
                                 image=self.PLAYER_LIST,
@@ -856,7 +870,7 @@ class H5_Lobby(GameWindowsBase):
             if not self.__elapsed_time:
                 self.__elapsed_time = time.time()
             if not self.__game_found_music:
-                self.__queue_channel = play_on_empty("resources/match_found.wav", volume=self.config["volume"])
+                self.__queue_channel = play_on_empty_channel("resources/match_found.wav", volume=self.config["volume"])
                 pygame.mixer.Channel(0).set_volume(0.0)
                 self.__game_found_music = True
 
@@ -1379,6 +1393,7 @@ class H5_Lobby(GameWindowsBase):
             self.__found_game = True
             self.__opponent_nickname = message["opponent"]
             self.__oponnent_ranking_points = message["points"]
+            self.__is_invited = message["is_invited"]
             logger.debug(f"Found opponent: {self.__opponent_nickname}")
 
         elif event == "check_if_accepted":
@@ -1432,6 +1447,15 @@ class H5_Lobby(GameWindowsBase):
         payload = {
             "action": "check_if_accepted",
             "nickname": self.user["nickname"],
+        }
+        self.send_ws_message(payload)
+
+    def send_game_invite_ws(self, opponent_nickname: str):
+        payload = {
+            "action": "invite_player",
+            "nickname": self.user["nickname"],
+            "opponent": opponent_nickname,
+            "is_searching_ranked": self.config["is_ranked"],
         }
         self.send_ws_message(payload)
 

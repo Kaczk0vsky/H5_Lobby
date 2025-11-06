@@ -1,6 +1,6 @@
 import pygame
 
-from src.helpers import render_small_caps, play_on_empty
+from src.helpers import render_small_caps, play_on_empty_channel
 
 
 class OptionBox:
@@ -89,14 +89,14 @@ class OptionBox:
 
     def check_for_input(self, position: tuple[int, int]) -> bool:
         if self.arrow_left_rect.collidepoint(position):
-            play_on_empty(path="resources/button_click.mp3")
+            play_on_empty_channel(path="resources/button_click.mp3")
             self.selected -= 1
             if self.selected == -1:
                 self.selected = len(self.option_list) - 1
             return True
 
         if self.arrow_right_rect.collidepoint(position):
-            play_on_empty(path="resources/button_click.mp3")
+            play_on_empty_channel(path="resources/button_click.mp3")
             self.selected += 1
             if self.selected == len(self.option_list):
                 self.selected = 0

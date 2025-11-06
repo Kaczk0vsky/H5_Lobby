@@ -44,6 +44,7 @@ class UsersList:
         self,
         position: tuple[float, float],
         color: pygame.Color,
+        hovering_color: pygame.Color,
         font_size: int,
         title: str,
         image: pygame.Surface,
@@ -58,6 +59,7 @@ class UsersList:
         self.x_pos = position[0]
         self.y_pos = position[1]
         self.color = color
+        self.hovering_color = hovering_color
         self.font_size = font_size
         self.title = title
         self.image = image
@@ -107,7 +109,7 @@ class UsersList:
             self.rect_bg.bottom - self.line_rect.bottom,
         )
 
-    def update(self, screen: pygame.Surface) -> None:
+    def update(self, screen: pygame.Surface, mouse_pos: tuple[int, int]) -> None:
         screen.blit(self.image_bg, self.rect_bg)
         self.image_bg.fill((0, 0, 0, 220))
         screen.blit(self.title_surface, self.title_rect)
@@ -137,7 +139,7 @@ class UsersList:
         for player, base_y in self.player_list:
             player_y = base_y - scroll_offset
             player.rect.y = player_y
-            player.update(screen)
+            player.update(screen, mouse_pos)
 
         screen.set_clip(old_clip)
 
@@ -147,6 +149,8 @@ class UsersList:
 
     def event(self, event) -> None:
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        for player, base_y in self.player_list:
+            player.event(event, (mouse_x, mouse_y))
 
         if event.type == pygame.MOUSEWHEEL and self.rect_bg.collidepoint((mouse_x, mouse_y)):
             self.target_scroll_pos -= event.y * len(self.text) * 3
@@ -206,6 +210,7 @@ class UsersList:
                             self.rect.height / 10,
                         ),
                         color=self.color,
+                        hovering_color=self.hovering_color,
                         font_size=self.font_size,
                         nickname=key,
                         ranking_points=value[0],
@@ -227,6 +232,7 @@ class UsersList:
                         self.rect.height / 10,
                     ),
                     color=self.color,
+                    hovering_color=self.hovering_color,
                     font_size=self.font_size,
                     nickname=key,
                     ranking_points=value[0],

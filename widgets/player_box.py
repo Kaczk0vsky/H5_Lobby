@@ -1,6 +1,7 @@
 import pygame
 
-from src.helpers import render_small_caps
+from src.helpers import render_small_caps, play_on_empty_channel
+from widgets.player_action_menu import PlayerActionMenu
 
 
 class PlayerBox:
@@ -42,6 +43,7 @@ class PlayerBox:
         position: tuple[float, float],
         dimensions: tuple[int, int],
         color: pygame.Color,
+        hovering_color: pygame.Color,
         font_size: int,
         nickname: str,
         ranking_points: int,
@@ -53,6 +55,7 @@ class PlayerBox:
         self.w = dimensions[0]
         self.h = dimensions[1]
         self.color = color
+        self.hovering_color = hovering_color
         self.red = "#db1102"
         self.green = "#02ba09"
         self.font_size = font_size
@@ -64,11 +67,20 @@ class PlayerBox:
         self.rect = pygame.Rect(position, dimensions)
         self.image_line = pygame.transform.scale(image_line, (self.w, image_line.get_height() * 0.4))
         self.image_box = pygame.transform.scale(image_box, (image_box.get_width() * 1.25, image_box.get_height() * 1.25))
+        self.player_action_menu = PlayerActionMenu(
+            position=(self.rect.x * 0.755, self.rect.y * 0.65),
+            dimensions=(self.w, self.h * 2),
+            color=self.color,
+            hovering_color=self.hovering_color,
+            font_size=self.font_size,
+        )
+        self.player_action_menu.is_visible = False
 
         self.update_surfaces()
 
     def update_surfaces(self):
         self.text_surface_nickname = render_small_caps(self.nickname, self.font_size, self.color)
+        self.text_surface_nickname_highlighted = render_small_caps(self.nickname, self.font_size, self.hovering_color)
         self.text_surface_points = render_small_caps(f"Ranking points: {self.ranking_points}", self.font_small, self.color)
         self.text_surface_status_title = render_small_caps("Status: ", self.font_small, self.color)
         state_str = f"{self.state} ({self.state_info})" if self.state in self.__additional_info_state else self.state
@@ -76,11 +88,18 @@ class PlayerBox:
             state_str, self.font_small, self.green if str(self.state) in self.__green_coloring_states else self.red
         )
 
-    def update(self, screen: pygame.Surface) -> None:
+    def update(self, screen: pygame.Surface, mouse_pos: tuple[int, int]) -> None:
         text_x = self.rect.x + self.w * 0.075
         text_y = self.rect.y + self.h * 0.1
+        nickname_x = text_x + self.w * 0.15
+        nickname_y = text_y
+        nickname_rect = self.get_nickname_rect()
 
-        screen.blit(self.text_surface_nickname, (text_x + self.w * 0.15, text_y))
+        if nickname_rect.collidepoint(mouse_pos):
+            screen.blit(self.text_surface_nickname_highlighted, (nickname_x, nickname_y))
+        else:
+            screen.blit(self.text_surface_nickname, (nickname_x, nickname_y))
+
         screen.blit(self.text_surface_points, (text_x, text_y + self.h * 0.4))
         screen.blit(
             self.text_surface_status_title,
@@ -103,3 +122,25 @@ class PlayerBox:
             image_x = self.rect.x + self.w - self.image_line.get_width()
             image_y = self.rect.y + self.h
             screen.blit(self.image_line, (image_x, image_y))
+
+    def event(self, event, mouse_pos: tuple[int, int]) -> None:
+        nickname_rect = self.get_nickname_rect()
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if nickname_rect.collidepoint(mouse_pos):
+                play_on_empty_channel(path="resources/button_click.mp3")
+                self.player_action_menu.is_visible = True
+                self.player_action_menu.ignore_next_click = True
+
+    def get_nickname_rect(self) -> pygame.Rect:
+        text_x = self.rect.x + self.w * 0.075
+        text_y = self.rect.y + self.h * 0.1
+        nickname_x = text_x + self.w * 0.15
+        nickname_y = text_y
+
+        return pygame.Rect(
+            nickname_x,
+            nickname_y,
+            self.text_surface_nickname.get_width(),
+            self.text_surface_nickname.get_height(),
+        )

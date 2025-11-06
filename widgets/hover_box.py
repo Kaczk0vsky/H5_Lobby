@@ -1,6 +1,6 @@
 import pygame
 
-from src.helpers import play_on_empty
+from src.helpers import play_on_empty_channel
 
 
 class HoverBox:
@@ -42,6 +42,6 @@ class HoverBox:
 
     def check_for_input(self, position: tuple[int, int]) -> bool:
         if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
-            play_on_empty(path="resources/button_click.mp3")
+            play_on_empty_channel(path="resources/button_click.mp3")
             return True
         return False

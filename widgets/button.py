@@ -1,6 +1,6 @@
 import pygame
 
-from src.helpers import play_on_empty, render_small_caps
+from src.helpers import play_on_empty_channel, render_small_caps
 
 
 class Button:
@@ -126,7 +126,7 @@ class Button:
     def check_for_input(self, position: tuple[int, int]) -> bool:
         if self.active:
             if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
-                play_on_empty(path="resources/button_click.mp3")
+                play_on_empty_channel(path="resources/button_click.mp3")
                 return True
             return False
 
