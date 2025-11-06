@@ -67,18 +67,15 @@ class PlayerBox:
         self.rect = pygame.Rect(position, dimensions)
         self.image_line = pygame.transform.scale(image_line, (self.w, image_line.get_height() * 0.4))
         self.image_box = pygame.transform.scale(image_box, (image_box.get_width() * 1.25, image_box.get_height() * 1.25))
-        self.player_action_menu = PlayerActionMenu(
-            position=(self.rect.x * 0.755, self.rect.y * 0.65),
-            dimensions=(self.w, self.h * 2),
-            color=self.color,
-            hovering_color=self.hovering_color,
-            font_size=self.font_size,
-        )
-        self.player_action_menu.is_visible = False
 
-        self.update_surfaces()
+        self.update_surfaces(position, dimensions)
 
-    def update_surfaces(self):
+    def update_surfaces(
+        self,
+        position: tuple[float, float],
+        dimensions: tuple[int, int],
+    ):
+        self.rect = pygame.Rect(position, dimensions)
         self.text_surface_nickname = render_small_caps(self.nickname, self.font_size, self.color)
         self.text_surface_nickname_highlighted = render_small_caps(self.nickname, self.font_size, self.hovering_color)
         self.text_surface_points = render_small_caps(f"Ranking points: {self.ranking_points}", self.font_small, self.color)
@@ -86,6 +83,13 @@ class PlayerBox:
         state_str = f"{self.state} ({self.state_info})" if self.state in self.__additional_info_state else self.state
         self.text_surface_status = render_small_caps(
             state_str, self.font_small, self.green if str(self.state) in self.__green_coloring_states else self.red
+        )
+        self.player_action_menu = PlayerActionMenu(
+            position=(self.rect.x * 0.755, self.rect.y),
+            dimensions=(self.w, self.h * 2),
+            color=self.color,
+            hovering_color=self.hovering_color,
+            font_size=self.font_size,
         )
 
     def update(self, screen: pygame.Surface, mouse_pos: tuple[int, int]) -> None:

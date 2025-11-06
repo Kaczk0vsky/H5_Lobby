@@ -219,6 +219,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
                     "event": "match_found",
                     "opponent": event["opponent"],
                     "points": event["points"],
+                    "is_invited": event["is_invited"],
                 }
             )
         )

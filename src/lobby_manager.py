@@ -619,6 +619,7 @@ class H5_Lobby(GameWindowsBase):
                 if not self.__connection_timer:
                     RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
+            continue_main = False
             for event in pygame.event.get():
                 USERS_LIST.event(event)
                 for player, _ in USERS_LIST.player_list:
@@ -626,9 +627,18 @@ class H5_Lobby(GameWindowsBase):
                     if player_action == "invite_player":
                         self.send_game_invite_ws(opponent_nickname=player.nickname)
                         logger.debug(f"Invited player: {player.nickname}")
+                        self.__queue_status = True
+                        self.__update_queue_status = True
+                        self.__found_game = True
+                        self.__is_invited = True
+                        continue_main = True
+                        continue
                     elif player_action == "send_message":
                         # TODO: sending messages functionality
                         pass
+                if continue_main:
+                    continue_main = False
+                    continue
 
                 if event.type == pygame.QUIT:
                     if self.__queue_status:
@@ -876,6 +886,8 @@ class H5_Lobby(GameWindowsBase):
 
             if self.__player_accepted:
                 information_str = f"Waiting for {self.__opponent_nickname} to accept..."
+            elif self.__is_invited:
+                information_str = f"{self.__opponent_nickname}"
             else:
                 information_str = f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} PKT"
             OPONNENT_TEXT = render_small_caps(information_str, self.font_size[0], self.text_color)
@@ -909,6 +921,7 @@ class H5_Lobby(GameWindowsBase):
                     image_frame=self.PROGRESS_BAR_FRAME,
                     image_bg=self.PROGRESS_BAR_BG,
                     image_edge=self.PROGRESS_BAR_EDGE,
+                    max_wait_time=10 if not self.__is_invited else 30,
                 )
 
         return (

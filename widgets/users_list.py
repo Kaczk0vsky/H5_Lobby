@@ -199,7 +199,10 @@ class UsersList:
                         if player.nickname == key:
                             player.ranking_points = value[0]
                             player.state = value[1]
-                            player.update_surfaces()
+                            player.update_surfaces(
+                                position=(self.x_pos - self.rect.w / 2.2, base_y),
+                                dimensions=(self.rect.width - self.rect.width / 15, self.rect.height / 10),
+                            )
                             temp_list.append((player, base_y))
                             break
                 else:
