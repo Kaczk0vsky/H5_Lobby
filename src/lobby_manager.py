@@ -619,25 +619,36 @@ class H5_Lobby(GameWindowsBase):
                 if not self.__connection_timer:
                     RETURN_BUTTON.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
-            continue_main = False
             for event in pygame.event.get():
                 USERS_LIST.event(event)
+
+                event_handled = False
                 for player, _ in USERS_LIST.player_list:
                     player_action = player.player_action_menu.event(event, MENU_MOUSE_POS)
                     if player_action == "invite_player":
-                        self.send_game_invite_ws(opponent_nickname=player.nickname)
-                        logger.debug(f"Invited player: {player.nickname}")
-                        self.__queue_status = True
-                        self.__update_queue_status = True
-                        self.__found_game = True
-                        self.__is_invited = True
-                        continue_main = True
-                        continue
+                        if str(player.state).lower() == "online":
+                            logger.debug(f"Invited player: {player.nickname}")
+                            self.send_game_invite_ws(opponent_nickname=player.nickname)
+
+                            self.__opponent_nickname = player.nickname
+                            self.__oponnent_ranking_points = player.ranking_points
+                            self.__queue_status = True
+                            self.__update_queue_status = True
+                            self.__found_game = True
+                            self.__is_invited = True
+                            event_handled = True
+                            break
+                        else:
+                            self.__window_overlay = True
+                            self.__error_msg = "You cannot invite not online players!"
+                            event_handled = True
+                            break
+
                     elif player_action == "send_message":
                         # TODO: sending messages functionality
                         pass
-                if continue_main:
-                    continue_main = False
+
+                if event_handled:
                     continue
 
                 if event.type == pygame.QUIT:
@@ -886,10 +897,9 @@ class H5_Lobby(GameWindowsBase):
 
             if self.__player_accepted:
                 information_str = f"Waiting for {self.__opponent_nickname} to accept..."
-            elif self.__is_invited:
-                information_str = f"{self.__opponent_nickname}"
             else:
                 information_str = f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} PKT"
+
             OPONNENT_TEXT = render_small_caps(information_str, self.font_size[0], self.text_color)
             OPONNENT_RECT = OPONNENT_TEXT.get_rect(center=(self.SCREEN.get_width() / 2, self.SCREEN.get_height() / 2.12))
             ACCEPT_BUTTON = Button(
