@@ -307,7 +307,8 @@ class H5_Lobby(GameWindowsBase):
             try:
                 USERS_LIST.update(self.SCREEN, MENU_MOUSE_POS)
                 for player, _ in USERS_LIST.player_list:
-                    player.player_action_menu.update(self.SCREEN, MENU_MOUSE_POS)
+                    if player.player_action_menu.is_visible:
+                        player.player_action_menu.update(self.SCREEN, MENU_MOUSE_POS)
             except pygame.error as e:
                 logger.warning(f"Users list rendering error: {e}")
                 continue

@@ -108,7 +108,7 @@ class PlayerActionMenu:
             self.ignore_next_click = False
             return
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.is_visible:
             if self.check_mark_rect.collidepoint(mouse_pos):
                 play_on_empty_channel(path="resources/button_click.mp3")
                 self.is_visible = False
