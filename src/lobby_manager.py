@@ -1412,6 +1412,7 @@ class H5_Lobby(GameWindowsBase):
             self.__set_queue_variables(state=False)
 
         elif event == "match_found":
+            self.__queue_status = True
             self.__update_queue_status = True
             self.__found_game = True
             self.__opponent_nickname = message["opponent"]
