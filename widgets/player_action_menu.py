@@ -11,13 +11,17 @@ class PlayerActionMenu:
         dimensions: tuple[int, int],
         color: pygame.Color,
         hovering_color: pygame.Color,
+        inactive_color: pygame.Color,
         font_size: int,
+        state: str,
     ):
         self.w = dimensions[0]
         self.h = dimensions[1]
         self.color = color
         self.hovering_color = hovering_color
+        self.inactove_color = inactive_color
         self.font_size = font_size
+        self.state = state
         self.rect = pygame.Rect(position, dimensions)
         self.bg = pygame.image.load(os.path.join(os.getcwd(), "resources/player_action_menu/frame_bg.png"))
         self.chat_icon = pygame.image.load(os.path.join(os.getcwd(), "resources/player_action_menu/chat_icon.png"))
@@ -34,6 +38,7 @@ class PlayerActionMenu:
         )
         self.text_surface_invite = render_small_caps("Invite to game", self.font_size, self.color)
         self.text_surface_invite_highlighted = render_small_caps("Invite to game", self.font_size, self.hovering_color)
+        self.text_surface_invite_inactive = render_small_caps("Invite to game", self.font_size, self.inactove_color)
         self.text_surface_message = render_small_caps("Send message", self.font_size, self.color)
         self.text_surface_message_highlighted = render_small_caps("Send message", self.font_size, self.hovering_color)
 
@@ -61,10 +66,13 @@ class PlayerActionMenu:
             invite_icon_rect.centery = self.invite_rect.centery
             invite_icon_rect.right = self.invite_rect.left - self.w * 0.03
 
-            if self.invite_rect.collidepoint(mouse_pos):
-                screen.blit(self.text_surface_invite_highlighted, self.invite_rect)
+            if self.state == "Online":
+                if self.invite_rect.collidepoint(mouse_pos):
+                    screen.blit(self.text_surface_invite_highlighted, self.invite_rect)
+                else:
+                    screen.blit(self.text_surface_invite, self.invite_rect)
             else:
-                screen.blit(self.text_surface_invite, self.invite_rect)
+                screen.blit(self.text_surface_invite_inactive, self.invite_rect)
 
             screen.blit(invite_icon_scaled, invite_icon_rect)
 
@@ -114,7 +122,7 @@ class PlayerActionMenu:
                 self.is_visible = False
             elif not self.rect.collidepoint(mouse_pos):
                 self.is_visible = False
-            elif self.invite_rect.collidepoint(mouse_pos):
+            elif self.invite_rect.collidepoint(mouse_pos) and self.state == "Online":
                 play_on_empty_channel(path="resources/button_click.mp3")
                 self.is_visible = False
                 return "invite_player"

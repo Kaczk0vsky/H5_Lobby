@@ -6,7 +6,7 @@ from django.db.models import Q
 from asgiref.sync import sync_to_async
 
 from h5_backend.models import Player, Game, Ban, PlayerState, OfflineMessage
-from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_opponent_left_queue, notify_match_found
+from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_match_found
 
 
 class ModelParser:
@@ -133,6 +133,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
     async def _remove_from_queue(self, data: str):
         nickname = data.get("nickname")
         is_queue_accepted = data.get("is_queue_accepted")
+        is_invited = data.get("is_invited")
         player = await self._get_player(nickname)
         if not player:
             raise ValueError(f"Player {nickname} not found")
@@ -146,10 +147,9 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
                 player.save()
                 if not is_queue_accepted and game:
                     opponent = game.player_2 if player == game.player_1 else game.player_1
-                    opponent.player_state = PlayerState.IN_QUEUE
+                    opponent.player_state = PlayerState.IN_QUEUE if not is_invited else PlayerState.ONLINE
                     opponent.save()
                     game.delete()
-                    notify_opponent_left_queue(opponent, player)
 
         await remove_from_queue()
 
@@ -195,12 +195,18 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         if not player:
             raise ValueError(f"Player {player_nickname} not found")
 
+        unaccepted_game = await self._get_unaccepted_game(player)
+
         opponent = await self._get_player(opponent_nickname)
         if not opponent:
             raise ValueError(f"Player {opponent} not found")
 
         @sync_to_async
         def send_invite():
+            if unaccepted_game:
+                notify_unaccepted_report(player, unaccepted_game)
+                return
+
             if player.player_state == PlayerState.ONLINE and opponent.player_state == PlayerState.ONLINE:
                 Game.objects.create(player_1=player, player_2=opponent, is_new=True, is_ranked=is_searching_ranked)
                 notify_match_found(player1=player, player2=opponent, is_invited=True)
@@ -243,16 +249,6 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
                     "nicknames": [event["player1_nickname"], event["player2_nickname"]],
                     "castles": [event["player1_castle"], event["player2_castle"]],
                     "who_won": event["who_won"],
-                }
-            )
-        )
-
-    async def opponent_left_queue(self, event):
-        await self.send(
-            json.dumps(
-                {
-                    "event": "opponent_left_queue",
-                    "opponent": event["opponent"],
                 }
             )
         )

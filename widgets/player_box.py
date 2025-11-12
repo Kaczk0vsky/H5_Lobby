@@ -44,6 +44,7 @@ class PlayerBox:
         dimensions: tuple[int, int],
         color: pygame.Color,
         hovering_color: pygame.Color,
+        inactive_color: pygame.Color,
         font_size: int,
         nickname: str,
         ranking_points: int,
@@ -56,6 +57,7 @@ class PlayerBox:
         self.h = dimensions[1]
         self.color = color
         self.hovering_color = hovering_color
+        self.inactive_color = inactive_color
         self.red = "#db1102"
         self.green = "#02ba09"
         self.font_size = font_size
@@ -89,7 +91,9 @@ class PlayerBox:
             dimensions=(self.w, self.h * 2),
             color=self.color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
             font_size=self.font_size,
+            state=self.state,
         )
 
     def update(self, screen: pygame.Surface, mouse_pos: tuple[int, int]) -> None:

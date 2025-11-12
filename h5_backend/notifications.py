@@ -36,9 +36,5 @@ def notify_unaccepted_report(player, game):
     )
 
 
-def notify_opponent_left_queue(player, opponent):
-    send_or_store(player, "opponent_left_queue", {"opponent": opponent.nickname})
-
-
 def notify_users_list_change(player, users_list):
     send_or_store(player, "refresh_friend_list", {"users_list": users_list})

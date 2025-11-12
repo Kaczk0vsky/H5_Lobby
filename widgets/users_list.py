@@ -45,6 +45,7 @@ class UsersList:
         position: tuple[float, float],
         color: pygame.Color,
         hovering_color: pygame.Color,
+        inactive_color: pygame.Color,
         font_size: int,
         title: str,
         image: pygame.Surface,
@@ -60,6 +61,7 @@ class UsersList:
         self.y_pos = position[1]
         self.color = color
         self.hovering_color = hovering_color
+        self.inactive_color = inactive_color
         self.font_size = font_size
         self.title = title
         self.image = image
@@ -214,6 +216,7 @@ class UsersList:
                         ),
                         color=self.color,
                         hovering_color=self.hovering_color,
+                        inactive_color=self.inactive_color,
                         font_size=self.font_size,
                         nickname=key,
                         ranking_points=value[0],
@@ -236,6 +239,7 @@ class UsersList:
                     ),
                     color=self.color,
                     hovering_color=self.hovering_color,
+                    inactive_color=self.inactive_color,
                     font_size=self.font_size,
                     nickname=key,
                     ranking_points=value[0],

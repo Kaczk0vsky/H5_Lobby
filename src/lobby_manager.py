@@ -125,6 +125,7 @@ class H5_Lobby(GameWindowsBase):
         self.thread = threading.Thread(target=self._run_loop, daemon=True)
         self.thread.start()
         asyncio.run_coroutine_threadsafe(self.websocket_client.connect(), self.loop)
+        self.load_ws_messages()
 
         # Lobby parameters initialization
         self.lobby_data = load_lobby_data()
@@ -148,6 +149,12 @@ class H5_Lobby(GameWindowsBase):
         if hasattr(self, "loop") and self.loop.is_running():
             asyncio.run_coroutine_threadsafe(self.websocket_client.disconnect(), self.loop)
             self.loop.call_soon_threadsafe(self.loop.stop)
+
+    def load_ws_messages(self):
+        while not self.websocket_client._message_queue.empty():
+            message = self.websocket_client._message_queue.get_nowait()
+            if message:
+                self.handle_ws_message(message)
 
     def __set_queue_variables(self, state: bool = False) -> None:
         self.__game_found_music = state
@@ -266,6 +273,7 @@ class H5_Lobby(GameWindowsBase):
             ),
             color=self.text_color,
             hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
             font_size=self.font_size[0],
             title="Players Online",
             image=self.PLAYER_LIST,
@@ -280,13 +288,11 @@ class H5_Lobby(GameWindowsBase):
         buttons = [FIND_GAME_BUTTON, CREATE_REPORT, RANKING, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
         logger.debug("Displaying lobby window.")
         while True:
-            while not self.websocket_client._message_queue.empty():
-                message = self.websocket_client._message_queue.get_nowait()
-                if message:
-                    self.handle_ws_message(message)
+            self.load_ws_messages()
 
             if self.__refresh_users_list:
                 USERS_LIST.get_players_list(self.__sorted_players)
+                logger.info(f"Sorted players: {self.__sorted_players}")
                 self.__refresh_users_list = False
 
             self.SCREEN.blit(self.BG, (0, 0))
@@ -304,14 +310,10 @@ class H5_Lobby(GameWindowsBase):
             for button in buttons:
                 button.handle_button(self.SCREEN, MENU_MOUSE_POS)
 
-            try:
-                USERS_LIST.update(self.SCREEN, MENU_MOUSE_POS)
-                for player, _ in USERS_LIST.player_list:
-                    if player.player_action_menu.is_visible:
-                        player.player_action_menu.update(self.SCREEN, MENU_MOUSE_POS)
-            except pygame.error as e:
-                logger.warning(f"Users list rendering error: {e}")
-                continue
+            USERS_LIST.update(self.SCREEN, MENU_MOUSE_POS)
+            for player, _ in USERS_LIST.player_list:
+                if player.player_action_menu.is_visible:
+                    player.player_action_menu.update(self.SCREEN, MENU_MOUSE_POS)
 
             if not self.__profile_button_active and not self.__loading_profile_data:
                 MY_PROFILE.set_active(is_active=True) if isinstance(self.__profile_data, dict) else MY_PROFILE.set_active(is_active=False)
@@ -389,7 +391,7 @@ class H5_Lobby(GameWindowsBase):
                         FIND_GAME_BUTTON.set_active(is_active=True)
                         OPTIONS_BUTTON.set_active(is_active=True)
                         self.__set_queue_variables(state=False)
-                        self.remove_from_queue_ws(is_accepted=False)
+                        self.remove_from_queue_ws(is_accepted=False, is_invited=self.__is_invited)
                         continue
 
             if self.__create_report_question:
@@ -639,11 +641,6 @@ class H5_Lobby(GameWindowsBase):
                             self.__is_invited = True
                             event_handled = True
                             break
-                        else:
-                            self.__window_overlay = True
-                            self.__error_msg = "You cannot invite not online players!"
-                            event_handled = True
-                            break
 
                     elif player_action == "send_message":
                         # TODO: sending messages functionality
@@ -654,7 +651,7 @@ class H5_Lobby(GameWindowsBase):
 
                 if event.type == pygame.QUIT:
                     if self.__queue_status:
-                        self.remove_from_queue_ws(is_accepted=False)
+                        self.remove_from_queue_ws(is_accepted=False, is_invited=self.__is_invited)
                     self.quit_game_handling(self.crsf_token, self.session)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if FIND_GAME_BUTTON.check_for_input(MENU_MOUSE_POS):
@@ -695,7 +692,7 @@ class H5_Lobby(GameWindowsBase):
                         continue
                     if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                         if self.__queue_status:
-                            self.remove_from_queue_ws(is_accepted=False)
+                            self.remove_from_queue_ws(is_accepted=False, is_invited=self.__is_invited)
                         self.quit_game_handling(self.crsf_token, self.session)
                     if self.__queue_status:
                         if CANCEL_QUEUE.check_for_input(MENU_MOUSE_POS):
@@ -705,7 +702,7 @@ class H5_Lobby(GameWindowsBase):
                             FIND_GAME_BUTTON.set_active(is_active=True)
                             OPTIONS_BUTTON.set_active(True)
                             self.__set_queue_variables(state=False)
-                            self.remove_from_queue_ws(is_accepted=False)
+                            self.remove_from_queue_ws(is_accepted=False, is_invited=self.__is_invited)
                             self.__player_declined = True
                             continue
                         if ACCEPT_QUEUE is not None:
@@ -713,7 +710,7 @@ class H5_Lobby(GameWindowsBase):
                                 self.__update_queue_status = True
                                 self.__player_accepted = True
                                 FIND_GAME_BUTTON.set_active(is_active=False)
-                                self.remove_from_queue_ws(is_accepted=True)
+                                self.remove_from_queue_ws(is_accepted=True, is_invited=self.__is_invited)
                                 self.check_if_oponnent_accepted_ws()
 
                     if self.__report_creation_status:
@@ -1460,11 +1457,12 @@ class H5_Lobby(GameWindowsBase):
         }
         self.send_ws_message(payload)
 
-    def remove_from_queue_ws(self, is_accepted: bool):
+    def remove_from_queue_ws(self, is_accepted: bool, is_invited: bool):
         payload = {
             "action": "remove_from_queue",
             "nickname": self.user["nickname"],
             "is_queue_accepted": is_accepted,
+            "is_invited": is_invited,
         }
         self.send_ws_message(payload)
 
