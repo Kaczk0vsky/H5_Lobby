@@ -6,7 +6,7 @@ from django.db.models import Q
 from asgiref.sync import sync_to_async
 
 from h5_backend.models import Player, Game, Ban, PlayerState, OfflineMessage
-from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_match_found, notify_opponent_left_queue
+from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_match_found
 
 
 class ModelParser:
