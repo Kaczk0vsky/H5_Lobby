@@ -292,7 +292,6 @@ class H5_Lobby(GameWindowsBase):
 
             if self.__refresh_users_list:
                 USERS_LIST.get_players_list(self.__sorted_players)
-                logger.info(f"Sorted players: {self.__sorted_players}")
                 self.__refresh_users_list = False
 
             self.SCREEN.blit(self.BG, (0, 0))
@@ -1426,6 +1425,9 @@ class H5_Lobby(GameWindowsBase):
                 logger.debug("Opponent is still deciding.")
             elif self.__opponent_accepted:
                 logger.debug("Got opponent acceptance status.")
+            elif self.__opponent_declined:
+                logger.debug("Opponent declined. Returning back to queue...")
+                pass
 
         elif event == "refresh_friend_list":
             players_data = message.get("users_list")
