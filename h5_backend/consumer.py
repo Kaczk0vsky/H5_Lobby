@@ -150,7 +150,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
                     opponent.player_state = PlayerState.IN_QUEUE if not is_invited else PlayerState.ONLINE
                     opponent.save()
                     game.delete()
-                    notify_match_status_changed(player, False, True)
+                    notify_match_status_changed(opponent, False, True)
 
         await remove_from_queue()
 

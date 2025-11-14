@@ -721,7 +721,6 @@ class H5_Lobby(GameWindowsBase):
                                 "who_won": self.user["nickname"] if WHO_WON_CHOICES.get_selected_option() == "You" else self.__opponent_nickname,
                             }
                             self.handle_match_report(report_data=report_data)
-                            self.get_user_profile()
                             self.__report_creation_status = False
                             self.__report_data = None
                         if CANCEL_REPORT.check_for_input(MENU_MOUSE_POS):
@@ -1504,6 +1503,7 @@ class H5_Lobby(GameWindowsBase):
             if response.status_code == 200:
                 logger.debug(response.text)
                 self.__connection_timer = None
+                self.get_user_profile()
                 logger.info("Match result reported succesfully.")
                 return True
 
@@ -1624,7 +1624,6 @@ class H5_Lobby(GameWindowsBase):
 
     def minimize_to_tray(self):
         logger.debug("Minimizing to tray.")
-        self.__stop_refreshing_friends_list = True
         time.sleep(0.1)
         lobby_data = {"last_opponent": self.__opponent_nickname}
         save_lobby_data(lobby_data)
@@ -1651,7 +1650,6 @@ class H5_Lobby(GameWindowsBase):
             ctypes.windll.user32.AttachThreadInput(current_thread_id, foreground_thread_id, False)
         self.play_background_music(music_path="resources/H5_main_theme.mp3")
         self.__set_buttons_active = True
-        self.__stop_refreshing_friends_list = False
         self.vpn_client.set_vpn_state(state=False)
         logger.debug("Window restored from tray.")
 
