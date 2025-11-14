@@ -1,4 +1,5 @@
 from django.db.models.signals import post_save, post_delete, pre_delete
+from django.db import transaction
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -46,3 +47,21 @@ def update_user_list(sender, instance, **kwargs):
             notify_users_list_change(player, current_users_formatted)
 
     cache.set("previous_users_formatted", current_users_formatted, timeout=None)
+
+
+@receiver(post_save, sender=Player)
+def update_ranking_positions(sender, instance, **kwargs):
+    with transaction.atomic():
+        players = Player.objects.all().order_by("-ranking_points", "id")
+
+        updates = []
+        current_position = 1
+
+        for player in players:
+            if player.ranking_position != current_position:
+                player.ranking_position = current_position
+                updates.append(player)
+            current_position += 1
+
+        if updates:
+            Player.objects.bulk_update(updates, ["ranking_position"])
