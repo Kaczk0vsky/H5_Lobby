@@ -31,7 +31,7 @@ class Player(models.Model):
     # ranking points
     ranking_points = models.IntegerField(editable=True, default=1000)
     # leaderboard position
-    ranking_position = models.IntegerField(editable=False, unique=True, null=True)
+    ranking_position = models.IntegerField(editable=False, null=True)
     # player state in lobby
     player_state = models.CharField(max_length=30, choices=PlayerState.choices, default=PlayerState.OFFLINE, editable=True)
     # if player is looking to play ranked game
