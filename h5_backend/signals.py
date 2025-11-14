@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, post_delete, pre_delete
+from django.db.models.signals import post_save, post_delete, pre_save, pre_delete
 from django.db import transaction
 from django.dispatch import receiver
 from django.contrib.auth.models import User
@@ -49,19 +49,31 @@ def update_user_list(sender, instance, **kwargs):
     cache.set("previous_users_formatted", current_users_formatted, timeout=None)
 
 
+@receiver(pre_save, sender=Player)
+def cache_old_points(sender, instance, **kwargs):
+    if instance.pk:
+        instance._old_points = Player.objects.get(pk=instance.pk).ranking_points
+    else:
+        instance._old_points = None
+
+
 @receiver(post_save, sender=Player)
-def update_ranking_positions(sender, instance, **kwargs):
+def update_ranking_positions(sender, instance, created, **kwargs):
+    old = getattr(instance, "_old_points", None)
+    if not created and old == instance.ranking_points:
+        return
+
     with transaction.atomic():
-        players = Player.objects.all().order_by("-ranking_points", "id")
+        players = Player.objects.order_by("-ranking_points", "id")
 
         updates = []
-        current_position = 1
+        position = 1
 
         for player in players:
-            if player.ranking_position != current_position:
-                player.ranking_position = current_position
+            if player.ranking_position != position:
+                player.ranking_position = position
                 updates.append(player)
-            current_position += 1
+            position += 1
 
         if updates:
             Player.objects.bulk_update(updates, ["ranking_position"])
