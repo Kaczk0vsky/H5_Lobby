@@ -96,7 +96,7 @@ class SoftEtherClient:
         if "Virtual Network Adapter Name" in result.stdout:
             logger.debug(f"VPN adapter already exists. Skipping...")
         else:
-            command = f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD NicCreate {vpn_hub}'
+            command = f'"{self.vpn_cmd_path}" localhost /CLIENT /CMD NicCreate VPN'
             try:
                 subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
             except subprocess.CalledProcessError as e:
