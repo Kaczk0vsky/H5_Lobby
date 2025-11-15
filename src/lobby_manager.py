@@ -132,7 +132,7 @@ class H5_Lobby(GameWindowsBase):
         self.__opponent_nickname = self.lobby_data["last_opponent"]
         self.get_user_profile()
         self.set_window_caption(title="Menu")
-        self.play_background_music(music_path="resources/H5_main_theme.mp3")
+        self.play_background_music(music_path="resources/H5_Menu.mp3")
         self.create_lobby_elements()
         self.resolution = (int(self.config["resolution"].split("x")[0]), int(self.config["resolution"].split("x")[1]))
         self.SCREEN = pygame.display.set_mode(self.resolution)
@@ -1648,7 +1648,7 @@ class H5_Lobby(GameWindowsBase):
         ctypes.windll.user32.BringWindowToTop(hwnd)
         if foreground_thread_id != current_thread_id:
             ctypes.windll.user32.AttachThreadInput(current_thread_id, foreground_thread_id, False)
-        self.play_background_music(music_path="resources/H5_main_theme.mp3")
+        self.play_background_music(music_path="resources/H5_Menu.mp3")
         self.__set_buttons_active = True
         self.vpn_client.set_vpn_state(state=False)
         logger.debug("Window restored from tray.")

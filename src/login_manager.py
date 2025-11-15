@@ -82,7 +82,7 @@ class LoginWindow(GameWindowsBase):
 
         self.user = load_user()
         self.set_window_caption(title="Login")
-        self.play_background_music(music_path="resources/H5_login_menu_theme.mp3")
+        self.play_background_music(music_path="resources/H5_Login.mp3")
         self.create_login_elements()
 
         self.SCREEN = pygame.display.set_mode(self.bg_dims)
