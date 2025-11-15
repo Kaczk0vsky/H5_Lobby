@@ -113,7 +113,7 @@ class UsersList:
 
     def update(self, screen: pygame.Surface, mouse_pos: tuple[int, int]) -> None:
         screen.blit(self.image_bg, self.rect_bg)
-        self.image_bg.fill((0, 0, 0, 220))
+        self.image_bg.fill((0, 0, 0, 180))
         screen.blit(self.title_surface, self.title_rect)
         screen.blit(self.line, self.line_rect)
 

@@ -90,7 +90,6 @@ class GameWindowsBase:
         sys.exit()
 
     def create_universal_elements(self) -> None:
-        self.BG = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/bg.png"))
         self.SMALLER_WINDOW_BASE = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/player_search_frame.png"))
         self.BUTTON = pygame.image.load(os.path.join(os.getcwd(), "resources/top_bar/button_dark.png"))
         self.BUTTON_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/top_bar/button_highlighted.png"))
@@ -104,6 +103,7 @@ class GameWindowsBase:
 
     def create_login_elements(self) -> None:
         self.create_universal_elements()
+        self.LOGIN_BG = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/login_bg.png"))
         self.CHECK_MARK = pygame.image.load(os.path.join(os.getcwd(), "resources/registration/yes2.png"))
         self.CHECK_MARK_HIGHLIGHTED = pygame.image.load(os.path.join(os.getcwd(), "resources/registration/yes1.png"))
         self.UNCHECK_MARK = pygame.image.load(os.path.join(os.getcwd(), "resources/registration/no2.png"))
@@ -113,6 +113,7 @@ class GameWindowsBase:
 
     def create_lobby_elements(self) -> None:
         self.create_universal_elements()
+        self.MAIN_BG = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/main_bg.png"))
         self.PLAYER_LIST = pygame.image.load(os.path.join(os.getcwd(), "resources/players_online/players_online.png"))
         self.TOP_BAR = pygame.image.load(os.path.join(os.getcwd(), "resources/top_bar/top_bar.png"))
         self.ICON_SQUARE = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/iconsquare_dark.png"))
@@ -189,7 +190,7 @@ class GameWindowsBase:
             30 * (transformation_factors[self.transformation_option][0]),
             30 * (transformation_factors[self.transformation_option][1]),
         )
-        self.BG = pygame.transform.scale(self.BG, self.resolution)
+        self.BG = pygame.transform.scale(self.MAIN_BG, self.resolution)
         self.PLAYER_LIST = pygame.transform.scale(self.PLAYER_LIST, self.player_list_dims)
         self.PLAYER_LIST_BG = pygame.Surface(self.player_list_dims, pygame.SRCALPHA)
         self.OPTIONS = pygame.transform.scale(self.OPTIONS, self.top_elements_dims)

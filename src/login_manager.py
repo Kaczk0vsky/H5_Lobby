@@ -86,7 +86,7 @@ class LoginWindow(GameWindowsBase):
         self.create_login_elements()
 
         self.SCREEN = pygame.display.set_mode(self.bg_dims)
-        self.BG = pygame.transform.scale(self.BG, self.bg_dims)
+        self.LOGIN_BG = pygame.transform.scale(self.LOGIN_BG, self.bg_dims)
 
         self.session = requests.Session()
         self.csrf_token = None
@@ -186,7 +186,7 @@ class LoginWindow(GameWindowsBase):
 
         logger.debug("Displaying login window.")
         while True:
-            self.SCREEN.blit(self.BG, (0, 0))
+            self.SCREEN.blit(self.LOGIN_BG, (0, 0))
             self.SCREEN.blit(self.TEXT_BG, (200, 50))
             self.SCREEN.blit(REMEMBER_LOGIN_TEXT, REMEMBER_LOGIN_RECT)
             self.cursor.update()
@@ -356,7 +356,7 @@ class LoginWindow(GameWindowsBase):
         logger.debug("Displaying register window.")
 
         while True:
-            self.SCREEN.blit(self.BG, (0, 0))
+            self.SCREEN.blit(self.LOGIN_BG, (0, 0))
             self.SCREEN.blit(self.TEXT_BG, (200, 50))
             self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
@@ -494,7 +494,7 @@ class LoginWindow(GameWindowsBase):
         logger.debug("Displaying forgot password window.")
 
         while True:
-            self.SCREEN.blit(self.BG, (0, 0))
+            self.SCREEN.blit(self.LOGIN_BG, (0, 0))
             self.SCREEN.blit(self.TEXT_BG, (200, 50))
             self.cursor.update()
             MENU_MOUSE_POS = pygame.mouse.get_pos()
