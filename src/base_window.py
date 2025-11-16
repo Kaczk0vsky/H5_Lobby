@@ -114,6 +114,7 @@ class GameWindowsBase:
     def create_lobby_elements(self) -> None:
         self.create_universal_elements()
         self.MAIN_BG = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/main_bg.png"))
+        self.PLAYER_INFO = pygame.image.load(os.path.join(os.getcwd(), "resources/frames_and_bg/player_info.png"))
         self.PLAYER_LIST = pygame.image.load(os.path.join(os.getcwd(), "resources/players_online/players_online.png"))
         self.TOP_BAR = pygame.image.load(os.path.join(os.getcwd(), "resources/top_bar/top_bar.png"))
         self.ICON_SQUARE = pygame.image.load(os.path.join(os.getcwd(), "resources/buttons/iconsquare_dark.png"))
@@ -190,8 +191,13 @@ class GameWindowsBase:
             30 * (transformation_factors[self.transformation_option][0]),
             30 * (transformation_factors[self.transformation_option][1]),
         )
+        self.player_info_dims = (
+            280 * (transformation_factors[self.transformation_option][0]),
+            180 * (transformation_factors[self.transformation_option][1]),
+        )
         self.BG = pygame.transform.scale(self.MAIN_BG, self.resolution)
         self.PLAYER_LIST = pygame.transform.scale(self.PLAYER_LIST, self.player_list_dims)
+        self.PLAYER_INFO = pygame.transform.scale(self.PLAYER_INFO, self.player_info_dims)
         self.PLAYER_LIST_BG = pygame.Surface(self.player_list_dims, pygame.SRCALPHA)
         self.OPTIONS = pygame.transform.scale(self.OPTIONS, self.top_elements_dims)
         self.OPTIONS_HIGHLIGHTED = pygame.transform.scale(self.OPTIONS_HIGHLIGHTED, self.top_elements_dims)
@@ -277,6 +283,27 @@ class GameWindowsBase:
             (
                 30 * (transformation_factors[self.transformation_option][0]),
                 30 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.NICKNAME_TEXT = render_small_caps(f"{self.user["nickname"]}", self.font_size[0], self.hovering_color)
+        self.NICKNAME_RECT = self.NICKNAME_TEXT.get_rect(
+            topleft=(
+                20 * (transformation_factors[self.transformation_option][0]),
+                15 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.POINS_TEXT = render_small_caps(f"Points: 2137", self.font_size[1], self.text_color)
+        self.POINTS_RECT = self.POINS_TEXT.get_rect(
+            topleft=(
+                20 * (transformation_factors[self.transformation_option][0]),
+                50 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.RANKING_TEXT = render_small_caps(f"Ranking: 12", self.font_size[1], self.text_color)
+        self.RANKING_RECT = self.RANKING_TEXT.get_rect(
+            topleft=(
+                20 * (transformation_factors[self.transformation_option][0]),
+                75 * (transformation_factors[self.transformation_option][1]),
             ),
         )
         self.CHECKBOX = pygame.transform.scale(self.CHECKBOX, self.checkbox_dims)

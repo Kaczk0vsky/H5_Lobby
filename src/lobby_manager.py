@@ -102,6 +102,8 @@ class H5_Lobby(GameWindowsBase):
     __report_data = None
     __report_title = None
     __sorted_players = None
+    __player_points = None
+    __player_ranking = None
 
     def __init__(
         self,
@@ -284,6 +286,27 @@ class H5_Lobby(GameWindowsBase):
             line=self.LINE,
             box=self.CHECKBOX,
         )
+        self.NICKNAME_TEXT = render_small_caps(f"{self.user["nickname"]}", self.font_size[0], self.hovering_color)
+        self.NICKNAME_RECT = self.NICKNAME_TEXT.get_rect(
+            topleft=(
+                20 * (transformation_factors[self.transformation_option][0]),
+                15 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.POINS_TEXT = render_small_caps(f"Points: {self.__player_points}", self.font_size[1], self.text_color)
+        self.POINTS_RECT = self.POINS_TEXT.get_rect(
+            topleft=(
+                20 * (transformation_factors[self.transformation_option][0]),
+                55 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.RANKING_TEXT = render_small_caps(f"Ranking: {self.__player_ranking}", self.font_size[1], self.text_color)
+        self.RANKING_RECT = self.RANKING_TEXT.get_rect(
+            topleft=(
+                20 * (transformation_factors[self.transformation_option][0]),
+                80 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
 
         buttons = [FIND_GAME_BUTTON, CREATE_REPORT, RANKING, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
         logger.debug("Displaying lobby window.")
@@ -305,6 +328,16 @@ class H5_Lobby(GameWindowsBase):
                     5 * (transformation_factors[self.transformation_option][1]),
                 ),
             )
+            self.SCREEN.blit(
+                self.PLAYER_INFO,
+                (
+                    5 * (transformation_factors[self.transformation_option][0]),
+                    5 * (transformation_factors[self.transformation_option][1]),
+                ),
+            )
+            self.SCREEN.blit(self.NICKNAME_TEXT, self.NICKNAME_RECT)
+            self.SCREEN.blit(self.POINS_TEXT, self.POINTS_RECT)
+            self.SCREEN.blit(self.RANKING_TEXT, self.RANKING_RECT)
 
             for button in buttons:
                 button.handle_button(self.SCREEN, MENU_MOUSE_POS)
@@ -1550,6 +1583,8 @@ class H5_Lobby(GameWindowsBase):
                 self.__loading_profile_data = False
                 self.__update_profile_status = True
                 self.__profile_data = response.json().get("player_information")
+                self.__player_points = self.__profile_data["ranking_points"]
+                self.__player_ranking = self.__profile_data["ranking_position"]
                 logger.info("Users profile fetched succesfully.")
                 return True
 
