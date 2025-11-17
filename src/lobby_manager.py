@@ -104,6 +104,7 @@ class H5_Lobby(GameWindowsBase):
     __sorted_players = None
     __player_points = None
     __player_ranking = None
+    __last_opponent_nickname = None
 
     def __init__(
         self,
@@ -176,11 +177,11 @@ class H5_Lobby(GameWindowsBase):
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
-                830 * (transformation_factors[self.transformation_option][0]),
-                50 * (transformation_factors[self.transformation_option][1]),
+                760 * (transformation_factors[self.transformation_option][0]),
+                40 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="Find Game",
-            font_size=self.font_size[1],
+            font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -188,11 +189,11 @@ class H5_Lobby(GameWindowsBase):
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
-                1060 * (transformation_factors[self.transformation_option][0]),
-                50 * (transformation_factors[self.transformation_option][1]),
+                1030 * (transformation_factors[self.transformation_option][0]),
+                40 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="Create Report",
-            font_size=self.font_size[1],
+            font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -200,11 +201,11 @@ class H5_Lobby(GameWindowsBase):
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
-                1290 * (transformation_factors[self.transformation_option][0]),
-                50 * (transformation_factors[self.transformation_option][1]),
+                1300 * (transformation_factors[self.transformation_option][0]),
+                40 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="Ranking",
-            font_size=self.font_size[1],
+            font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -212,11 +213,11 @@ class H5_Lobby(GameWindowsBase):
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
             position=(
-                1520 * (transformation_factors[self.transformation_option][0]),
-                50 * (transformation_factors[self.transformation_option][1]),
+                1550 * (transformation_factors[self.transformation_option][0]),
+                40 * (transformation_factors[self.transformation_option][1]),
             ),
             text_input="My Profile",
-            font_size=self.font_size[1],
+            font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
@@ -224,33 +225,20 @@ class H5_Lobby(GameWindowsBase):
             image=self.DISCORD_LOGO,
             image_highlited=self.DISCORD_LOGO_HIGHLIGHTED,
             position=(
-                1660 * (transformation_factors[self.transformation_option][0]),
-                50 * (transformation_factors[self.transformation_option][1]),
-            ),
-            font_size=self.font_size[1],
-            base_color=self.text_color,
-            hovering_color=self.hovering_color,
-        )
-        PLAYER_PROFILE = Button(
-            image=self.ICON_SQUARE,
-            image_highlited=self.ICON_SQUARE_HIGHLIGHTED,
-            image_inactive=self.ICON_SQUARE,
-            position=(
                 1730 * (transformation_factors[self.transformation_option][0]),
-                50 * (transformation_factors[self.transformation_option][1]),
+                40 * (transformation_factors[self.transformation_option][1]),
             ),
-            font_size=self.font_size[1],
+            font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
-            inactive_color=self.inactive_color,
         )
         OPTIONS_BUTTON = Button(
             image=self.OPTIONS,
             image_highlited=self.OPTIONS_HIGHLIGHTED,
             image_inactive=self.OPTIONS,
             position=(
-                1800 * (transformation_factors[self.transformation_option][0]),
-                50 * (transformation_factors[self.transformation_option][1]),
+                1805 * (transformation_factors[self.transformation_option][0]),
+                40 * (transformation_factors[self.transformation_option][1]),
             ),
             font_size=self.font_size[1],
             base_color=self.text_color,
@@ -261,16 +249,29 @@ class H5_Lobby(GameWindowsBase):
             image=self.QUIT_LOBBY,
             image_highlited=self.QUIT_LOBBY_HIGHLIGHTED,
             position=(
-                1870 * (transformation_factors[self.transformation_option][0]),
-                50 * (transformation_factors[self.transformation_option][1]),
+                1875 * (transformation_factors[self.transformation_option][0]),
+                40 * (transformation_factors[self.transformation_option][1]),
             ),
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
         )
+        PLAYER_ICON = Button(
+            image=self.ICON_SQUARE,
+            image_highlited=self.ICON_SQUARE_HIGHLIGHTED,
+            image_inactive=self.ICON_SQUARE,
+            position=(
+                45 * (transformation_factors[self.transformation_option][0]),
+                45 * (transformation_factors[self.transformation_option][1]),
+            ),
+            font_size=self.font_size[1],
+            base_color=self.text_color,
+            hovering_color=self.hovering_color,
+            inactive_color=self.inactive_color,
+        )
         USERS_LIST = UsersList(
             position=(
-                1710 * (transformation_factors[self.transformation_option][0]),
+                1720 * (transformation_factors[self.transformation_option][0]),
                 590 * (transformation_factors[self.transformation_option][1]),
             ),
             color=self.text_color,
@@ -286,29 +287,29 @@ class H5_Lobby(GameWindowsBase):
             line=self.LINE,
             box=self.CHECKBOX,
         )
-        self.NICKNAME_TEXT = render_small_caps(f"{self.user["nickname"]}", self.font_size[0], self.hovering_color)
+        self.NICKNAME_TEXT = render_small_caps(f"{self.user["nickname"]}", int(self.font_size[1] * 1.2), self.hovering_color)
         self.NICKNAME_RECT = self.NICKNAME_TEXT.get_rect(
-            topleft=(
-                20 * (transformation_factors[self.transformation_option][0]),
-                15 * (transformation_factors[self.transformation_option][1]),
+            center=(
+                165 * (transformation_factors[self.transformation_option][0]),
+                45 * (transformation_factors[self.transformation_option][1]),
             ),
         )
-        self.POINS_TEXT = render_small_caps(f"Points: {self.__player_points}", self.font_size[1], self.text_color)
+        self.POINS_TEXT = render_small_caps(f"Ranking Points: {self.__player_points}", int(self.font_size[1] * 0.9), self.text_color)
         self.POINTS_RECT = self.POINS_TEXT.get_rect(
             topleft=(
-                20 * (transformation_factors[self.transformation_option][0]),
-                55 * (transformation_factors[self.transformation_option][1]),
+                15 * (transformation_factors[self.transformation_option][0]),
+                90 * (transformation_factors[self.transformation_option][1]),
             ),
         )
-        self.RANKING_TEXT = render_small_caps(f"Ranking: {self.__player_ranking}", self.font_size[1], self.text_color)
+        self.RANKING_TEXT = render_small_caps(f"Ranking Position: #{self.__player_ranking}", int(self.font_size[1] * 0.9), self.text_color)
         self.RANKING_RECT = self.RANKING_TEXT.get_rect(
             topleft=(
-                20 * (transformation_factors[self.transformation_option][0]),
-                80 * (transformation_factors[self.transformation_option][1]),
+                15 * (transformation_factors[self.transformation_option][0]),
+                120 * (transformation_factors[self.transformation_option][1]),
             ),
         )
 
-        buttons = [FIND_GAME_BUTTON, CREATE_REPORT, RANKING, MY_PROFILE, DISCORD, PLAYER_PROFILE, OPTIONS_BUTTON, QUIT_BUTTON]
+        buttons = [FIND_GAME_BUTTON, CREATE_REPORT, RANKING, MY_PROFILE, DISCORD, PLAYER_ICON, OPTIONS_BUTTON, QUIT_BUTTON]
         logger.debug("Displaying lobby window.")
         while True:
             self.load_ws_messages()
@@ -324,18 +325,14 @@ class H5_Lobby(GameWindowsBase):
             self.SCREEN.blit(
                 self.TOP_BAR,
                 (
-                    635 * (transformation_factors[self.transformation_option][0]),
-                    5 * (transformation_factors[self.transformation_option][1]),
+                    520 * (transformation_factors[self.transformation_option][0]),
+                    0,
                 ),
             )
-            self.SCREEN.blit(
-                self.PLAYER_INFO,
-                (
-                    5 * (transformation_factors[self.transformation_option][0]),
-                    5 * (transformation_factors[self.transformation_option][1]),
-                ),
-            )
+            self.SCREEN.blit(self.PLAYER_INFO, (0, 0))
+            self.SCREEN.blit(self.PROFILE_LINE, (80, 22.5))
             self.SCREEN.blit(self.NICKNAME_TEXT, self.NICKNAME_RECT)
+            self.SCREEN.blit(self.PROFILE_LINE, (80, 67.5))
             self.SCREEN.blit(self.POINS_TEXT, self.POINTS_RECT)
             self.SCREEN.blit(self.RANKING_TEXT, self.RANKING_RECT)
 
@@ -357,7 +354,7 @@ class H5_Lobby(GameWindowsBase):
                 RANKING.set_active(is_active=True)
                 MY_PROFILE.set_active(is_active=True)
                 DISCORD.set_active(is_active=True)
-                PLAYER_PROFILE.set_active(is_active=True)
+                PLAYER_ICON.set_active(is_active=True)
                 OPTIONS_BUTTON.set_active(is_active=True)
                 self.__set_buttons_active = False
 
@@ -694,7 +691,7 @@ class H5_Lobby(GameWindowsBase):
                         self.add_to_queue_ws()
                         continue
                     if CREATE_REPORT.check_for_input(MENU_MOUSE_POS):
-                        if self.__opponent_nickname:
+                        if self.__last_opponent_nickname:
                             self.__report_creation_status = True
                             self.__generate_report_elements = True
                             self.__report_title = "Create Report"
@@ -714,7 +711,7 @@ class H5_Lobby(GameWindowsBase):
                         continue
                     if DISCORD.check_for_input(MENU_MOUSE_POS):
                         webbrowser.open(discord_invite)
-                    if PLAYER_PROFILE.check_for_input(MENU_MOUSE_POS):
+                    if PLAYER_ICON.check_for_input(MENU_MOUSE_POS):
                         pass
                     if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):
                         self.__update_options_status = True
@@ -841,10 +838,14 @@ class H5_Lobby(GameWindowsBase):
                             pygame.mixer.Channel(0).set_volume(self.config["volume"])
 
             if (self.__opponent_accepted and self.__player_accepted) or (self.__reconnect_back_to_game and self.__is_connected):
+                self.__last_opponent_nickname = self.__opponent_nickname
                 OPTIONS_BUTTON.set_active(True)
                 if self.__queue_channel:
                     pygame.mixer.Channel(self.__queue_channel).stop()
                 pygame.mixer.Channel(0).set_volume(0.0)
+                lobby_data = {"last_opponent": self.__last_opponent_nickname}
+                save_lobby_data(lobby_data)
+                logger.debug(f"Saved lobby data.")
                 self.__set_queue_variables(state=False)
                 self.vpn_client.set_vpn_state(state=True)
                 self.run_arena()
@@ -927,7 +928,7 @@ class H5_Lobby(GameWindowsBase):
             if self.__player_accepted:
                 information_str = f"Waiting for {self.__opponent_nickname} to accept..."
             else:
-                information_str = f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} PKT"
+                information_str = f"{self.__opponent_nickname} - {self.__oponnent_ranking_points} PTS"
 
             OPONNENT_TEXT = render_small_caps(information_str, self.font_size[0], self.text_color)
             OPONNENT_RECT = OPONNENT_TEXT.get_rect(center=(self.SCREEN.get_width() / 2, self.SCREEN.get_height() / 2.12))
@@ -978,7 +979,7 @@ class H5_Lobby(GameWindowsBase):
         )
         NICKNAME_LINE = (self.frame_position[0] + self.frame_dims[0] * 0.1, self.frame_position[1] + self.frame_dims[1] * 0.1875)
 
-        POINTS_TEXT = render_small_caps(f"{self.__profile_data['ranking_points']} PKT", int(self.font_size[0]), self.text_color)
+        POINTS_TEXT = render_small_caps(f"{self.__profile_data['ranking_points']} PTS", int(self.font_size[0]), self.text_color)
         POINTS_RECT = POINTS_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.225)
         )
@@ -1007,7 +1008,7 @@ class H5_Lobby(GameWindowsBase):
         )
 
         RANKED_WINS_LOSES_TEXT = render_small_caps(
-            f"Wins/Loses: {self.__profile_data['ranked_games'][0]}/{self.__profile_data['ranked_games'][1]}",
+            f"Wins/Losses: {self.__profile_data['ranked_games'][0]}/{self.__profile_data['ranked_games'][1]}",
             int(self.font_size[1]),
             self.text_color,
         )
@@ -1043,7 +1044,7 @@ class H5_Lobby(GameWindowsBase):
         )
 
         UNRANKED_WINS_LOSES_TEXT = render_small_caps(
-            f"Wins/Loses: {self.__profile_data['unranked_games'][0]}/{self.__profile_data['unranked_games'][1]}",
+            f"Wins/Losses: {self.__profile_data['unranked_games'][0]}/{self.__profile_data['unranked_games'][1]}",
             int(self.font_size[1]),
             self.text_color,
         )
@@ -1075,7 +1076,7 @@ class H5_Lobby(GameWindowsBase):
 
         total_wins = self.__profile_data["ranked_games"][0] + self.__profile_data["unranked_games"][0]
         total_loses = self.__profile_data["ranked_games"][1] + self.__profile_data["unranked_games"][1]
-        TOTAL_WINS_LOSES_TEXT = render_small_caps(f"Wins/Loses: {total_wins}/{total_loses}", int(self.font_size[1]), self.text_color)
+        TOTAL_WINS_LOSES_TEXT = render_small_caps(f"Wins/Losses: {total_wins}/{total_loses}", int(self.font_size[1]), self.text_color)
         TOTAL_WINS_LOSES_RECT = TOTAL_WINS_LOSES_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.78)
         )
@@ -1660,9 +1661,6 @@ class H5_Lobby(GameWindowsBase):
     def minimize_to_tray(self):
         logger.debug("Minimizing to tray.")
         time.sleep(0.1)
-        lobby_data = {"last_opponent": self.__opponent_nickname}
-        save_lobby_data(lobby_data)
-        logger.debug(f"Saved lobby data.")
         self.window = get_window()
         self.window.minimize()
         self.window.hide()

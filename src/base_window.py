@@ -148,7 +148,7 @@ class GameWindowsBase:
             self.create_lobby_elements()
 
         self.button_dims = (
-            200 * (transformation_factors[self.transformation_option][0]),
+            280 * (transformation_factors[self.transformation_option][0]),
             60 * (transformation_factors[self.transformation_option][1]),
         )
         self.top_elements_dims = (
@@ -192,8 +192,12 @@ class GameWindowsBase:
             30 * (transformation_factors[self.transformation_option][1]),
         )
         self.player_info_dims = (
-            280 * (transformation_factors[self.transformation_option][0]),
-            180 * (transformation_factors[self.transformation_option][1]),
+            360 * (transformation_factors[self.transformation_option][0]),
+            200 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.player_icon_dims = (
+            75 * (transformation_factors[self.transformation_option][0]),
+            75 * (transformation_factors[self.transformation_option][1]),
         )
         self.BG = pygame.transform.scale(self.MAIN_BG, self.resolution)
         self.PLAYER_LIST = pygame.transform.scale(self.PLAYER_LIST, self.player_list_dims)
@@ -201,8 +205,8 @@ class GameWindowsBase:
         self.PLAYER_LIST_BG = pygame.Surface(self.player_list_dims, pygame.SRCALPHA)
         self.OPTIONS = pygame.transform.scale(self.OPTIONS, self.top_elements_dims)
         self.OPTIONS_HIGHLIGHTED = pygame.transform.scale(self.OPTIONS_HIGHLIGHTED, self.top_elements_dims)
-        self.ICON_SQUARE = pygame.transform.scale(self.ICON_SQUARE, self.top_elements_dims)
-        self.ICON_SQUARE_HIGHLIGHTED = pygame.transform.scale(self.ICON_SQUARE_HIGHLIGHTED, self.top_elements_dims)
+        self.ICON_SQUARE = pygame.transform.scale(self.ICON_SQUARE, self.player_icon_dims)
+        self.ICON_SQUARE_HIGHLIGHTED = pygame.transform.scale(self.ICON_SQUARE_HIGHLIGHTED, self.player_icon_dims)
         self.QUIT_LOBBY = pygame.transform.scale(self.QUIT, self.top_elements_dims)
         self.QUIT_LOBBY_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.top_elements_dims)
         self.QUIT_FRAME = pygame.transform.scale(self.QUIT, self.quit_frame_dims)
@@ -225,8 +229,8 @@ class GameWindowsBase:
         self.TOP_BAR = pygame.transform.scale(
             self.TOP_BAR,
             (
-                1280 * (transformation_factors[self.transformation_option][0]),
-                110 * (transformation_factors[self.transformation_option][1]),
+                1400 * (transformation_factors[self.transformation_option][0]),
+                100 * (transformation_factors[self.transformation_option][1]),
             ),
         )
         self.PROGRESS_BAR_FRAME = pygame.transform.scale(
@@ -269,6 +273,13 @@ class GameWindowsBase:
             (
                 330 * (transformation_factors[self.transformation_option][0]),
                 5 * (transformation_factors[self.transformation_option][1]),
+            ),
+        )
+        self.PROFILE_LINE = pygame.transform.scale(
+            self.LINE,
+            (
+                160 * (transformation_factors[self.transformation_option][0]),
+                2 * (transformation_factors[self.transformation_option][1]),
             ),
         )
         self.SETTINGS_SCROLL_BAR = pygame.transform.scale(
