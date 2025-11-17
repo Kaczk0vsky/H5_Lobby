@@ -25,6 +25,7 @@ class GameAdmin(admin.ModelAdmin):
         "is_ranked",
         "is_waiting_confirmation",
         "is_different",
+        "is_canceled",
     )
 
     list_filter = ("is_ranked", "is_waiting_confirmation", "is_different")

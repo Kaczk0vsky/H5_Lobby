@@ -314,6 +314,8 @@ class HandleMatchReport(View):
             game = Game.objects.create(player_1=player, player_2=opponent)
 
         if game.is_waiting_confirmation:
+            game.is_waiting_confirmation = False
+
             if is_canceled:
                 game.is_canceled = is_canceled
             else:
@@ -324,11 +326,6 @@ class HandleMatchReport(View):
                     if game.castle_2 != player_castle or game.castle_1 != opponent_castle or game.who_won != who_won:
                         game.is_different = True
 
-                if game.is_different:
-                    game.is_waiting_confirmation = False
-                    game.save()
-
-                game.is_waiting_confirmation = False
                 players_data = {"who_won": who_won.nickname}
                 if game.is_ranked:
                     player_won = game.who_won
