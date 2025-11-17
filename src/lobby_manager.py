@@ -92,6 +92,7 @@ class H5_Lobby(GameWindowsBase):
     __generate_report_elements = False
     __loading_profile_data = False
     __profile_button_active = False
+    __update_player_info = False
     __is_invited = False
     __elapsed_time = None
     __decline_time = None
@@ -317,6 +318,13 @@ class H5_Lobby(GameWindowsBase):
             if self.__refresh_users_list:
                 USERS_LIST.get_players_list(self.__sorted_players)
                 self.__refresh_users_list = False
+
+            if self.__update_player_info:
+                self.__player_points = self.__profile_data["ranking_points"]
+                self.__player_ranking = self.__profile_data["ranking_position"]
+                self.POINS_TEXT = render_small_caps(f"Ranking Points: {self.__player_points}", int(self.font_size[1] * 0.9), self.text_color)
+                self.RANKING_TEXT = render_small_caps(f"Ranking Position: #{self.__player_ranking}", int(self.font_size[1] * 0.9), self.text_color)
+                self.__update_player_info = False
 
             self.SCREEN.blit(self.BG, (0, 0))
             self.cursor.update()
@@ -761,12 +769,20 @@ class H5_Lobby(GameWindowsBase):
                                 "nicknames": [self.user["nickname"], self.__opponent_nickname],
                                 "castles": [MYSELF_CASTLE.get_selected_option().lower(), OPPONENT_CASTLE.get_selected_option().lower()],
                                 "who_won": self.user["nickname"] if WHO_WON_CHOICES.get_selected_option() == "You" else self.__opponent_nickname,
+                                "is_canceled": False,
                             }
                             self.handle_match_report(report_data=report_data)
                             self.__report_creation_status = False
                             self.__report_data = None
                         if CANCEL_REPORT.check_for_input(MENU_MOUSE_POS):
                             FIND_GAME_BUTTON.set_active(is_active=True)
+                            report_data = {
+                                "nicknames": [self.user["nickname"], self.__opponent_nickname],
+                                "castles": [MYSELF_CASTLE.get_selected_option().lower(), OPPONENT_CASTLE.get_selected_option().lower()],
+                                "who_won": self.user["nickname"] if WHO_WON_CHOICES.get_selected_option() == "You" else self.__opponent_nickname,
+                                "is_canceled": True,
+                            }
+                            self.handle_match_report(report_data=report_data)
                             self.__report_creation_status = False
                             self.__report_data = None
                             logger.info("Canceled report creation.")
@@ -1469,7 +1485,7 @@ class H5_Lobby(GameWindowsBase):
         logger.debug(message)
         event = message.get("event")
 
-        if event == "unaccepted_report_data":
+        if event == "report_data":
             self.__report_data = {
                 "nicknames": message.get("nicknames"),
                 "castles": message.get("castles"),
@@ -1622,9 +1638,8 @@ class H5_Lobby(GameWindowsBase):
             if response.status_code == 200:
                 self.__loading_profile_data = False
                 self.__update_profile_status = True
+                self.__update_player_info = True
                 self.__profile_data = response.json().get("player_information")
-                self.__player_points = self.__profile_data["ranking_points"]
-                self.__player_ranking = self.__profile_data["ranking_position"]
                 logger.info("Users profile fetched succesfully.")
                 return True
 

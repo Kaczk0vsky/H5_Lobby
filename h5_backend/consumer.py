@@ -6,7 +6,7 @@ from django.db.models import Q
 from asgiref.sync import sync_to_async
 
 from h5_backend.models import Player, Game, Ban, PlayerState, OfflineMessage
-from h5_backend.notifications import notify_match_status_changed, notify_unaccepted_report, notify_match_found
+from h5_backend.notifications import notify_match_status_changed, notify_report_data, notify_match_found
 
 
 class ModelParser:
@@ -119,7 +119,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         @sync_to_async
         def add_to_queue():
             if unaccepted_game:
-                notify_unaccepted_report(player, unaccepted_game)
+                notify_report_data(player, unaccepted_game)
                 return
 
             with transaction.atomic():
@@ -205,7 +205,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         @sync_to_async
         def send_invite():
             if unaccepted_game:
-                notify_unaccepted_report(player, unaccepted_game)
+                notify_report_data(player, unaccepted_game)
                 return
 
             if player.player_state == PlayerState.ONLINE and opponent.player_state == PlayerState.ONLINE:
@@ -242,11 +242,11 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
             )
         )
 
-    async def unaccepted_report_data(self, event):
+    async def report_data(self, event):
         await self.send(
             json.dumps(
                 {
-                    "event": "unaccepted_report_data",
+                    "event": "report_data",
                     "nicknames": [event["player1_nickname"], event["player2_nickname"]],
                     "castles": [event["player1_castle"], event["player2_castle"]],
                     "who_won": event["who_won"],

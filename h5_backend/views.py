@@ -279,20 +279,29 @@ class HandleMatchReport(View):
             if not game_serializer.is_valid():
                 errors = {}
                 errors.update(game_serializer.errors)
-                return None, None, None, None, None, JsonResponse({"success": False, "errors": errors}, status=400)
+                return None, None, None, None, None, None, JsonResponse({"success": False, "errors": errors}, status=400)
 
             player_nickname = game_serializer.validated_data["nicknames"][0]
             opponent_nickname = game_serializer.validated_data["nicknames"][1]
             player_castle = game_serializer.validated_data["castles"][0]
             opponent_castle = game_serializer.validated_data["castles"][1]
             who_won = game_serializer.validated_data["who_won"]
+            is_canceled = game_serializer.validated_data["is_canceled"]
 
-            return player_nickname, opponent_nickname, player_castle, opponent_castle, who_won, None
+            return player_nickname, opponent_nickname, player_castle, opponent_castle, who_won, is_canceled, None
 
         except json.JSONDecodeError:
             return None, None, None, None, None, JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
 
-    def _create_match_report(self, player: Player, opponent: Player, player_castle: CastleType, opponent_castle: CastleType, who_won: Player):
+    def _create_match_report(
+        self,
+        player: Player,
+        opponent: Player,
+        player_castle: CastleType,
+        opponent_castle: CastleType,
+        who_won: Player,
+        is_canceled: bool,
+    ):
         game = (
             Game.objects.filter(
                 (Q(player_1=player) | Q(player_2=player)) & (Q(is_new=True) | Q(is_waiting_confirmation=True)) & ~Q(who_created=player)
@@ -305,26 +314,29 @@ class HandleMatchReport(View):
             game = Game.objects.create(player_1=player, player_2=opponent)
 
         if game.is_waiting_confirmation:
-            if game.player_1 == player:
-                if game.castle_1 != player_castle or game.castle_2 != opponent_castle or game.who_won != who_won:
-                    game.is_different = True
+            if is_canceled:
+                game.is_canceled = is_canceled
             else:
-                if game.castle_2 != player_castle or game.castle_1 != opponent_castle or game.who_won != who_won:
-                    game.is_different = True
+                if game.player_1 == player:
+                    if game.castle_1 != player_castle or game.castle_2 != opponent_castle or game.who_won != who_won:
+                        game.is_different = True
+                else:
+                    if game.castle_2 != player_castle or game.castle_1 != opponent_castle or game.who_won != who_won:
+                        game.is_different = True
 
-            if game.is_different:
+                if game.is_different:
+                    game.is_waiting_confirmation = False
+                    game.save()
+
                 game.is_waiting_confirmation = False
-                game.save()
-
-            game.is_waiting_confirmation = False
-            players_data = {"who_won": who_won.nickname}
-            if game.is_ranked:
-                player_won = game.who_won
-                player_lost = game.player_2 if player_won == game.player_1 else game.player_1
-                if not game.points_change_winner and not game.points_change_loser:
-                    game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
-                players_data[player_won.nickname] = game.points_change_winner
-                players_data[player_lost.nickname] = game.points_change_loser
+                players_data = {"who_won": who_won.nickname}
+                if game.is_ranked:
+                    player_won = game.who_won
+                    player_lost = game.player_2 if player_won == game.player_1 else game.player_1
+                    if not game.points_change_winner and not game.points_change_loser:
+                        game.points_change_winner, game.points_change_loser = self.__calculate_points_change(player_won, player_lost)
+                    players_data[player_won.nickname] = game.points_change_winner
+                    players_data[player_lost.nickname] = game.points_change_loser
 
             game.save()
             return players_data
@@ -339,7 +351,10 @@ class HandleMatchReport(View):
             game.who_won = who_won
             game.who_created = player
             game.is_new = False
-            game.is_waiting_confirmation = True
+            if is_canceled:
+                game.is_canceled = is_canceled
+            else:
+                game.is_waiting_confirmation = True
 
         game.save()
         return None
@@ -366,6 +381,7 @@ class HandleMatchReport(View):
                 player_castle,
                 opponent_castle,
                 who_won,
+                is_canceled,
                 parse_error,
             ) = self._parse_post_data(request)
             if parse_error:
@@ -378,7 +394,7 @@ class HandleMatchReport(View):
             except Player.DoesNotExist:
                 return JsonResponse({"success": False, "error": "Player not found"}, status=400)
 
-            data = self._create_match_report(player, opponent, player_castle, opponent_castle, who_won)
+            data = self._create_match_report(player, opponent, player_castle, opponent_castle, who_won, is_canceled)
 
             return JsonResponse({"success": True, "data": data})
 

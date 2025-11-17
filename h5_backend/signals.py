@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 
 from h5_backend.models import Player, Game, PlayerState
-from h5_backend.notifications import notify_users_list_change
+from h5_backend.notifications import notify_users_list_change, notify_report_data
 
 
 @receiver(post_save, sender=User)
@@ -47,6 +47,21 @@ def update_user_list(sender, instance, **kwargs):
             notify_users_list_change(player, current_users_formatted)
 
     cache.set("previous_users_formatted", current_users_formatted, timeout=None)
+
+
+@receiver(post_save, sender=Game)
+def send_report(sender, instance, created, **kwargs):
+    if created:
+        return
+
+    try:
+        old = sender.objects.get(pk=instance.pk)
+    except sender.DoesNotExist:
+        return
+
+    if old.who_won != instance.who_won:
+        opponent = instance.player_1 if instance.who_created == instance.player_2 else instance.player_2
+        notify_report_data(opponent, instance)
 
 
 @receiver(pre_save, sender=Player)

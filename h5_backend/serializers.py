@@ -48,6 +48,7 @@ class GameReportSerializer(serializers.Serializer):
         help_text="List of two castles: [castle1, castle2]",
     )
     who_won = serializers.CharField(max_length=16, required=True, help_text="Nickname of the player who won: player1")
+    is_canceled = serializers.BooleanField(required=True)
 
     def __init__(self, *args, required_fields=None, **kwargs):
         super().__init__(*args, **kwargs)

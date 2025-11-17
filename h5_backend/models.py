@@ -107,6 +107,7 @@ class Game(models.Model):
     is_ranked = models.BooleanField(default=True)
     is_waiting_confirmation = models.BooleanField(default=False)
     is_different = models.BooleanField(default=False)
+    is_canceled = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Game ID - {self.id}, Won by - {self.who_won}"

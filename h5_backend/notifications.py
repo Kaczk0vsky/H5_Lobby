@@ -22,10 +22,10 @@ def notify_match_status_changed(player, opponent_accepted, opponent_declined):
     send_or_store(player, "check_if_accepted", {"opponent_accepted": opponent_accepted, "opponent_declined": opponent_declined})
 
 
-def notify_unaccepted_report(player, game):
+def notify_report_data(player, game):
     send_or_store(
         player,
-        "unaccepted_report_data",
+        "report_data",
         {
             "player1_nickname": game.player_1.nickname,
             "player2_nickname": game.player_2.nickname,
