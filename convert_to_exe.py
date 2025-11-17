@@ -37,16 +37,10 @@ def create_exe_file():
             --collect-submodules=pygame \
             --hidden-import=toml \
             --collect-submodules=toml \
-            --hidden-import=django \
-            --collect-submodules=django \
             --hidden-import=requests \
             --collect-submodules=requests \
-            --hidden-import=dotenv \
-            --collect-submodules=dotenv \
             --hidden-import=pygetwindow \
             --collect-submodules=pygetwindow \
-            --hidden-import=psutil \
-            --collect-submodules=psutil \
             --hidden-import=dotenv \
             --collect-submodules=dotenv \
             --hidden-import=tkinter \
@@ -55,8 +49,6 @@ def create_exe_file():
             --collect-submodules=_tkinter \
             --hidden-import=easygui \
             --collect-submodules=easygui \
-            --hidden-import=pygetwindow \
-            --collect-submodules=pygetwindow \
             --hidden-import=psycopg2 \
             --collect-submodules=psycopg2 \
             --hidden-import=psutil \
@@ -65,8 +57,6 @@ def create_exe_file():
             --collect-submodules=keyboard \
             --hidden-import=logging \
             --collect-submodules=logging \
-            --hidden-import=channels \
-            --collect-submodules=channels \
             --name={EXE_NAME} main.py'
     )
 
