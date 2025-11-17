@@ -296,27 +296,6 @@ class GameWindowsBase:
                 30 * (transformation_factors[self.transformation_option][1]),
             ),
         )
-        self.NICKNAME_TEXT = render_small_caps(f"{self.user["nickname"]}", self.font_size[0], self.hovering_color)
-        self.NICKNAME_RECT = self.NICKNAME_TEXT.get_rect(
-            topleft=(
-                20 * (transformation_factors[self.transformation_option][0]),
-                15 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.POINS_TEXT = render_small_caps(f"Points: 2137", self.font_size[1], self.text_color)
-        self.POINTS_RECT = self.POINS_TEXT.get_rect(
-            topleft=(
-                20 * (transformation_factors[self.transformation_option][0]),
-                50 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
-        self.RANKING_TEXT = render_small_caps(f"Ranking: 12", self.font_size[1], self.text_color)
-        self.RANKING_RECT = self.RANKING_TEXT.get_rect(
-            topleft=(
-                20 * (transformation_factors[self.transformation_option][0]),
-                75 * (transformation_factors[self.transformation_option][1]),
-            ),
-        )
         self.CHECKBOX = pygame.transform.scale(self.CHECKBOX, self.checkbox_dims)
         self.CHECKBOX_CHECKED = pygame.transform.scale(self.CHECKBOX_CHECKED, self.checkbox_dims)
         self.CHECKBOX_SETTINGS = pygame.transform.scale(self.CHECKBOX, self.settings_checkbox_dims)

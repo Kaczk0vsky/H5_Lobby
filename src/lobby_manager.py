@@ -124,11 +124,11 @@ class H5_Lobby(GameWindowsBase):
 
         # WebSocket Client Initialization
         self.websocket_client = WebSocketClient(user=self.user)
+        self.load_ws_messages()
         self.loop = asyncio.new_event_loop()
+        asyncio.run_coroutine_threadsafe(self.websocket_client.connect(), self.loop)
         self.thread = threading.Thread(target=self._run_loop, daemon=True)
         self.thread.start()
-        asyncio.run_coroutine_threadsafe(self.websocket_client.connect(), self.loop)
-        self.load_ws_messages()
 
         # Lobby parameters initialization
         self.lobby_data = load_lobby_data()
@@ -330,9 +330,21 @@ class H5_Lobby(GameWindowsBase):
                 ),
             )
             self.SCREEN.blit(self.PLAYER_INFO, (0, 0))
-            self.SCREEN.blit(self.PROFILE_LINE, (80, 22.5))
+            self.SCREEN.blit(
+                self.PROFILE_LINE,
+                (
+                    80 * (transformation_factors[self.transformation_option][0]),
+                    22.5 * (transformation_factors[self.transformation_option][1]),
+                ),
+            )
             self.SCREEN.blit(self.NICKNAME_TEXT, self.NICKNAME_RECT)
-            self.SCREEN.blit(self.PROFILE_LINE, (80, 67.5))
+            self.SCREEN.blit(
+                self.PROFILE_LINE,
+                (
+                    80 * (transformation_factors[self.transformation_option][0]),
+                    67.5 * (transformation_factors[self.transformation_option][1]),
+                ),
+            )
             self.SCREEN.blit(self.POINS_TEXT, self.POINTS_RECT)
             self.SCREEN.blit(self.RANKING_TEXT, self.RANKING_RECT)
 
@@ -801,11 +813,12 @@ class H5_Lobby(GameWindowsBase):
                             # FIXME: leave for now - rescaling is to complicated :/
                             USERS_LIST = UsersList(
                                 position=(
-                                    1710 * (transformation_factors[self.transformation_option][0]),
+                                    1720 * (transformation_factors[self.transformation_option][0]),
                                     590 * (transformation_factors[self.transformation_option][1]),
                                 ),
                                 color=self.text_color,
                                 hovering_color=self.hovering_color,
+                                inactive_color=self.inactive_color,
                                 font_size=self.font_size[0],
                                 title="Players Online",
                                 image=self.PLAYER_LIST,
@@ -816,7 +829,32 @@ class H5_Lobby(GameWindowsBase):
                                 line=self.LINE,
                                 box=self.CHECKBOX,
                             )
-                            self.refresh_friends_list(USERS_LIST)
+                            self.__refresh_users_list = True
+                            self.NICKNAME_TEXT = render_small_caps(f"{self.user["nickname"]}", int(self.font_size[1] * 1.2), self.hovering_color)
+                            self.NICKNAME_RECT = self.NICKNAME_TEXT.get_rect(
+                                center=(
+                                    165 * (transformation_factors[self.transformation_option][0]),
+                                    45 * (transformation_factors[self.transformation_option][1]),
+                                ),
+                            )
+                            self.POINS_TEXT = render_small_caps(
+                                f"Ranking Points: {self.__player_points}", int(self.font_size[1] * 0.9), self.text_color
+                            )
+                            self.POINTS_RECT = self.POINS_TEXT.get_rect(
+                                topleft=(
+                                    15 * (transformation_factors[self.transformation_option][0]),
+                                    90 * (transformation_factors[self.transformation_option][1]),
+                                ),
+                            )
+                            self.RANKING_TEXT = render_small_caps(
+                                f"Ranking Position: #{self.__player_ranking}", int(self.font_size[1] * 0.9), self.text_color
+                            )
+                            self.RANKING_RECT = self.RANKING_TEXT.get_rect(
+                                topleft=(
+                                    15 * (transformation_factors[self.transformation_option][0]),
+                                    120 * (transformation_factors[self.transformation_option][1]),
+                                ),
+                            )
 
                         if POINTS_CHOICES.check_for_input(MENU_MOUSE_POS):
                             self.config["points_treshold"] = str(POINTS_CHOICES.get_selected_option())
@@ -1428,6 +1466,7 @@ class H5_Lobby(GameWindowsBase):
         )
 
     def handle_ws_message(self, message):
+        logger.debug(message)
         event = message.get("event")
 
         if event == "unaccepted_report_data":
