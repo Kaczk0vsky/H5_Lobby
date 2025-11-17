@@ -49,18 +49,6 @@ def update_user_list(sender, instance, **kwargs):
     cache.set("previous_users_formatted", current_users_formatted, timeout=None)
 
 
-@receiver(pre_save, sender=Game)
-def send_report(sender, instance, **kwargs):
-    try:
-        old = sender.objects.get(pk=instance.pk)
-    except sender.DoesNotExist:
-        return
-
-    if instance.who_won and old.is_waiting_confirmation and not instance.is_waiting_confirmation:
-        opponent = instance.player_1 if instance.who_created == instance.player_2 else instance.player_2
-        notify_report_data(opponent, instance)
-
-
 @receiver(pre_save, sender=Player)
 def cache_old_points(sender, instance, **kwargs):
     if instance.pk:

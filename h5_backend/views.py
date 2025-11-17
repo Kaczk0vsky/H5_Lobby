@@ -20,8 +20,9 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse
 
 from h5_backend.tasks import add_new_user_to_vpn_server
-from h5_backend.models import Player, PlayerState, Ban, Game, CastleType
+from h5_backend.models import Player, Ban, Game, CastleType
 from h5_backend.serializers import UserSerializer, GameReportSerializer
+from h5_backend.notifications import notify_report_data
 
 logger = logging.getLogger(__name__)
 
@@ -352,6 +353,7 @@ class HandleMatchReport(View):
                 game.is_canceled = is_canceled
             else:
                 game.is_waiting_confirmation = True
+                notify_report_data(opponent, game)
 
         game.save()
         return None
