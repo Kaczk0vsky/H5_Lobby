@@ -50,10 +50,7 @@ def update_user_list(sender, instance, **kwargs):
 
 
 @receiver(pre_save, sender=Game)
-def send_report(sender, instance, created, **kwargs):
-    if created:
-        return
-
+def send_report(sender, instance, **kwargs):
     try:
         old = sender.objects.get(pk=instance.pk)
     except sender.DoesNotExist:
