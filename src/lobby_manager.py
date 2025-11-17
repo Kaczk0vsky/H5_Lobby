@@ -73,7 +73,6 @@ class H5_Lobby(GameWindowsBase):
     __opponent_accepted = False
     __opponent_declined = False
     __player_accepted = False
-    __player_declined = False
     __queue_status = False
     __update_queue_status = False
     __profile_status = False
@@ -434,10 +433,14 @@ class H5_Lobby(GameWindowsBase):
                     if cancel_bar:
                         self.__window_overlay = True
                         self.__queue_canceled = True
-                        self.__error_msg = "Queue has been declined"
+                        if self.__is_invited:
+                            self.__error_msg = "Invitation has been declined"
+                        else:
+                            self.__error_msg = "Queue has been declined"
                         pygame.mixer.Channel(0).set_volume(self.config["volume"])
                         pygame.mixer.Channel(self.__queue_channel).stop()
                         FIND_GAME_BUTTON.set_active(is_active=True)
+                        CREATE_REPORT.set_active(is_active=True)
                         OPTIONS_BUTTON.set_active(is_active=True)
                         self.__set_queue_variables(state=False)
                         self.remove_from_queue_ws(is_accepted=False, is_invited=self.__is_invited)
@@ -681,7 +684,8 @@ class H5_Lobby(GameWindowsBase):
                         if str(player.state).lower() == "online":
                             logger.debug(f"Invited player: {player.nickname}")
                             self.send_game_invite_ws(opponent_nickname=player.nickname)
-
+                            FIND_GAME_BUTTON.set_active(is_active=False)
+                            CREATE_REPORT.set_active(is_active=False)
                             self.__opponent_nickname = player.nickname
                             self.__oponnent_ranking_points = player.ranking_points
                             self.__queue_status = True
@@ -749,10 +753,12 @@ class H5_Lobby(GameWindowsBase):
                             if self.__queue_channel:
                                 pygame.mixer.Channel(self.__queue_channel).stop()
                             FIND_GAME_BUTTON.set_active(is_active=True)
-                            OPTIONS_BUTTON.set_active(True)
+                            CREATE_REPORT.set_active(is_active=True)
+                            OPTIONS_BUTTON.set_active(is_active=True)
                             self.__set_queue_variables(state=False)
                             self.remove_from_queue_ws(is_accepted=False, is_invited=self.__is_invited)
-                            self.__player_declined = True
+                            self.__is_invited = False
+                            self.__decline_time = None
                             continue
                         if ACCEPT_QUEUE is not None:
                             if ACCEPT_QUEUE.check_for_input(MENU_MOUSE_POS):
@@ -905,19 +911,51 @@ class H5_Lobby(GameWindowsBase):
                 self.run_arena()
                 continue
 
-            if self.__opponent_declined and not self.__player_declined:
-                self.__decline_time = time.time()
-                self.__update_queue_status = True
+            # ----- QUEUE DECLINE -----
+            # 1. Opponent declined in queue game
+            if self.__opponent_declined and not self.__is_invited:
                 self.__opponent_declined = False
+                self.__queue_status = True
+                self.__update_queue_status = True
                 self.__found_game = False
-                self.__player_accepted = False
                 self.__game_found_music = False
+                if self.__player_accepted:
+                    self.__player_accepted = False
+
                 self.__elapsed_time = None
-                self.__opponent_nickname = None
+                self.__decline_time = time.time()
                 pygame.mixer.Channel(0).set_volume(self.config["volume"])
                 if self.__queue_channel:
                     pygame.mixer.Channel(self.__queue_channel).stop()
+
                 self.add_to_queue_ws()
+                continue
+
+            # 2. Opponent declined in invited game
+            if self.__opponent_declined and self.__is_invited:
+                self.__opponent_declined = False
+                self.__is_invited = False
+                self.__queue_status = False
+                self.__update_queue_status = False
+                self.__found_game = False
+                self.__game_found_music = False
+                self.__window_overlay = True
+                if self.__player_accepted:
+                    self.__player_accepted = False
+
+                self.__elapsed_time = None
+                pygame.mixer.Channel(0).set_volume(self.config["volume"])
+                if self.__queue_channel:
+                    pygame.mixer.Channel(self.__queue_channel).stop()
+
+                self.__error_msg = "Opponent has declined invitation."
+                FIND_GAME_BUTTON.set_active(is_active=True)
+                CREATE_REPORT.set_active(is_active=True)
+                continue
+
+            if self.__is_invited:
+                FIND_GAME_BUTTON.set_active(is_active=False)
+                CREATE_REPORT.set_active(is_active=False)
 
             if self.__connection_timer:
                 time_passed = calculate_time_passed(start_time=self.__connection_timer)
