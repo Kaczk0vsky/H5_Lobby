@@ -59,7 +59,7 @@ def send_report(sender, instance, created, **kwargs):
     except sender.DoesNotExist:
         return
 
-    if instance.who_won:
+    if instance.who_won and instance.is_waiting_confirmation:
         opponent = instance.player_1 if instance.who_created == instance.player_2 else instance.player_2
         notify_report_data(opponent, instance)
 
