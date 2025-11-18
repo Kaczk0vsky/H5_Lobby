@@ -47,13 +47,33 @@ class Button:
         text_input: str = "",
         image_inactive: pygame.Surface = None,
         inactive_color: str = None,
+        transformation_factors: tuple[float, float] = None,
     ):
-        self.image = image
-        self.image_highlighted = image_highlited
         self.original_image = image
         self.original_image_highlighted = image_highlited
-        self.x_pos = position[0]
-        self.y_pos = position[1]
+        if transformation_factors:
+            self.x_pos = position[0] * transformation_factors[0]
+            self.y_pos = position[1] * transformation_factors[0]
+            self.image = pygame.transform.scale(
+                self.original_image,
+                (
+                    self.original_image.get_width() * transformation_factors[0],
+                    self.original_image.get_height() * transformation_factors[1],
+                ),
+            )
+            self.image_highlighted = pygame.transform.scale(
+                self.original_image_highlighted,
+                (
+                    self.original_image_highlighted.get_width() * transformation_factors[0],
+                    self.original_image_highlighted.get_height() * transformation_factors[1],
+                ),
+            )
+        else:
+            self.x_pos = position[0]
+            self.y_pos = position[1]
+            self.image = image
+            self.image_highlighted = image_highlited
+
         self.original_x_pos = position[0]
         self.original_y_pos = position[1]
         self.font_size = font_size

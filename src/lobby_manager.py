@@ -176,98 +176,82 @@ class H5_Lobby(GameWindowsBase):
         FIND_GAME_BUTTON = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            position=(
-                760 * (transformation_factors[self.transformation_option][0]),
-                40 * (transformation_factors[self.transformation_option][1]),
-            ),
+            position=(760, 40),
             text_input="Find Game",
             font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
         CREATE_REPORT = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            position=(
-                1030 * (transformation_factors[self.transformation_option][0]),
-                40 * (transformation_factors[self.transformation_option][1]),
-            ),
+            position=(1030, 40),
             text_input="Create Report",
             font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
         RANKING = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            position=(
-                1300 * (transformation_factors[self.transformation_option][0]),
-                40 * (transformation_factors[self.transformation_option][1]),
-            ),
+            position=(1300, 40),
             text_input="Ranking",
             font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
         MY_PROFILE = Button(
             image=self.BUTTON,
             image_highlited=self.BUTTON_HIGHLIGHTED,
-            position=(
-                1550 * (transformation_factors[self.transformation_option][0]),
-                40 * (transformation_factors[self.transformation_option][1]),
-            ),
+            position=(1550, 40),
             text_input="My Profile",
             font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
         DISCORD = Button(
             image=self.DISCORD_LOGO,
             image_highlited=self.DISCORD_LOGO_HIGHLIGHTED,
-            position=(
-                1730 * (transformation_factors[self.transformation_option][0]),
-                40 * (transformation_factors[self.transformation_option][1]),
-            ),
+            position=(1730, 40),
             font_size=self.font_size[0],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
         OPTIONS_BUTTON = Button(
             image=self.OPTIONS,
             image_highlited=self.OPTIONS_HIGHLIGHTED,
             image_inactive=self.OPTIONS,
-            position=(
-                1805 * (transformation_factors[self.transformation_option][0]),
-                40 * (transformation_factors[self.transformation_option][1]),
-            ),
+            position=(1805, 40),
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
         QUIT_BUTTON = Button(
             image=self.QUIT_LOBBY,
             image_highlited=self.QUIT_LOBBY_HIGHLIGHTED,
-            position=(
-                1875 * (transformation_factors[self.transformation_option][0]),
-                40 * (transformation_factors[self.transformation_option][1]),
-            ),
+            position=(1875, 40),
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
         PLAYER_ICON = Button(
             image=self.ICON_SQUARE,
             image_highlited=self.ICON_SQUARE_HIGHLIGHTED,
             image_inactive=self.ICON_SQUARE,
-            position=(
-                45 * (transformation_factors[self.transformation_option][0]),
-                45 * (transformation_factors[self.transformation_option][1]),
-            ),
+            position=(45, 45),
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
         USERS_LIST = UsersList(
             position=(
@@ -830,7 +814,7 @@ class H5_Lobby(GameWindowsBase):
                             self.__update_options_status = True
                             self.rescale_lobby_elements(reload=True)
                             for button in buttons:
-                                button.rescale(fonts_sizes[self.config["resolution"]][1], transformation_factors[self.config["resolution"]])
+                                button.rescale(fonts_sizes[self.config["resolution"]][0], transformation_factors[self.config["resolution"]])
 
                             # FIXME: leave for now - rescaling is to complicated :/
                             USERS_LIST = UsersList(
@@ -1520,7 +1504,6 @@ class H5_Lobby(GameWindowsBase):
         )
 
     def handle_ws_message(self, message):
-        logger.debug(message)
         event = message.get("event")
 
         if event == "report_data":

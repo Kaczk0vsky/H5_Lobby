@@ -147,14 +147,9 @@ class GameWindowsBase:
         if reload:
             self.create_lobby_elements()
 
-        self.button_dims = (
-            280 * (transformation_factors[self.transformation_option][0]),
-            60 * (transformation_factors[self.transformation_option][1]),
-        )
-        self.top_elements_dims = (
-            50 * (transformation_factors[self.transformation_option][0]),
-            50 * (transformation_factors[self.transformation_option][1]),
-        )
+        self.button_dims = (280, 60)
+        self.top_elements_dims = (50, 50)
+        self.discord_logo_dims = (60, 60)
         self.player_list_dims = (
             400 * (transformation_factors[self.transformation_option][0]),
             1000 * (transformation_factors[self.transformation_option][1]),
@@ -199,26 +194,6 @@ class GameWindowsBase:
             75 * (transformation_factors[self.transformation_option][0]),
             75 * (transformation_factors[self.transformation_option][1]),
         )
-        self.BG = pygame.transform.scale(self.MAIN_BG, self.resolution)
-        self.PLAYER_LIST = pygame.transform.scale(self.PLAYER_LIST, self.player_list_dims)
-        self.PLAYER_INFO = pygame.transform.scale(self.PLAYER_INFO, self.player_info_dims)
-        self.PLAYER_LIST_BG = pygame.Surface(self.player_list_dims, pygame.SRCALPHA)
-        self.OPTIONS = pygame.transform.scale(self.OPTIONS, self.top_elements_dims)
-        self.OPTIONS_HIGHLIGHTED = pygame.transform.scale(self.OPTIONS_HIGHLIGHTED, self.top_elements_dims)
-        self.ICON_SQUARE = pygame.transform.scale(self.ICON_SQUARE, self.player_icon_dims)
-        self.ICON_SQUARE_HIGHLIGHTED = pygame.transform.scale(self.ICON_SQUARE_HIGHLIGHTED, self.player_icon_dims)
-        self.QUIT_LOBBY = pygame.transform.scale(self.QUIT, self.top_elements_dims)
-        self.QUIT_LOBBY_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.top_elements_dims)
-        self.QUIT_FRAME = pygame.transform.scale(self.QUIT, self.quit_frame_dims)
-        self.QUIT_FRAME_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.quit_frame_dims)
-        self.BUTTON = pygame.transform.scale(self.BUTTON, self.button_dims)
-        self.BUTTON_HIGHLIGHTED = pygame.transform.scale(self.BUTTON_HIGHLIGHTED, self.button_dims)
-        self.ACCEPT_BUTTON = pygame.transform.scale(self.ACCEPT_BUTTON, self.button_dims)
-        self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.transform.scale(self.ACCEPT_BUTTON_HIGHLIGHTED, self.button_dims)
-        self.ACCEPT_BUTTON_INACTIVE = pygame.transform.scale(self.ACCEPT_BUTTON_INACTIVE, self.button_dims)
-        self.CANCEL_BUTTON = pygame.transform.scale(self.CANCEL_BUTTON, self.button_dims)
-        self.CANCEL_BUTTON_HIGHLIGHTED = pygame.transform.scale(self.CANCEL_BUTTON_HIGHLIGHTED, self.button_dims)
-        self.CANCEL_BUTTON_INACTIVE = pygame.transform.scale(self.CANCEL_BUTTON_INACTIVE, self.button_dims)
         self.PLAYER_LIST_FRAME = pygame.transform.scale(
             self.LEFT_FRAME,
             (
@@ -296,6 +271,26 @@ class GameWindowsBase:
                 30 * (transformation_factors[self.transformation_option][1]),
             ),
         )
+        self.BG = pygame.transform.scale(self.MAIN_BG, self.resolution)
+        self.PLAYER_LIST = pygame.transform.scale(self.PLAYER_LIST, self.player_list_dims)
+        self.PLAYER_INFO = pygame.transform.scale(self.PLAYER_INFO, self.player_info_dims)
+        self.PLAYER_LIST_BG = pygame.Surface(self.player_list_dims, pygame.SRCALPHA)
+        self.OPTIONS = pygame.transform.scale(self.OPTIONS, self.top_elements_dims)
+        self.OPTIONS_HIGHLIGHTED = pygame.transform.scale(self.OPTIONS_HIGHLIGHTED, self.top_elements_dims)
+        self.ICON_SQUARE = pygame.transform.scale(self.ICON_SQUARE, self.player_icon_dims)
+        self.ICON_SQUARE_HIGHLIGHTED = pygame.transform.scale(self.ICON_SQUARE_HIGHLIGHTED, self.player_icon_dims)
+        self.QUIT_LOBBY = pygame.transform.scale(self.QUIT, self.top_elements_dims)
+        self.QUIT_LOBBY_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.top_elements_dims)
+        self.QUIT_FRAME = pygame.transform.scale(self.QUIT, self.quit_frame_dims)
+        self.QUIT_FRAME_HIGHLIGHTED = pygame.transform.scale(self.QUIT_HIGHLIGHTED, self.quit_frame_dims)
+        self.BUTTON = pygame.transform.scale(self.BUTTON, self.button_dims)
+        self.BUTTON_HIGHLIGHTED = pygame.transform.scale(self.BUTTON_HIGHLIGHTED, self.button_dims)
+        self.ACCEPT_BUTTON = pygame.transform.scale(self.ACCEPT_BUTTON, self.button_dims)
+        self.ACCEPT_BUTTON_HIGHLIGHTED = pygame.transform.scale(self.ACCEPT_BUTTON_HIGHLIGHTED, self.button_dims)
+        self.ACCEPT_BUTTON_INACTIVE = pygame.transform.scale(self.ACCEPT_BUTTON_INACTIVE, self.button_dims)
+        self.CANCEL_BUTTON = pygame.transform.scale(self.CANCEL_BUTTON, self.button_dims)
+        self.CANCEL_BUTTON_HIGHLIGHTED = pygame.transform.scale(self.CANCEL_BUTTON_HIGHLIGHTED, self.button_dims)
+        self.CANCEL_BUTTON_INACTIVE = pygame.transform.scale(self.CANCEL_BUTTON_INACTIVE, self.button_dims)
         self.CHECKBOX = pygame.transform.scale(self.CHECKBOX, self.checkbox_dims)
         self.CHECKBOX_CHECKED = pygame.transform.scale(self.CHECKBOX_CHECKED, self.checkbox_dims)
         self.CHECKBOX_SETTINGS = pygame.transform.scale(self.CHECKBOX, self.settings_checkbox_dims)
@@ -303,8 +298,8 @@ class GameWindowsBase:
         self.QUESTION_MARK = pygame.transform.scale(self.QUESTION_MARK, self.hoverbox_dims)
         self.QUESTION_MARK_HIGHLIGHTED = pygame.transform.scale(self.QUESTION_MARK_HIGHLIGHTED, self.hoverbox_dims)
         self.LEFT_FRAME = pygame.transform.scale(self.LEFT_FRAME, self.frame_dims)
-        self.DISCORD_LOGO = pygame.transform.scale(self.DISCORD_LOGO, self.quit_frame_dims)
-        self.DISCORD_LOGO_HIGHLIGHTED = pygame.transform.scale(self.DISCORD_LOGO_HIGHLIGHTED, self.quit_frame_dims)
+        self.DISCORD_LOGO = pygame.transform.scale(self.DISCORD_LOGO, self.discord_logo_dims)
+        self.DISCORD_LOGO_HIGHLIGHTED = pygame.transform.scale(self.DISCORD_LOGO_HIGHLIGHTED, self.discord_logo_dims)
         self.NARROW_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 3))
         self.WIDE_LINE = pygame.transform.scale(self.LINE, (self.frame_dims[0] * 0.8, 5))
         self.ARROW_LEFT = pygame.transform.scale(self.ARROW_LEFT, self.arrows_dims)
