@@ -1,4 +1,5 @@
 import json
+import asyncio
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db import transaction
@@ -77,6 +78,7 @@ class QueueConsumer(AsyncWebsocketConsumer, ModelParser):
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
 
+        await asyncio.sleep(2)
         player = await self._get_player(self.nickname)
         await self._set_connection_state(player, True)
         await self._send_pending_messages(player)
