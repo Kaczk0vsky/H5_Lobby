@@ -51,6 +51,8 @@ class Button:
     ):
         self.original_image = image
         self.original_image_highlighted = image_highlited
+        self.original_image_inactive = image_inactive or image
+
         if transformation_factors:
             self.x_pos = position[0] * transformation_factors[0]
             self.y_pos = position[1] * transformation_factors[0]
@@ -68,11 +70,22 @@ class Button:
                     self.original_image_highlighted.get_height() * transformation_factors[1],
                 ),
             )
+            if image_inactive:
+                self.image_inactive = pygame.transform.scale(
+                    self.original_image_inactive,
+                    (
+                        self.original_image_inactive.get_width() * transformation_factors[0],
+                        self.original_image_inactive.get_height() * transformation_factors[1],
+                    ),
+                )
+            else:
+                self.image_inactive = self.image
         else:
             self.x_pos = position[0]
             self.y_pos = position[1]
             self.image = image
             self.image_highlighted = image_highlited
+            self.image_inactive = image_inactive or image
 
         self.original_x_pos = position[0]
         self.original_y_pos = position[1]
@@ -82,13 +95,9 @@ class Button:
         self.text_input = text_input
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         self.inactive_color = base_color
-        self.image_inactive = image_inactive or image
-        self.original_image_inactive = image_inactive or image
 
         if inactive_color:
             self.inactive_color = inactive_color
-        if image_inactive:
-            self.image_inactive = image_inactive
         if self.text_input:
             self.text = render_small_caps(self.text_input, self.font_size, self.base_color)
             self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))

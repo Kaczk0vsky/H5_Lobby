@@ -816,7 +816,6 @@ class H5_Lobby(GameWindowsBase):
                             for button in buttons:
                                 button.rescale(fonts_sizes[self.config["resolution"]][0], transformation_factors[self.config["resolution"]])
 
-                            # FIXME: leave for now - rescaling is to complicated :/
                             USERS_LIST = UsersList(
                                 position=(
                                     1720 * (transformation_factors[self.transformation_option][0]),
@@ -968,11 +967,12 @@ class H5_Lobby(GameWindowsBase):
             pygame.display.update()
 
     def queue_window(self):
-        dims = (
+        dims = (640, 360)
+        window_dims = (
             640 * transformation_factors[self.transformation_option][0],
             360 * transformation_factors[self.transformation_option][1],
         )
-        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOW_BASE, dims)
+        self.SMALLER_WINDOWS_BG = pygame.transform.scale(self.SMALLER_WINDOW_BASE, window_dims)
 
         if not self.__get_time:
             self.start_time = time.time()
@@ -986,6 +986,7 @@ class H5_Lobby(GameWindowsBase):
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
 
         ACCEPT_BUTTON = None
@@ -1018,6 +1019,7 @@ class H5_Lobby(GameWindowsBase):
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
                 inactive_color=self.inactive_color,
+                transformation_factors=transformation_factors[self.transformation_option],
             )
             CANCEL_BUTTON = Button(
                 image=self.CANCEL_BUTTON,
@@ -1029,11 +1031,12 @@ class H5_Lobby(GameWindowsBase):
                 base_color=self.text_color,
                 hovering_color=self.hovering_color,
                 inactive_color=self.inactive_color,
+                transformation_factors=transformation_factors[self.transformation_option],
             )
             if not self.__player_accepted:
                 PROGRESS_BAR = ProgressBar(
-                    position=(dims[0] * 1.5, dims[1] * 1.6),
-                    dimensions=(dims[0] * 0.9, dims[1] * 0.175),
+                    position=(window_dims[0] * 1.5, window_dims[1] * 1.6),
+                    dimensions=(window_dims[0] * 0.9, window_dims[1] * 0.175),
                     image_frame=self.PROGRESS_BAR_FRAME,
                     image_bg=self.PROGRESS_BAR_BG,
                     image_edge=self.PROGRESS_BAR_EDGE,
@@ -1049,6 +1052,15 @@ class H5_Lobby(GameWindowsBase):
         )
 
     def profile_window(self):
+        self.frame_dims = (
+            520 * (transformation_factors[self.transformation_option][0]),
+            800 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.frame_position = (
+            15 * (transformation_factors[self.transformation_option][0]),
+            240 * (transformation_factors[self.transformation_option][1]),
+        )
+
         NICKNAME_TEXT = render_small_caps(self.user["nickname"], int(self.font_size[0] * 1.75), self.hovering_color)
         NICKNAME_RECT = NICKNAME_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.15)
@@ -1169,10 +1181,11 @@ class H5_Lobby(GameWindowsBase):
         CLOSE_BUTTON = Button(
             image=self.QUIT_FRAME,
             image_highlited=self.QUIT_FRAME_HIGHLIGHTED,
-            position=(self.frame_position[0] + self.frame_dims[0] * 0.875, self.frame_position[1] + self.frame_dims[1] * 0.0875),
+            position=(470, 310),
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
 
         return (
@@ -1298,24 +1311,26 @@ class H5_Lobby(GameWindowsBase):
             image=self.ACCEPT_BUTTON,
             image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
             image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-            position=(dims[0] * 1.25, dims[1] * 1.8),
+            position=(800, 650),
             text_input="Confirm",
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
 
         CANCEL_REPORT = Button(
             image=self.ACCEPT_BUTTON,
             image_highlited=self.ACCEPT_BUTTON_HIGHLIGHTED,
             image_inactive=self.ACCEPT_BUTTON_INACTIVE,
-            position=(dims[0] * 1.75, dims[1] * 1.8),
+            position=(1120, 650),
             text_input="Cancel",
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
             inactive_color=self.inactive_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
 
         return (
@@ -1335,6 +1350,14 @@ class H5_Lobby(GameWindowsBase):
         )
 
     def options_window(self):
+        self.frame_dims = (
+            520 * (transformation_factors[self.transformation_option][0]),
+            800 * (transformation_factors[self.transformation_option][1]),
+        )
+        self.frame_position = (
+            15 * (transformation_factors[self.transformation_option][0]),
+            240 * (transformation_factors[self.transformation_option][1]),
+        )
         SETTINGS_TEXT = render_small_caps("Settings", int(self.font_size[0] * 1.5), self.text_color)
         SETTINGS_RECT = SETTINGS_TEXT.get_rect(
             center=(self.frame_position[0] + self.frame_dims[0] * 0.5, self.frame_position[1] + self.frame_dims[1] * 0.15)
@@ -1414,10 +1437,11 @@ class H5_Lobby(GameWindowsBase):
         CLOSE_BUTTON = Button(
             image=self.QUIT_FRAME,
             image_highlited=self.QUIT_FRAME_HIGHLIGHTED,
-            position=(self.frame_position[0] + self.frame_dims[0] * 0.875, self.frame_position[1] + self.frame_dims[1] * 0.0875),
+            position=(470, 310),
             font_size=self.font_size[1],
             base_color=self.text_color,
             hovering_color=self.hovering_color,
+            transformation_factors=transformation_factors[self.transformation_option],
         )
 
         return (
@@ -1445,6 +1469,7 @@ class H5_Lobby(GameWindowsBase):
         )
 
     def yes_no_window(self, first_line: str, second_line: str = None, third_line: str = None):
+        # FIXME: not used, if used correct the dimensions and factors
         dims = (
             640 * transformation_factors[self.transformation_option][0],
             360 * transformation_factors[self.transformation_option][1],
@@ -1611,7 +1636,6 @@ class H5_Lobby(GameWindowsBase):
         try:
             response = self.session.post(url, json=report_data, headers=headers)
             if response.status_code == 200:
-                logger.debug(response.text)
                 self.__connection_timer = None
                 self.get_user_profile()
                 logger.info("Match result reported succesfully.")
